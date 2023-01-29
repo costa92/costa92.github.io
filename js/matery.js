@@ -106,6 +106,9 @@ $(function () {
             subHtmlSelectorRelative: true
         });
 
+        $(document).find('img[data-original]').each(function(){
+            $(this).parent().attr("href", $(this).attr("data-original"));
+        });
         // progress bar init
         const progressElement = window.document.querySelector('.progress-bar');
         if (progressElement) {
@@ -146,16 +149,16 @@ $(function () {
         }
     }
 
-    	
+
 	$(".nav-menu>li").hover(function(){
 		$(this).children('ul').stop(true,true).show();
 		 $(this).addClass('nav-show').siblings('li').removeClass('nav-show');
-		
+
 	},function(){
 		$(this).children('ul').stop(true,true).hide();
 		$('.nav-item.nav-show').removeClass('nav-show');
 	})
-	
+
     $('.m-nav-item>a').on('click',function(){
             if ($(this).next('ul').css('display') == "none") {
                 $('.m-nav-item').children('ul').slideUp(300);
