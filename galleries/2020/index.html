@@ -4,7 +4,7 @@
 
 <head>
     <meta charset="utf-8">
-    <meta name="keywords" content="分类, 山海行码">
+    <meta name="keywords" content="2020, 山海行码">
     <meta name="description" content="山海行码">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
@@ -17,7 +17,7 @@
     <!-- Global site tag (gtag.js) - Google Analytics -->
 
 
-    <title>分类 | 山海行码</title>
+    <title>2020 | 山海行码</title>
     <link rel="icon" type="image/png" href="/favicon.png">
     
 
@@ -291,148 +291,48 @@
 
 </header>
 
-    <div class="bg-cover pd-header about-cover">
-    <div class="container">
-    <div class="row">
-    <div class="col s10 offset-s1 m8 offset-m2 l8 offset-l2">
-        <div class="brand">
-            <div class="title center-align">
-                
-                山海行码
-                
-            </div>
+    <link rel="stylesheet" href="/css/gallery.css">
 
-            <div class="description center-align">
-                
-                <span id="subtitle"></span>
-                <script src="/libs/typed/typed.js"></script>
-                <script>
-                    var typed = new Typed("#subtitle", {
-                        strings: [ 
-                            
-                                "从来没有真正的绝境, 只有心灵的迷途",
-                            
-                                "Never really desperate, only the lost of the soul",
-                            
-                                "从简单到复杂是成长,从复杂到简单是沉淀",
-                            
-                                "From simple to complex is long, from complex to simple is precipitation",
-                            
-                        ],
-                        startDelay: 300,
-                        typeSpeed: 100,
-                        loop: true,
-                        backSpeed: 50,
-                        showCursor: true
-                    });
-                </script>
-                
+<link type="text/css" href="/libs/fancybox/jquery.fancybox.css" rel="stylesheet">
+<link type="text/css" href="/libs/justifiedGallery/justifiedGallery.min.css" rel="stylesheet">
+
+
+
+<div class="bg-cover pd-header post-cover" style="background-image: url('/medias/featureimages/4.jpg')">
+    <div class="container" style="right: 0px;left: 0px;">
+        <div class="row">
+            <div class="col s12 m12 l12">
+                <div class="brand">
+                    <h1 class="description center-align post-title">2020</h1>
+                </div>
             </div>
         </div>
     </div>
 </div>
 
+  
 
+<div class="container">
+    <div class="photo-wrapper">
+        
+            <div class="waterfall" id="encrypt-blog">
+                <a target="_blank" href="https://blog.17lai.site/medias_webp/banner/1.webp"     class="photo-item" rel="example_group noopener"     data-fancybox="images">      <img src="https://blog.17lai.site/medias_webp/banner/1.webp"       alt=https://blog.17lai.site/medias_webp/banner/1.webp>
+    </a><a target="_blank" href="https://blog.17lai.site/medias_webp/banner/1.webp"     class="photo-item" rel="example_group noopener"     data-fancybox="images">      <img src="https://blog.17lai.site/medias_webp/banner/1.webp"       alt=https://blog.17lai.site/medias_webp/banner/1.webp>
+    </a><a target="_blank" href="https://blog.17lai.site/medias_webp/banner/1.webp"     class="photo-item" rel="example_group noopener"     data-fancybox="images">      <img src="https://blog.17lai.site/medias_webp/banner/1.webp"       alt=https://blog.17lai.site/medias_webp/banner/1.webp>
+    </a>
+            </div>
+        
+    </div>
+</div>
+
+<script src="/libs/fancybox/fancybox.js"></script>
+<script src="/libs/justifiedGallery/justifiedGallery.min.js"></script>
 <script>
-    // 每天切换 banner 图.  Switch banner image every day.
-    var bannerUrl = "/medias/banner/" + new Date().getDay() + '.jpg';
-    $('.bg-cover').css('background-image', 'url(' + bannerUrl + ')');
+
+    $("a[rel=example_group]").fancybox();
+    $("#encrypt-blog").justifiedGallery({margins: 5, rowHeight: 150});
+
 </script>
-
-
-    </div>
-</div>
-
-<main class="content">
-
-    
-
-<div id="category-cloud" class="container chip-container">
-    <div class="card">
-        <div class="card-content">
-            <div class="tag-title center-align">
-                <i class="fas fa-bookmark"></i>&nbsp;&nbsp;文章分类
-            </div>
-            <div class="tag-chips">
-                
-                
-                
-                <a href="/categories/Tool/" title="Tool: 1">
-                    <span class="chip center-align waves-effect waves-light
-                             chip-default "
-                            style="background-color: #F9EBEA;">Tool
-                        <span class="tag-length">1</span>
-                    </span>
-                </a>
-                
-                
-            </div>
-        </div>
-    </div>
-</div>
-
-
-    
-    <style type="text/css">
-    #category-radar {
-        width: 100%;
-        height: 360px;
-    }
-</style>
-
-<div class="container" data-aos="fade-up">
-    <div class="card">
-        <div id="category-radar" class="card-content"></div>
-    </div>
-</div>
-
-<script type="text/javascript" src="/libs/echarts/echarts.min.js"></script>
-<script type="text/javascript">
-    let radarChart = echarts.init(document.getElementById('category-radar'));
-
-    
-
-    let option = {
-        title: {
-            left: 'center',
-            text: '文章分类雷达图',
-            textStyle: {
-                fontWeight: 500,
-                fontSize: 22
-            }
-        },
-        tooltip: {},
-        radar: {
-            name: {
-                textStyle: {
-                    color: '#3C4858'
-                }
-            },
-            indicator: [{"name":"Tool","max":2}],
-            nameGap: 5,
-            center: ['50%','55%'],
-            radius: '66%'
-        },
-        series: [{
-            type: 'radar',
-            color: ['#3ecf8e'],
-            itemStyle: {normal: {areaStyle: {type: 'default'}}},
-            data : [
-                {
-                    value : [1],
-                    name : '文章分类数量'
-                }
-            ]
-        }]
-    };
-
-    radarChart.setOption(option);
-</script>
-
-    
-
-</main>
-
 
     <footer class="page-footer bg-color">
     
