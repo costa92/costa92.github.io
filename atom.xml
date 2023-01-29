@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <feed xmlns="http://www.w3.org/2005/Atom">
-  <title>costalong</title>
+  <title>山海行码</title>
   
-  
+  <subtitle>山海行码</subtitle>
   <link href="http://costalong.com/atom.xml" rel="self"/>
   
   <link href="http://costalong.com/"/>
