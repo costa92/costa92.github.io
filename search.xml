@@ -4,6 +4,33 @@
   
     
     <entry>
+      <title>ubuntu 安装 nfs</title>
+      <link href="/2023/09/13/linux/ubuntu-install-nfs-server/"/>
+      <url>/2023/09/13/linux/ubuntu-install-nfs-server/</url>
+      
+        <content type="html"><![CDATA[<ol><li>安装nfs服务</li></ol><pre class=" language-sh"><code class="language-sh">sudo apt install nfs-kernel-server</code></pre><ol start="2"><li>编辑配置文件</li></ol><pre class=" language-sh"><code class="language-sh">sudo vim /etc/exports# Example for NFSv4:# /srv/nfs4        gss/krb5i(rw,sync,fsid=0,crossmnt,no_subtree_check)# /srv/nfs4/homes  gss/krb5i(rw,sync,no_subtree_check)#/data/nfs-share *(rw,sync,no_subtree_check,no_root_squash) </code></pre><ol start="3"><li>创建共享目录</li></ol><pre class=" language-sh"><code class="language-sh">sudo mkdir -p /data/nfs-share</code></pre><ol start="4"><li>重启nfs服务</li></ol><pre class=" language-sh"><code class="language-sh">sudo service nfs-kernel-server restart</code></pre><ol start="5"><li><p>常用命令工具</p><p>已经安装的nfs无需安装客户端</p></li></ol><pre class=" language-sh"><code class="language-sh"># 显示已经mount到本机上sudo showmount -e localhost# 将配置文件中的目录全部重新 Export一次，无需重启sudo exportfs -rv# 查看nfs的运行状态sudo nfsstat#查看rpc执行信息，可以用于检测rpc运行情况sudo rpcinfo#查看网络端口，NFS默认是使用111端口。sudo netstat -tu -4</code></pre><ol start="6"><li>客户端的命令</li></ol><pre class=" language-sh"><code class="language-sh"># 安装客户端命令sudo apt install nfs-common</code></pre><ol start="7"><li>显示指定的（192.168.2.167）NFS服务器上export出来的目录</li></ol><pre class=" language-sh"><code class="language-sh">sudo showmount -e 192.168.2.167</code></pre><ol start="8"><li>创建本地挂载目录</li></ol><pre class=" language-sh"><code class="language-sh">sudo mkdir -p /mnt/data</code></pre><ol start="9"><li>挂载共享目录</li></ol><pre class=" language-sh"><code class="language-sh">sudo mount -t nfs 192.168.3.167:/data/nfs-share /mnt/data</code></pre><link rel="stylesheet" href="/css/spoiler.css" type="text/css"><script src="/js/spoiler.js" type="text/javascript" async></script>]]></content>
+      
+      
+      <categories>
+          
+          <category> linux </category>
+          
+      </categories>
+      
+      
+        <tags>
+            
+            <tag> nfs </tag>
+            
+            <tag> storage </tag>
+            
+        </tags>
+      
+    </entry>
+    
+    
+    
+    <entry>
       <title>nfs实现k8s持久化</title>
       <link href="/2023/09/13/k8s/k8s-install-nfs/"/>
       <url>/2023/09/13/k8s/k8s-install-nfs/</url>
