@@ -1,0 +1,21 @@
+{
+    "version": "https://jsonfeed.org/version/1",
+    "title": "翼舞成梦",
+    "subtitle": "翼舞成梦",
+    "icon": "https://costalong.com/images/favicon.ico",
+    "description": "",
+    "home_page_url": "https://costalong.com",
+    "items": [
+        {
+            "id": "https://costalong.com/2024/06/18/makefile/print-variable/",
+            "url": "https://costalong.com/2024/06/18/makefile/print-variable/",
+            "title": "Makefile 打印变量",
+            "date_published": "2024-06-18T10:08:52.000Z",
+            "content_html": "<p>在编写Makefile时，调试信息的输出对于查找和解决问题至关重要。Makefile提供了几种不同的方式来输出调试信息，包括<code>info</code>、<code>warning</code>、<code>error</code>以及<code>echo</code>命令。下面我们将详细介绍这些工具的使用方法以及它们之间的区别。</p>\n<p>makefile 打印变量方式有两种情况</p>\n<ol>\n<li>使用info/warning/error增加调试信息<ol>\n<li>打印字符串</li>\n</ol>\n</li>\n</ol>\n<pre class=\" language-Makefile\"><code class=\"language-Makefile\">$(info xxx-msg)  # 输出字符串xxxx-msg，不需要加\"\"，info后加空格\n=>  xxxx-msg \n</code></pre>\n<pre><code>2. 打印变量\n</code></pre>\n<pre class=\" language-Makefile\"><code class=\"language-Makefile\">$(info $(GOPATH)) #打印变量GOPATH，变量名用$())\n\n=> /home/user/code/go\n\n</code></pre>\n<pre><code>3. 字符串、变量混合打印\n</code></pre>\n<pre class=\" language-Makefile\"><code class=\"language-Makefile\">$(info GOPATH: $(GOPATH))\n=> GOPATH: /home/hellotalk/code/go\n</code></pre>\n<pre><code>4. info/warning/error之间区别  \n\n    info只输出信息：\n</code></pre>\n<pre class=\" language-Makefile\"><code class=\"language-Makefile\">$(info GOPATH is: $(GOPATH)) \n=> GOPATH is: /home/hellotalk/code/go\n</code></pre>\n<pre><code>    warning输出信息和对应的行号：\n</code></pre>\n<pre class=\" language-Makefile\"><code class=\"language-Makefile\">  $(warning ***** $(shell date))\n  => scripts/make-rules/common.mk:99: ***** Tue Jun 18 05:27:20 PM CST 2024\n</code></pre>\n<pre><code>    error输出信息和对应的行号，并停止makefile的编译：\n</code></pre>\n<pre class=\" language-Makefile\"><code class=\"language-Makefile\">$(error GOPATH: $(GOPATH))\n=> scripts/make-rules/golang.mk:12: *** GOPATH: /home/hellotalk/code/go。 停止。\n</code></pre>\n<ol start=\"2\">\n<li>使用echo增加调试信息（echo只能在target：后面的语句中使用，且前面是个TAB）</li>\n</ol>\n<pre class=\" language-Makefile\"><code class=\"language-Makefile\"># 假设我们有一个变量  \nMY_VARIABLE := Hello, Makefile!  \n  \n# 定义一个目标（target）  \nall:  \n  # 注意这里有一个制表符（Tab），而不是空格  \n  @echo \"开始构建...\"  \n  @echo \"MY_VARIABLE 的值是: $(MY_VARIABLE)\"  \n  # 假设这里有一些其他的构建命令...  \n  @echo \"构建完成!\"  \n  \n# 如果你还有其他的目标（target），也可以在这里定义  \nclean:  \n  # 同样是制表符（Tab）开头  \n  @echo \"开始清理...\"  \n  # 这里应该有清理构建产物的命令，比如 rm -f ...  \n  @echo \"清理完成!\"\n</code></pre>\n<pre><code>执行测试命令\n</code></pre>\n<pre class=\" language-Bash\"><code class=\"language-Bash\">make -n all\n</code></pre>\n<pre><code>这将会显示`all`目标下的所有命令，但由于`@`前缀的存在，它们不会显示`echo`命令的内容。如果你想要看到`echo`的内容，你需要移除`@`前缀或者不使用`-n`选项。\n</code></pre>\n<link rel=\"stylesheet\" href=\"/css/spoiler.css\" type=\"text/css\"><script src=\"/js/spoiler.js\" type=\"text/javascript\" async></script>",
+            "tags": [
+                "makefile",
+                "makefile"
+            ]
+        }
+    ]
+}
