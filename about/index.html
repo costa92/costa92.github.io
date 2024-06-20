@@ -67,7 +67,7 @@
                 type: 'pie',
                 radius: '50%',
                 color: ['#6772e5', '#ff9e0f', '#fa755a', '#3ecf8e', '#82d3f4', '#ab47bc', '#525f7f', '#f51c47', '#26A69A'],
-                data: [{"name":"Tool","value":2},{"name":"hexo","value":2},{"name":"k8s","value":4},{"name":"linux","value":1},{"name":"traefik","value":1},{"name":"makefile","value":1}],
+                data: [{"name":"Tool","value":2},{"name":"hexo","value":2},{"name":"k8s","value":4},{"name":"linux","value":1},{"name":"traefik","value":1},{"name":"makefile","value":2}],
                 itemStyle: {
                     emphasis: {
                         shadowBlur: 10,
@@ -91,7 +91,7 @@
         xAxis: [
             {
                 type: 'category',
-                data: ["k8s","git","go","redis","hexo","nfs","storage","golang","pods","traefik"]
+                data: ["k8s","git","go","redis","hexo","nfs","storage","makefile","golang","pods"]
             }
         ],
         yAxis: [
@@ -104,7 +104,7 @@
                 type: 'bar',
                 color: ['#82d3f4'],
                 barWidth : 18,
-                data: [5,2,2,2,2,2,2,1,1,1],
+                data: [5,2,2,2,2,2,2,2,1,1],
                 markPoint: {
                     symbolSize: 45,
                     data: [{
