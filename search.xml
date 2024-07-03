@@ -4,6 +4,33 @@
   
     
     <entry>
+      <title>ubuntu24.04 微信客户端</title>
+      <link href="/2024/07/03/linux/wechat/"/>
+      <url>/2024/07/03/linux/wechat/</url>
+      
+        <content type="html"><![CDATA[<h2 id="使用终端命令行安装铜豌豆软件源。注意需要用到sudo权限"><a href="#使用终端命令行安装铜豌豆软件源。注意需要用到sudo权限" class="headerlink" title="使用终端命令行安装铜豌豆软件源。注意需要用到sudo权限"></a>使用终端命令行安装铜豌豆软件源。注意需要用到sudo权限</h2><pre class=" language-sh"><code class="language-sh">wget -c -O atzlinux-v12-archive-keyring_lastest_all.deb https://www.atzlinux.com/atzlinux/pool/main/a/atzlinux-archive-keyring/atzlinux-v12-archive-keyring_lastest_all.debsudo apt -y install ./atzlinux-v12-archive-keyring_lastest_all.deb</code></pre><h2 id="使用终端命令行安装微信原生版本。注意需要用到sudo权限"><a href="#使用终端命令行安装微信原生版本。注意需要用到sudo权限" class="headerlink" title="使用终端命令行安装微信原生版本。注意需要用到sudo权限"></a>使用终端命令行安装微信原生版本。注意需要用到sudo权限</h2><pre class=" language-sh"><code class="language-sh">sudo apt updatesudo cp /etc/lsb-release /etc/lsb-release.Ubuntusudo apt -y install electronic-wechat-icons-atzlinuxsudo apt -y install com.tencent.wechatsudo cp /etc/lsb-release /etc/lsb-release.wechat</code></pre><h2 id="登录微信并使用"><a href="#登录微信并使用" class="headerlink" title="登录微信并使用"></a>登录微信并使用</h2><pre class=" language-sh"><code class="language-sh">wechat</code></pre><p>登录成功以后，下次就可以直接在终端使用wechat启动微信，或者在显示应用程序里面找到微信linux原生版图标启动了。本次安装的微信版本号：1.0.0.241</p><p><img src="/medias/loading.gif" data-original="/images/linux/wechat/image.png" alt="start wechat"></p><p><a href="https://link.zhihu.com/?target=https://www.atzlinux.com/">铜豌豆 Linux</a>是个开源网站</p><link rel="stylesheet" href="/css/spoiler.css" type="text/css"><script src="/js/spoiler.js" type="text/javascript" async></script>]]></content>
+      
+      
+      <categories>
+          
+          <category> linux </category>
+          
+      </categories>
+      
+      
+        <tags>
+            
+            <tag> ubuntu </tag>
+            
+            <tag> 微信 </tag>
+            
+        </tags>
+      
+    </entry>
+    
+    
+    
+    <entry>
       <title>awk 常用的命令</title>
       <link href="/2024/07/01/linux/awk/"/>
       <url>/2024/07/01/linux/awk/</url>

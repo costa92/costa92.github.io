@@ -17,18 +17,6 @@
                 "ubuntu",
                 "微信"
             ]
-        },
-        {
-            "id": "https://costalong.com/2023/09/13/linux/ubuntu-install-nfs-server/",
-            "url": "https://costalong.com/2023/09/13/linux/ubuntu-install-nfs-server/",
-            "title": "ubuntu 安装 nfs",
-            "date_published": "2023-09-13T10:49:02.000Z",
-            "content_html": "<ol>\n<li>安装nfs服务</li>\n</ol>\n<pre class=\" language-sh\"><code class=\"language-sh\">sudo apt install nfs-kernel-server\n</code></pre>\n<ol start=\"2\">\n<li>编辑配置文件</li>\n</ol>\n<pre class=\" language-sh\"><code class=\"language-sh\">sudo vim /etc/exports\n\n# Example for NFSv4:\n# /srv/nfs4        gss/krb5i(rw,sync,fsid=0,crossmnt,no_subtree_check)\n# /srv/nfs4/homes  gss/krb5i(rw,sync,no_subtree_check)\n#\n/data/nfs-share *(rw,sync,no_subtree_check,no_root_squash) \n</code></pre>\n<ol start=\"3\">\n<li>创建共享目录</li>\n</ol>\n<pre class=\" language-sh\"><code class=\"language-sh\">sudo mkdir -p /data/nfs-share\n</code></pre>\n<ol start=\"4\">\n<li>重启nfs服务</li>\n</ol>\n<pre class=\" language-sh\"><code class=\"language-sh\">sudo service nfs-kernel-server restart\n</code></pre>\n<ol start=\"5\">\n<li><p>常用命令工具</p>\n<p>已经安装的nfs无需安装客户端</p>\n</li>\n</ol>\n<pre class=\" language-sh\"><code class=\"language-sh\"># 显示已经mount到本机上\nsudo showmount -e localhost\n# 将配置文件中的目录全部重新 Export一次，无需重启\nsudo exportfs -rv\n# 查看nfs的运行状态\nsudo nfsstat\n#查看rpc执行信息，可以用于检测rpc运行情况\nsudo rpcinfo\n\n#查看网络端口，NFS默认是使用111端口。\nsudo netstat -tu -4\n</code></pre>\n<ol start=\"6\">\n<li>客户端的命令</li>\n</ol>\n<pre class=\" language-sh\"><code class=\"language-sh\"># 安装客户端命令\nsudo apt install nfs-common\n</code></pre>\n<ol start=\"7\">\n<li>显示指定的（192.168.2.167）NFS服务器上export出来的目录</li>\n</ol>\n<pre class=\" language-sh\"><code class=\"language-sh\">sudo showmount -e 192.168.2.167\n</code></pre>\n<ol start=\"8\">\n<li>创建本地挂载目录</li>\n</ol>\n<pre class=\" language-sh\"><code class=\"language-sh\">sudo mkdir -p /mnt/data\n</code></pre>\n<ol start=\"9\">\n<li>挂载共享目录</li>\n</ol>\n<pre class=\" language-sh\"><code class=\"language-sh\">sudo mount -t nfs 192.168.3.167:/data/nfs-share /mnt/data\n</code></pre>\n<link rel=\"stylesheet\" href=\"/css/spoiler.css\" type=\"text/css\"><script src=\"/js/spoiler.js\" type=\"text/javascript\" async></script>",
-            "tags": [
-                "linux",
-                "nfs",
-                "storage"
-            ]
         }
     ]
 }

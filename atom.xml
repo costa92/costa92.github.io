@@ -6,7 +6,7 @@
   <link href="https://costalong.com/atom.xml" rel="self"/>
   
   <link href="https://costalong.com/"/>
-  <updated>2024-07-01T08:06:14.003Z</updated>
+  <updated>2024-07-03T08:09:24.716Z</updated>
   <id>https://costalong.com/</id>
   
   <author>
@@ -15,6 +15,32 @@
   </author>
   
   <generator uri="https://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>ubuntu24.04 微信客户端</title>
+    <link href="https://costalong.com/2024/07/03/linux/wechat/"/>
+    <id>https://costalong.com/2024/07/03/linux/wechat/</id>
+    <published>2024-07-03T07:14:42.000Z</published>
+    <updated>2024-07-03T08:09:24.716Z</updated>
+    
+    <content type="html"><![CDATA[<h2 id="使用终端命令行安装铜豌豆软件源。注意需要用到sudo权限"><a href="#使用终端命令行安装铜豌豆软件源。注意需要用到sudo权限" class="headerlink" title="使用终端命令行安装铜豌豆软件源。注意需要用到sudo权限"></a>使用终端命令行安装铜豌豆软件源。注意需要用到sudo权限</h2><pre class=" language-sh"><code class="language-sh">wget -c -O atzlinux-v12-archive-keyring_lastest_all.deb https://www.atzlinux.com/atzlinux/pool/main/a/atzlinux-archive-keyring/atzlinux-v12-archive-keyring_lastest_all.debsudo apt -y install ./atzlinux-v12-archive-keyring_lastest_all.deb</code></pre><h2 id="使用终端命令行安装微信原生版本。注意需要用到sudo权限"><a href="#使用终端命令行安装微信原生版本。注意需要用到sudo权限" class="headerlink" title="使用终端命令行安装微信原生版本。注意需要用到sudo权限"></a>使用终端命令行安装微信原生版本。注意需要用到sudo权限</h2><pre class=" language-sh"><code class="language-sh">sudo apt updatesudo cp /etc/lsb-release /etc/lsb-release.Ubuntusudo apt -y install electronic-wechat-icons-atzlinuxsudo apt -y install com.tencent.wechatsudo cp /etc/lsb-release /etc/lsb-release.wechat</code></pre><h2 id="登录微信并使用"><a href="#登录微信并使用" class="headerlink" title="登录微信并使用"></a>登录微信并使用</h2><pre class=" language-sh"><code class="language-sh">wechat</code></pre><p>登录成功以后，下次就可以直接在终端使用wechat启动微信，或者在显示应用程序里面找到微信linux原生版图标启动了。本次安装的微信版本号：1.0.0.241</p><p><img src="/medias/loading.gif" data-original="/images/linux/wechat/image.png" alt="start wechat"></p><p><a href="https://link.zhihu.com/?target=https://www.atzlinux.com/">铜豌豆 Linux</a>是个开源网站</p><link rel="stylesheet" href="/css/spoiler.css" type="text/css"><script src="/js/spoiler.js" type="text/javascript" async></script>]]></content>
+    
+    
+      
+      
+    <summary type="html">&lt;h2 id=&quot;使用终端命令行安装铜豌豆软件源。注意需要用到sudo权限&quot;&gt;&lt;a href=&quot;#使用终端命令行安装铜豌豆软件源。注意需要用到sudo权限&quot; class=&quot;headerlink&quot; title=&quot;使用终端命令行安装铜豌豆软件源。注意需要用到sudo权限&quot;&gt;&lt;/a&gt;使用</summary>
+      
+    
+    
+    
+    <category term="linux" scheme="https://costalong.com/categories/linux/"/>
+    
+    
+    <category term="ubuntu" scheme="https://costalong.com/tags/ubuntu/"/>
+    
+    <category term="微信" scheme="https://costalong.com/tags/%E5%BE%AE%E4%BF%A1/"/>
+    
+  </entry>
   
   <entry>
     <title>awk 常用的命令</title>
