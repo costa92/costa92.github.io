@@ -18,6 +18,17 @@
             ]
         },
         {
+            "id": "https://costalong.com/2024/11/19/git/git-commit/",
+            "url": "https://costalong.com/2024/11/19/git/git-commit/",
+            "title": "git commit",
+            "date_published": "2024-11-19T02:28:21.000Z",
+            "content_html": "<h2 id=\"git-commit-介绍\"><a href=\"#git-commit-介绍\" class=\"headerlink\" title=\"git commit 介绍\"></a>git commit 介绍</h2><p>git commit 命令用于将工作区内容或暂存区内容提交到版本库</p>\n<pre class=\" language-sh\"><code class=\"language-sh\"># 将暂存区内容提交到版本库, 进入 vi 命令界面输入提交信息\ngit commit\n\n# 将某些已被跟踪的文件提交到版本库（包含工作区和版本库）\ngit commit [file1] [file2] [...]\n\n# 将暂存区内容提交到版本库, 无需进入 vi 命令界面输入提交信息\ngit commit -m [message]\n\n# 跳过 git add, 将所有已被跟踪的文件更改提交到版本库\ngit commit -am [message]\n\n# 使用一次新的commit, 替代上一次提交\n# 如果代码没有任何新变化, 则用来改写上一次commit的提交信息\ngit commit --amend -m [message]\n</code></pre>\n<h2 id=\"用法\"><a href=\"#用法\" class=\"headerlink\" title=\"用法\"></a>用法</h2><p>git commit 参数选项</p>\n<table>\n<thead>\n<tr>\n<th>参数</th>\n<th>说明</th>\n</tr>\n</thead>\n<tbody><tr>\n<td><code>-m &lt;message&gt;</code></td>\n<td>指定提交信息，没有该选项时将打开文本编辑器提示输入消息</td>\n</tr>\n<tr>\n<td><code>-a</code></td>\n<td>提交所有已修改或删除的文件(提交已被 git 跟踪的文件的更改)，相当于默认执行了 git add -u</td>\n</tr>\n<tr>\n<td><code>--amend</code></td>\n<td>将本次提交追加到上一次的提交中</td>\n</tr>\n<tr>\n<td><code>--no-edit</code></td>\n<td>使用与之前一样的提交信息，不打开编辑器进行修改</td>\n</tr>\n</tbody></table>\n<link rel=\"stylesheet\" href=\"/css/spoiler.css\" type=\"text/css\"><script src=\"/js/spoiler.js\" type=\"text/javascript\" async></script>",
+            "tags": [
+                "Tool",
+                "git"
+            ]
+        },
+        {
             "id": "https://costalong.com/2024/07/11/git/no-sensitive/",
             "url": "https://costalong.com/2024/07/11/git/no-sensitive/",
             "title": "如何在 Git 提交中禁止包含敏感信息",

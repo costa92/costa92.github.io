@@ -29,6 +29,31 @@
     
     
     <entry>
+      <title>git commit</title>
+      <link href="/2024/11/19/git/git-commit/"/>
+      <url>/2024/11/19/git/git-commit/</url>
+      
+        <content type="html"><![CDATA[<h2 id="git-commit-介绍"><a href="#git-commit-介绍" class="headerlink" title="git commit 介绍"></a>git commit 介绍</h2><p>git commit 命令用于将工作区内容或暂存区内容提交到版本库</p><pre class=" language-sh"><code class="language-sh"># 将暂存区内容提交到版本库, 进入 vi 命令界面输入提交信息git commit# 将某些已被跟踪的文件提交到版本库（包含工作区和版本库）git commit [file1] [file2] [...]# 将暂存区内容提交到版本库, 无需进入 vi 命令界面输入提交信息git commit -m [message]# 跳过 git add, 将所有已被跟踪的文件更改提交到版本库git commit -am [message]# 使用一次新的commit, 替代上一次提交# 如果代码没有任何新变化, 则用来改写上一次commit的提交信息git commit --amend -m [message]</code></pre><h2 id="用法"><a href="#用法" class="headerlink" title="用法"></a>用法</h2><p>git commit 参数选项</p><table><thead><tr><th>参数</th><th>说明</th></tr></thead><tbody><tr><td><code>-m &lt;message&gt;</code></td><td>指定提交信息，没有该选项时将打开文本编辑器提示输入消息</td></tr><tr><td><code>-a</code></td><td>提交所有已修改或删除的文件(提交已被 git 跟踪的文件的更改)，相当于默认执行了 git add -u</td></tr><tr><td><code>--amend</code></td><td>将本次提交追加到上一次的提交中</td></tr><tr><td><code>--no-edit</code></td><td>使用与之前一样的提交信息，不打开编辑器进行修改</td></tr></tbody></table><link rel="stylesheet" href="/css/spoiler.css" type="text/css"><script src="/js/spoiler.js" type="text/javascript" async></script>]]></content>
+      
+      
+      <categories>
+          
+          <category> Tool </category>
+          
+      </categories>
+      
+      
+        <tags>
+            
+            <tag> git </tag>
+            
+        </tags>
+      
+    </entry>
+    
+    
+    
+    <entry>
       <title>Gomock进行单元测试</title>
       <link href="/2024/07/16/go/tests/gomock/"/>
       <url>/2024/07/16/go/tests/gomock/</url>
