@@ -1,0 +1,22 @@
+{
+    "version": "https://jsonfeed.org/version/1",
+    "title": "翼舞成梦",
+    "subtitle": "翼舞成梦",
+    "icon": "https://costalong.com/images/favicon.ico",
+    "description": "",
+    "home_page_url": "https://costalong.com",
+    "items": [
+        {
+            "id": "https://costalong.com/2024/07/03/linux/wechat/",
+            "url": "https://costalong.com/2024/07/03/linux/wechat/",
+            "title": "ubuntu24.04 微信客户端",
+            "date_published": "2024-07-03T07:14:42.000Z",
+            "content_html": "<h2 id=\"使用终端命令行安装铜豌豆软件源。注意需要用到sudo权限\"><a href=\"#使用终端命令行安装铜豌豆软件源。注意需要用到sudo权限\" class=\"headerlink\" title=\"使用终端命令行安装铜豌豆软件源。注意需要用到sudo权限\"></a>使用终端命令行安装铜豌豆软件源。注意需要用到sudo权限</h2><pre class=\" language-sh\"><code class=\"language-sh\">wget -c -O atzlinux-v12-archive-keyring_lastest_all.deb https://www.atzlinux.com/atzlinux/pool/main/a/atzlinux-archive-keyring/atzlinux-v12-archive-keyring_lastest_all.deb\nsudo apt -y install ./atzlinux-v12-archive-keyring_lastest_all.deb\n</code></pre>\n<h2 id=\"使用终端命令行安装微信原生版本。注意需要用到sudo权限\"><a href=\"#使用终端命令行安装微信原生版本。注意需要用到sudo权限\" class=\"headerlink\" title=\"使用终端命令行安装微信原生版本。注意需要用到sudo权限\"></a>使用终端命令行安装微信原生版本。注意需要用到sudo权限</h2><pre class=\" language-sh\"><code class=\"language-sh\">sudo apt update\nsudo cp /etc/lsb-release /etc/lsb-release.Ubuntu\nsudo apt -y install electronic-wechat-icons-atzlinux\nsudo apt -y install com.tencent.wechat\nsudo cp /etc/lsb-release /etc/lsb-release.wechat\n</code></pre>\n<h2 id=\"登录微信并使用\"><a href=\"#登录微信并使用\" class=\"headerlink\" title=\"登录微信并使用\"></a>登录微信并使用</h2><pre class=\" language-sh\"><code class=\"language-sh\">wechat\n</code></pre>\n<p>登录成功以后，下次就可以直接在终端使用wechat启动微信，或者在显示应用程序里面找到微信linux原生版图标启动了。本次安装的微信版本号：1.0.0.241</p>\n<p><img src=\"/medias/loading.gif\" data-original=\"/images/linux/wechat/image.png\" alt=\"start wechat\"></p>\n<p><a href=\"https://link.zhihu.com/?target=https://www.atzlinux.com/\">铜豌豆 Linux</a>是个开源网站</p>\n<link rel=\"stylesheet\" href=\"/css/spoiler.css\" type=\"text/css\"><script src=\"/js/spoiler.js\" type=\"text/javascript\" async></script>",
+            "tags": [
+                "linux",
+                "ubuntu",
+                "微信"
+            ]
+        }
+    ]
+}
