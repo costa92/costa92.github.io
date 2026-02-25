@@ -412,11 +412,11 @@
       
         <tags>
             
-            <tag> k8s </tag>
-            
             <tag> nfs </tag>
             
             <tag> storage </tag>
+            
+            <tag> k8s </tag>
             
         </tags>
       
