@@ -1,0 +1,22 @@
+{
+    "version": "https://jsonfeed.org/version/1",
+    "title": "翼舞成梦",
+    "subtitle": "翼舞成梦",
+    "icon": "https://costalong.com/images/favicon.ico",
+    "description": "翼舞成梦的个人博客，专注于后端开发、K8s 容器化技术、Linux 运维以及人工智能学习笔记分享。",
+    "home_page_url": "https://costalong.com",
+    "items": [
+        {
+            "id": "https://costalong.com/2026/02/25/moment-2026-02-25-coffee/",
+            "url": "https://costalong.com/2026/02/25/moment-2026-02-25-coffee/",
+            "title": "尝试了新的咖啡豆",
+            "date_published": "2026-02-25T00:15:00.000Z",
+            "content_html": "<p>今天开了一包来自云南的日晒豆，风味很惊喜 – 有明显的蓝莓和巧克力调。国产精品豆越来越棒了。</p>\n<link rel=\"stylesheet\" href=\"/css/spoiler.css\" type=\"text/css\"><script src=\"/js/spoiler.js\" type=\"text/javascript\" async></script>",
+            "tags": [
+                "moments",
+                "咖啡",
+                "生活"
+            ]
+        }
+    ]
+}

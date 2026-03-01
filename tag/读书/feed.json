@@ -1,0 +1,21 @@
+{
+    "version": "https://jsonfeed.org/version/1",
+    "title": "翼舞成梦",
+    "subtitle": "翼舞成梦",
+    "icon": "https://costalong.com/images/favicon.ico",
+    "description": "翼舞成梦的个人博客，专注于后端开发、K8s 容器化技术、Linux 运维以及人工智能学习笔记分享。",
+    "home_page_url": "https://costalong.com",
+    "items": [
+        {
+            "id": "https://costalong.com/2026/03/01/moment-2026-03-01-book/",
+            "url": "https://costalong.com/2026/03/01/moment-2026-03-01-book/",
+            "title": "周末读了一本好书",
+            "date_published": "2026-03-01T02:30:00.000Z",
+            "content_html": "<p>周末花了一下午读完了《设计心理学》，诺曼对日常物品的洞察力太强了。好的设计应该是不需要说明书的。</p>\n<link rel=\"stylesheet\" href=\"/css/spoiler.css\" type=\"text/css\"><script src=\"/js/spoiler.js\" type=\"text/javascript\" async></script>",
+            "tags": [
+                "moments",
+                "读书"
+            ]
+        }
+    ]
+}

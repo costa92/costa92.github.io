@@ -1,0 +1,22 @@
+{
+    "version": "https://jsonfeed.org/version/1",
+    "title": "翼舞成梦",
+    "subtitle": "翼舞成梦",
+    "icon": "https://costalong.com/images/favicon.ico",
+    "description": "翼舞成梦的个人博客，专注于后端开发、K8s 容器化技术、Linux 运维以及人工智能学习笔记分享。",
+    "home_page_url": "https://costalong.com",
+    "items": [
+        {
+            "id": "https://costalong.com/2026/02/20/moment-2026-02-20-k8s/",
+            "url": "https://costalong.com/2026/02/20/moment-2026-02-20-k8s/",
+            "title": "终于搞定了 K8s 网络策略",
+            "date_published": "2026-02-20T14:45:00.000Z",
+            "content_html": "<p>折腾了两天的 NetworkPolicy 终于通了。关键是 <code>namespaceSelector</code> 和 <code>podSelector</code> 要同时匹配，不能只写一个。记个笔记以防下次再踩坑。</p>\n<link rel=\"stylesheet\" href=\"/css/spoiler.css\" type=\"text/css\"><script src=\"/js/spoiler.js\" type=\"text/javascript\" async></script>",
+            "tags": [
+                "moments",
+                "k8s",
+                "技术"
+            ]
+        }
+    ]
+}
