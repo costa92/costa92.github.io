@@ -1,0 +1,413 @@
+<!DOCTYPE HTML><html lang="zh-CN"><head><meta charset="utf-8"><meta name="keywords" content="把 Claude Code 接到 Prometheus + Grafana：14 个变量讲清楚, costalong, 翼舞成梦, 后端开发, Go语言, Kubernetes, K8s, Linux, AI, 学习笔记"><meta name="description" content="把 Claude Code 接到 Prometheus + Grafana：14 个变量讲清楚
+我前两天帮一个团队 debug 他们的 Claude Code telemetry，把 alias 拷过去之后 Prometheus 一条数据都"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="renderer" content="webkit|ie-stand|ie-comp"><meta name="mobile-web-app-capable" content="yes"><meta name="format-detection" content="telephone=no"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><meta name="referrer" content="no-referrer-when-downgrade"><script async src="https://www.googletagmanager.com/gtag/js?id="></script><script>function gtag(){dataLayer.push(arguments)}window.dataLayer=window.dataLayer||[],gtag("js",new Date),gtag("config","")</script><title>把 Claude Code 接到 Prometheus + Grafana：14 个变量讲清楚 | 翼舞成梦</title><link rel="icon" type="image/png" href="/favicon.png"><link rel="stylesheet" href="/libs/awesome/css/all.min.css"><link rel="stylesheet" href="/libs/materialize/materialize.min.css"><link rel="stylesheet" href="/libs/aos/aos.css"><link rel="stylesheet" href="/libs/animate/animate.min.css"><link rel="stylesheet" href="/libs/lightGallery/css/lightgallery.min.css"><link rel="stylesheet" href="/css/matery.css"><link rel="stylesheet" href="/css/my.css"><link rel="stylesheet" href="/css/dark.css" media="none" onload='"all"!=media&&(media="all")'><link rel="stylesheet" href="/css/infinite-scroll.css"><link rel="stylesheet" href="/css/sidebar.css"><link rel="stylesheet" href="/css/navbar.css"><link rel="stylesheet" href="/libs/tocbot/tocbot.css"><link rel="stylesheet" href="/css/post.css"><link rel="stylesheet" href="/css/reward.css"><link rel="stylesheet" href="/css/obsidian.css"><link rel="stylesheet" href="/css/darkpremium.css"><link rel="stylesheet" href="/css/post-darkpremium.css"><script src="/libs/jquery/jquery-3.6.0.min.js"></script><script>new MutationObserver(function(t){t.forEach(function(t){"attributes"===t.type&&"aria-hidden"===t.attributeName&&"true"===document.body.getAttribute("aria-hidden")&&document.body.removeAttribute("aria-hidden")})}).observe(document.documentElement,{attributes:!0,subtree:!0,attributeFilter:["aria-hidden"]}),window.addEventListener("DOMContentLoaded",function(){"true"===document.body.getAttribute("aria-hidden")&&document.body.removeAttribute("aria-hidden")})</script><meta name="generator" content="Hexo 6.3.0"><style>.github-emoji{position:relative;display:inline-block;width:1.2em;min-height:1.2em;overflow:hidden;vertical-align:top;color:transparent}.github-emoji>span{position:relative;z-index:10}.github-emoji .fancybox,.github-emoji img{margin:0!important;padding:0!important;border:none!important;outline:0!important;text-decoration:none!important;user-select:none!important;cursor:auto!important}.github-emoji img{height:1.2em!important;width:1.2em!important;position:absolute!important;left:50%!important;top:50%!important;transform:translate(-50%,-50%)!important;user-select:none!important;cursor:auto!important}.github-emoji-fallback{color:inherit}.github-emoji-fallback img{opacity:0!important}</style><link rel="stylesheet" href="/css/prism-tomorrow.css"></head><body><header class="dp-nav"><div class="dp-wrap"><div class="dp-nav-inner"><a class="dp-brand" href="/"><span class="mark"><img src="/medias/logo.png" alt="LOGO"></span><span><span class="name">翼舞成梦</span><br><span class="dom">costalong.com</span></span></a><div class="dp-nav-links"><a href="/">首页</a> <a href="/archives">归档</a> <a href="/moments">Moments</a> <a href="/about">关于</a> <a href="/explore">探索</a> <a href="/galleries">相册</a> <a href="/notes">笔记</a> <a href="/contact">留言板</a> <a href="/friends">友情链接</a></div><div class="dp-nav-actions"><a href="#searchModal" class="icon-btn modal-trigger" title="搜索"><i class="fas fa-search"></i></a><a class="dp-nav-cta" href="/atom.xml"><i class="fas fa-rss" style="margin-right:6px"></i> 订阅更新</a><a href="#" data-target="mobile-nav" class="icon-btn dp-burger sidenav-trigger button-collapse" title="菜单"><i class="fas fa-bars"></i></a></div></div></div><div id="mobile-nav" class="side-nav sidenav"><div class="mobile-head bg-color"><img src="/medias/logo.png" class="logo-img circle responsive-img"><div class="logo-name">翼舞成梦</div><div class="logo-desc">翼舞成梦的个人博客，专注于后端开发、K8s 容器化技术、Linux 运维以及人工智能学习笔记分享。</div></div><ul class="menu-list mobile-menu-list"><li class="m-nav-item"><a href="/" class="waves-effect waves-light"><i class="fa-fw fas fa-home"></i> 首页</a></li><li class="m-nav-item"><a href="/archives" class="waves-effect waves-light"><i class="fa-fw fas fa-archive"></i> 归档</a></li><li class="m-nav-item"><a href="/moments" class="waves-effect waves-light"><i class="fa-fw fas fa-bolt"></i> Moments</a></li><li class="m-nav-item"><a href="javascript:;"><i class="fa-fw fas fa-compass"></i> Discover<span class="m-icon"><i class="fas fa-chevron-right"></i></span></a><ul><li><a href="/categories" class="m-sub-link"><i class="fa m-sub-icon fas fa-bookmark"></i> <span>分类</span></a></li><li><a href="/tags" class="m-sub-link"><i class="fa m-sub-icon fas fa-tags"></i> <span>标签</span></a></li><li><a href="/notes" class="m-sub-link"><i class="fa m-sub-icon fas fa-book-reader"></i> <span>笔记</span></a></li><li><a href="/galleries" class="m-sub-link"><i class="fa m-sub-icon fas fa-image"></i> <span>相册</span></a></li></ul></li><li class="m-nav-item"><a href="javascript:;"><i class="fa-fw fas fa-user-circle"></i> 关于<span class="m-icon"><i class="fas fa-chevron-right"></i></span></a><ul><li><a href="/about" class="m-sub-link"><i class="fa m-sub-icon fas fa-user-circle"></i> <span>关于</span></a></li><li><a href="/contact" class="m-sub-link"><i class="fa m-sub-icon fas fa-comments"></i> <span>留言板</span></a></li><li><a href="/friends" class="m-sub-link"><i class="fa m-sub-icon fas fa-address-book"></i> <span>友情链接</span></a></li></ul></li><li class="m-nav-item"><a href="/explore" class="waves-effect waves-light"><i class="fa-fw fas fa-compass"></i> 探索</a></li><li class="m-nav-item"><a href="/galleries" class="waves-effect waves-light"><i class="fa-fw fas fa-image"></i> 相册</a></li><li class="m-nav-item"><a href="/notes" class="waves-effect waves-light"><i class="fa-fw fas fa-book-reader"></i> 笔记</a></li><li class="m-nav-item"><a href="/contact" class="waves-effect waves-light"><i class="fa-fw fas fa-comments"></i> 留言板</a></li><li class="m-nav-item"><a href="/friends" class="waves-effect waves-light"><i class="fa-fw fas fa-address-book"></i> 友情链接</a></li></ul></div></header><div class="dp-bg-field"><div class="glow v"></div><div class="glow c"></div><div class="glow i"></div></div><div class="dp"><header class="dp-page-hero dp-wrap post-dp-hero"><span class="eyebrow"><span class="dot"></span><i class="fas fa-robot"></i> &nbsp;AI-生态</span><h1 id="post-title" class="post-title"><span class="grad">把 Claude Code 接到 Prometheus + Grafana：14 个变量讲清楚</span></h1><div class="meta"><span><i class="far fa-calendar-minus"></i> &nbsp;2026-06-09</span><span><i class="fas fa-bookmark"></i> &nbsp;<a href="/categories/AI-%E7%94%9F%E6%80%81/"><b>AI-生态</b></a></span> <span class="hero-tags"><a href="/tags/Claude-Code/"><span class="chip">Claude Code</span></a> <a href="/tags/OpenTelemetry/"><span class="chip">OpenTelemetry</span></a> <a href="/tags/Prometheus/"><span class="chip">Prometheus</span></a> <a href="/tags/Grafana/"><span class="chip">Grafana</span></a></span></div></header></div><main class="post-container content"><div class="row"><div id="main-content" class="col s12 m12 l9"><div id="artDetail"><div class="card"><div class="card-content article-info"><div class="row tag-cate"><div class="col s7"><div class="article-tag"><a href="/tags/Claude-Code/"><span class="chip bg-color">Claude Code</span></a> <a href="/tags/OpenTelemetry/"><span class="chip bg-color">OpenTelemetry</span></a> <a href="/tags/Prometheus/"><span class="chip bg-color">Prometheus</span></a> <a href="/tags/Grafana/"><span class="chip bg-color">Grafana</span></a> <a href="/tags/%E5%8F%AF%E8%A7%82%E6%B5%8B%E6%80%A7/"><span class="chip bg-color">可观测性</span></a> <a href="/tags/%E7%9B%91%E6%8E%A7%E8%BF%90%E7%BB%B4/"><span class="chip bg-color linux">监控运维</span></a> <a href="/tags/%E5%AE%9E%E6%88%98%E6%95%99%E7%A8%8B/"><span class="chip bg-color">实战教程</span></a></div></div><div class="col s5 right-align"><div class="post-cate"><i class="fas fa-bookmark fa-fw icon-category"></i> <a href="/categories/AI-%E7%94%9F%E6%80%81/" class="post-category">AI-生态</a></div></div></div><div class="post-info"><div class="post-date info-break-policy"><i class="far fa-calendar-minus fa-fw"></i> <span>发布日期:&nbsp;&nbsp;</span> <time datetime="2026-06-09 00:00" pubdate>2026-06-09</time></div><div class="info-break-policy"><i class="far fa-file-word fa-fw"></i> 文章字数:&nbsp;&nbsp; 7.2k</div><div id="busuanzi_container_page_pv" class="info-break-policy"><i class="far fa-eye fa-fw"></i> 阅读次数:&nbsp;&nbsp;<span id="busuanzi_value_page_pv"></span></div><div id="read_mode" class="info-break-policy" style="display:inline"><i class="fas fa-expand-arrows-alt" title="【进入/离开】 阅读模式" aria-hidden="true"></i> &nbsp;&nbsp; <span title="【进入/离开】阅读模式" aria-hidden="true">阅读模式</span></div></div></div><hr class="clearfix"><link rel="stylesheet" href="/libs/prism/prism.min.css"><div class="card-content article-card-content"><div id="articleContent"><h1 id="把-Claude-Code-接到-Prometheus-Grafana：14-个变量讲清楚"><a href="#把-Claude-Code-接到-Prometheus-Grafana：14-个变量讲清楚" class="headerlink" title="把 Claude Code 接到 Prometheus + Grafana：14 个变量讲清楚"></a>把 Claude Code 接到 Prometheus + Grafana：14 个变量讲清楚</h1><p><img src="/medias/loading.gif" data-original="/images/posts/292_8ffec82c409c857806865aac71012e58.jpg" alt="Claude Code → OTLP → Prometheus → Grafana 流水线封面"></p><p>我前两天帮一个团队 debug 他们的 Claude Code telemetry，把 alias 拷过去之后 Prometheus 一条数据都没收到。一查发现：默认 protocol 是 gRPC 不是 http/protobuf，端口是 4317 不是 4318，而对方的 Prometheus 只开了 HTTP receiver。一个变量错位，整条数据流哑火。</p><p>Claude Code 的 OpenTelemetry 配置一共有 14 个常用环境变量，分四层：开关、传输、隐私、基数。每一层都有”默认值跟你想要的不一样”的坑。</p><p>这篇分两半。前半把 14 个变量按层讲清楚（含完整对照表）。后半给你一份贴上就能跑的 Prometheus 2.47+ 原生 OTLP receive + Grafana 的 docker-compose——不需要 OTel Collector 中转，最少零件。</p><h2 id="14-个-env-vars-分四层看"><a href="#14-个-env-vars-分四层看" class="headerlink" title="14 个 env vars 分四层看"></a>14 个 env vars 分四层看</h2><p>按功能分组，记住每层只解决一个问题，记起来就简单：</p><table><thead><tr><th>层</th><th>变量</th><th>默认值</th><th>决定</th></tr></thead><tbody><tr><td><strong>开关</strong></td><td><code>CLAUDE_CODE_ENABLE_TELEMETRY</code></td><td>unset (= 关)</td><td>总开关，没有它后面全失效</td></tr><tr><td></td><td><code>CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC</code></td><td>unset</td><td>关 Anthropic 自己的遥测（与你的 OTel 无关）</td></tr><tr><td></td><td><code>OTEL_METRICS_EXPORTER</code></td><td>unset</td><td><code>otlp</code> / <code>prometheus</code> / <code>console</code> / <code>none</code></td></tr><tr><td></td><td><code>OTEL_LOGS_EXPORTER</code></td><td>unset</td><td><code>otlp</code> / <code>console</code> / <code>none</code>（注意没有 prometheus）</td></tr><tr><td><strong>传输</strong></td><td><code>OTEL_EXPORTER_OTLP_PROTOCOL</code></td><td><code>grpc</code> ⚠️</td><td><code>grpc</code> / <code>http/protobuf</code> / <code>http/json</code></td></tr><tr><td></td><td><code>OTEL_EXPORTER_OTLP_ENDPOINT</code></td><td><code>localhost:4317</code></td><td>gRPC 用 4317，HTTP 用 4318</td></tr><tr><td></td><td><code>OTEL_EXPORTER_OTLP_HEADERS</code></td><td>unset</td><td><code>Authorization=Bearer xxx</code></td></tr><tr><td><strong>标签</strong></td><td><code>OTEL_RESOURCE_ATTRIBUTES</code></td><td>unset</td><td><code>team=platform,user.email=x@y.com</code></td></tr><tr><td><strong>隐私</strong></td><td><code>OTEL_LOG_USER_PROMPTS</code></td><td><code>0</code></td><td>prompt 正文上不上报</td></tr><tr><td></td><td><code>OTEL_LOG_TOOL_CONTENT</code></td><td><code>0</code></td><td>tool 输入输出正文</td></tr><tr><td></td><td><code>OTEL_LOG_TOOL_DETAILS</code></td><td><code>0</code></td><td>bash 命令字符串、MCP server 名等元信息</td></tr><tr><td><strong>基数</strong></td><td><code>OTEL_METRICS_INCLUDE_SESSION_ID</code></td><td><code>true</code> ⚠️</td><td>不关掉会导致指标基数爆炸</td></tr><tr><td></td><td><code>OTEL_METRICS_INCLUDE_ACCOUNT_UUID</code></td><td><code>true</code></td><td>多用户场景下也要</td></tr><tr><td></td><td>时间间隔</td><td><code>60000</code> / <code>5000</code> ms</td><td>metrics 60s、logs 5s，debug 期调小</td></tr></tbody></table><p>标⚠️的两个最坑：默认 protocol 是 gRPC，但很多公司 HTTPS 反代只允许 HTTP；默认带 <code>session.id</code>，每次 Claude 重启都是新 series，几天 Prometheus 内存就崩。</p><p>最小启用模板（本地 dev，推到本地 4317）：</p><pre class="language-bash" data-language="bash"><code class="language-bash">export CLAUDE_CODE_ENABLE_TELEMETRY=1
+export OTEL_METRICS_EXPORTER=otlp
+export OTEL_LOGS_EXPORTER=otlp
+# 默认就是 grpc + localhost:4317，可以不写</code></pre><p>跑一下 <code>claude --version</code> 之后用 <code>tcpdump -i lo port 4317</code> 抓包，如果有流量，说明开关层 OK。</p><p>debug 阶段不想搭后端时，最方便的是 console exporter——直接把 metric 打到 stderr：</p><pre class="language-bash" data-language="bash"><code class="language-bash">export CLAUDE_CODE_ENABLE_TELEMETRY=1
+export OTEL_METRICS_EXPORTER=console
+export OTEL_METRIC_EXPORT_INTERVAL=5000   # 5 秒一次，看得见
+claude
+# 然后看 stderr，会有 JSON 形式的 metric 流出来</code></pre><h2 id="三种-exporter：gRPC-HTTP-protobuf-内置-Prometheus"><a href="#三种-exporter：gRPC-HTTP-protobuf-内置-Prometheus" class="headerlink" title="三种 exporter：gRPC / HTTP/protobuf / 内置 Prometheus"></a>三种 exporter：gRPC / HTTP/protobuf / 内置 Prometheus</h2><p>我推荐先想清楚走哪条路再配，不然变量改来改去会乱：</p><p><strong>Path A：gRPC OTLP</strong>（默认，最快）</p><pre class="language-bash" data-language="bash"><code class="language-bash">export OTEL_EXPORTER_OTLP_PROTOCOL=grpc
+export OTEL_EXPORTER_OTLP_ENDPOINT=http://otel-collector:4317</code></pre><p>适合本地 / VPC 内部、能直连的场景。性能最好，但很多企业反代不放 gRPC。</p><p><strong>Path B：HTTP/protobuf OTLP</strong>（跨网络、跨反代最稳）</p><pre class="language-bash" data-language="bash"><code class="language-bash">export OTEL_EXPORTER_OTLP_PROTOCOL=http/protobuf
+export OTEL_EXPORTER_OTLP_ENDPOINT=https://usage.example.com/api/v1/otlp
+# Prometheus 2.47+ 直接收，无需 OTel Collector</code></pre><p>这是 HelloTalk 那种远程聚合常用的姿势——HTTP/2 走 443，反代不挑食。我自己生产也用这条。</p><p><strong>Path C：内置 Prometheus exporter</strong>（最简单）</p><pre class="language-bash" data-language="bash"><code class="language-bash">export OTEL_METRICS_EXPORTER=prometheus
+# Claude Code 会在本地起一个 /metrics 端点，Prometheus 主动 scrape</code></pre><p>零依赖，本地用最快。缺点：只能采 metrics，logs 没法走这条；多用户聚合也不方便。</p><p>我自己的选型经验：单机本地用 Path C，团队聚合用 Path B，重度场景（要做 trace 关联）才上 Path A + OTel Collector。</p><h2 id="传输进阶：per-signal-拆分-4-种认证姿势"><a href="#传输进阶：per-signal-拆分-4-种认证姿势" class="headerlink" title="传输进阶：per-signal 拆分 + 4 种认证姿势"></a>传输进阶：per-signal 拆分 + 4 种认证姿势</h2><p>走到生产环境，基本会遇到两个需求：metrics 和 logs 想推到不同后端、跨网络要带认证。Claude Code 都支持，只是参数容易写错。</p><p><strong>Metrics 和 logs 走不同后端</strong>——比如 metrics 进 Prometheus、logs 进 Loki：</p><pre class="language-bash" data-language="bash"><code class="language-bash"># 通用 endpoint 不写，用 per-signal override
+export OTEL_EXPORTER_OTLP_METRICS_PROTOCOL=http/protobuf
+export OTEL_EXPORTER_OTLP_METRICS_ENDPOINT=http://prometheus:9090/api/v1/otlp
+export OTEL_EXPORTER_OTLP_LOGS_PROTOCOL=grpc
+export OTEL_EXPORTER_OTLP_LOGS_ENDPOINT=http://loki:4317</code></pre><p>注意 metrics endpoint 走 HTTP（带 <code>/api/v1/otlp</code> 路径），logs 走 gRPC（只到端口）。两边都各自的协议参数，不会互相覆盖。</p><blockquote><p>⚠️ <strong>Claude 2.1 实测坑</strong>：单独设 <code>OTEL_EXPORTER_OTLP_METRICS_ENDPOINT</code> + <code>OTEL_EXPORTER_OTLP_LOGS_ENDPOINT</code>，<strong>实际只有 metrics endpoint 生效</strong>，logs 信号仍走通用 endpoint。我自己的环境（2.1.153）跑下来就是这个行为——Prom 拿到了、loki 静默落空。最稳的做法是<strong>只设 <code>OTEL_EXPORTER_OTLP_ENDPOINT</code> 指向一个 OTel Collector</strong>,让 Collector 内部按 pipeline 分流给 Prom 和 Loki。Collector 这层配置 12 行就够，下面”Docker 容器”章节会贴完整 yaml。</p></blockquote><p><strong>认证姿势 1：静态 Bearer token</strong>——最简单，token 写在环境变量里：</p><pre class="language-bash" data-language="bash"><code class="language-bash">export OTEL_EXPORTER_OTLP_HEADERS="Authorization=Bearer $(cat /etc/secrets/otel-token)"
+# 多个 header 用逗号分隔
+export OTEL_EXPORTER_OTLP_HEADERS="Authorization=Bearer xxx,X-Tenant-ID=team-platform"</code></pre><p><strong>认证姿势 2：mTLS</strong>——企业内 zero-trust 网络常用，OTLP exporter 直接吃 cert 文件路径：</p><pre class="language-bash" data-language="bash"><code class="language-bash"># 客户端证书三件套（与 OTLP_PROTOCOL 配合）
+export OTEL_EXPORTER_OTLP_CLIENT_CERTIFICATE=/etc/ssl/claude-client.crt
+export OTEL_EXPORTER_OTLP_CLIENT_KEY=/etc/ssl/claude-client.key
+export OTEL_EXPORTER_OTLP_CERTIFICATE=/etc/ssl/ca-bundle.crt   # 服务端 CA</code></pre><p><strong>认证姿势 3：动态 headers</strong>——token 会过期、要轮换，写个脚本输出 JSON：</p><pre class="language-bash" data-language="bash"><code class="language-bash"># 准备一个 helper 脚本，stdout 输出 JSON
+cat &gt; /usr/local/bin/get-otel-headers.sh &lt;&lt;'EOF'
+#!/bin/bash
+TOKEN=$(aws sts assume-role-with-web-identity ... | jq -r '.Credentials.SessionToken')
+echo "{\"Authorization\": \"Bearer $TOKEN\"}"
+EOF
+chmod +x /usr/local/bin/get-otel-headers.sh
+
+# 告诉 Claude Code 用这个脚本（仅 http/protobuf 和 http/json 支持，gRPC 不行）
+export OTEL_EXPORTER_OTLP_HEADERS_HELPER=/usr/local/bin/get-otel-headers.sh
+export CLAUDE_CODE_OTEL_HEADERS_HELPER_DEBOUNCE_MS=900000   # 15 分钟刷新一次</code></pre><p><strong>认证姿势 4：管理员配置文件</strong>——团队不想让每个开发者自己配 env vars，用 settings 文件集中管理：</p><pre class="language-json" data-language="json"><code class="language-json">// /etc/claude-code/managed-settings.json（管理员级，优先级最高）
+{
+  "env": {
+    "CLAUDE_CODE_ENABLE_TELEMETRY": "1",
+    "OTEL_METRICS_EXPORTER": "otlp",
+    "OTEL_EXPORTER_OTLP_PROTOCOL": "http/protobuf",
+    "OTEL_EXPORTER_OTLP_ENDPOINT": "https://usage.example.com/api/v1/otlp",
+    "OTEL_EXPORTER_OTLP_HEADERS": "Authorization=Bearer $(cat /etc/secrets/otel)",
+    "OTEL_RESOURCE_ATTRIBUTES": "deployment.environment=prod"
+  }
+}</code></pre><p>放好之后，开发者 <code>claude</code> 一启动就自动拿到这些 env vars，不需要自己 export，也不能覆盖。多团队场景下 <code>OTEL_RESOURCE_ATTRIBUTES</code> 可以叠加打标签：</p><pre class="language-bash" data-language="bash"><code class="language-bash"># 用户 shell 里追加 team / user 维度（managed.json 里 prod 不变）
+export OTEL_RESOURCE_ATTRIBUTES="${OTEL_RESOURCE_ATTRIBUTES},team=infra,user.email=$(git config user.email),cost_center=eng-123"</code></pre><p>后端拿到的 resource attributes 是合并集，Prometheus 那边在 <code>promote_resource_attributes</code> 里挑要 promote 成 label 的字段就行。</p><h2 id="隐私-基数：你不想全推的两类参数"><a href="#隐私-基数：你不想全推的两类参数" class="headerlink" title="隐私 + 基数：你不想全推的两类参数"></a>隐私 + 基数：你不想全推的两类参数</h2><p>这块是踩坑重灾区。默认值在 <em>最保守</em> 一端（什么都不上报），但很多人为了”看清楚一点”把开关全打开，结果一周后日志里塞满了源码片段被合规扫到。</p><p><strong>隐私三件套</strong>（默认全是关，按需开）：</p><pre class="language-bash" data-language="bash"><code class="language-bash"># 我个人推荐的"够用不越界"组合
+export OTEL_LOG_USER_PROMPTS=0     # 用户 prompt 正文：永远关
+export OTEL_LOG_TOOL_CONTENT=0     # tool 输入输出正文：永远关（会包含文件内容！）
+export OTEL_LOG_TOOL_DETAILS=1     # tool 元信息：可以开，对审计有用</code></pre><p><code>OTEL_LOG_TOOL_DETAILS=1</code> 会上报 Bash 命令字符串、MCP server / tool 名、skill 名。这部分对审计很有用（知道用户在调哪些工具），但本身不含正文，比 <code>TOOL_CONTENT</code> 安全得多。</p><p>如果你要在 Grafana 的 prompt 二级页里看到 <strong>Tool Calls 的请求参数正文</strong>，还必须额外打开：</p><pre class="language-bash" data-language="bash"><code class="language-bash">export OTEL_LOG_TOOL_CONTENT=1</code></pre><p>注意这只对<strong>新启动的 Claude Code 进程</strong>生效，历史 Loki 数据补不回来。它会把 tool 输入/输出内容一起上报，可能包含文件路径、命令参数、代码片段甚至文件内容，只建议在明确的审计环境里打开。</p><p><strong>还有一个高危隐私变量必须知道</strong>：<code>OTEL_LOG_RAW_API_BODIES</code>。它会上报完整的 Anthropic Messages API 请求 / 响应 JSON，包含整段对话历史和生成内容。开启它等于把所有上面三个开关一次性打开，并且体量翻倍——单次 prompt 体量可以到 60KB。除非你在做 LLM 审计平台，不然永远别开：</p><pre class="language-bash" data-language="bash"><code class="language-bash"># 危险，除非你知道自己在做什么
+# export OTEL_LOG_RAW_API_BODIES=1            # 内联，单条 60KB 截断
+# export OTEL_LOG_RAW_API_BODIES=file:/var/log/claude-bodies   # 落盘，无截断</code></pre><p><strong>基数控制四件套</strong>（全部默认开的两个一定要关，另外两个按需）：</p><pre class="language-bash" data-language="bash"><code class="language-bash"># 高基数自杀风险：必须关
+export OTEL_METRICS_INCLUDE_SESSION_ID=false       # 默认 true，每次重启换值
+export OTEL_METRICS_INCLUDE_ACCOUNT_UUID=false     # 默认 true，多用户场景按 team 聚合时不需要
+
+# 默认关的两个：按需开
+export OTEL_METRICS_INCLUDE_VERSION=true           # 默认 false。Claude Code 升级监控想看版本分布时打开
+export OTEL_METRICS_INCLUDE_ENTRYPOINT=true        # 默认 false。区分 `claude` / `claude -p` / Agent SDK 调用源</code></pre><p><code>session.id</code> 每次 <code>claude</code> 命令重启都换，加进 metric 标签就是 cardinality 自杀。我之前没关，跑了 4 天 Prometheus 内存从 200MB 涨到 8GB，回查才发现是这个。<code>VERSION</code> 和 <code>ENTRYPOINT</code> 默认是关的——只在你要做”哪些用户还卡在旧版本””脚本调用占比多少”这类分析时才打开。</p><h2 id="Prometheus-原生-OTLP-接收：一条-flag-搞定"><a href="#Prometheus-原生-OTLP-接收：一条-flag-搞定" class="headerlink" title="Prometheus 原生 OTLP 接收：一条 flag 搞定"></a>Prometheus 原生 OTLP 接收：一条 flag 搞定</h2><p>Prometheus 从 2.47 开始原生支持 OTLP HTTP receive，不需要 OTel Collector 当中间件。这是目前最短的接收路径。</p><p>启动时加一个 flag：</p><pre class="language-bash" data-language="bash"><code class="language-bash">prometheus \
+  --config.file=/etc/prometheus/prometheus.yml \
+  --web.enable-otlp-receiver</code></pre><p>然后 prometheus.yml 里加一个 <code>otlp:</code> 段，告诉它把哪些 OTel resource attribute 提升成 label：</p><pre class="language-yaml" data-language="yaml"><code class="language-yaml"># prometheus.yml
+otlp:
+  # 把这些 OTel 资源属性 promote 成 Prometheus label，方便查询
+  promote_resource_attributes:
+    - service.name
+    - service.instance.id
+    - team
+    - user.email
+  keep_identifying_resource_attributes: true
+  # translation_strategy 用默认（UnderscoreEscapingWithSuffixes）
+  #   - OTel 名里 . → _（claude_code.session.count → claude_code_session_count）
+  #   - counter 自动加 _total 后缀
+  #   - 带单位的 metric 加单位后缀（详见下文"验证"段）
+
+storage:
+  tsdb:
+    # OTLP 数据偶尔会乱序到达，给一点容忍
+    out_of_order_time_window: 30m</code></pre><p>Claude Code 端指过去：</p><pre class="language-bash" data-language="bash"><code class="language-bash">export CLAUDE_CODE_ENABLE_TELEMETRY=1
+export OTEL_METRICS_EXPORTER=otlp
+export OTEL_EXPORTER_OTLP_PROTOCOL=http/protobuf
+export OTEL_EXPORTER_OTLP_ENDPOINT=http://prometheus:9090/api/v1/otlp
+export OTEL_EXPORTER_OTLP_METRICS_TEMPORALITY_PREFERENCE=cumulative
+export OTEL_METRICS_INCLUDE_SESSION_ID=false
+claude</code></pre><p>注意三个细节：endpoint 是 <code>/api/v1/otlp</code>（Prometheus 内部自动补 <code>/v1/metrics</code>）；temporality 一定要 <code>cumulative</code>，Prometheus 不擅长 delta；session_id 关掉。</p><p>验证：</p><pre class="language-bash" data-language="bash"><code class="language-bash">curl -s http://localhost:9090/api/v1/query?query=claude_code_session_count_total | jq .</code></pre><p>如果返回里有 <code>result</code> 数组，数据流就通了。</p><p><strong>实测过的命名规则</strong>（默认 <code>UnderscoreEscapingWithSuffixes</code> 策略）：</p><table><thead><tr><th>OTel 原名</th><th>Prometheus 名</th><th>备注</th></tr></thead><tbody><tr><td><code>claude_code.session.count</code></td><td><code>claude_code_session_count_total</code></td><td>unit=count 时不加单位后缀</td></tr><tr><td><code>claude_code.token.usage</code></td><td><code>claude_code_token_usage_**tokens**_total</code></td><td>⚠️ unit=tokens,加单位</td></tr><tr><td><code>claude_code.cost.usage</code></td><td><code>claude_code_cost_usage_**USD**_total</code></td><td>⚠️ unit=USD,加单位</td></tr><tr><td><code>claude_code.active_time.total</code></td><td><code>claude_code_active_time_**seconds**_total</code></td><td>⚠️ unit=s → seconds</td></tr><tr><td><code>claude_code.lines_of_code.count</code></td><td><code>claude_code_lines_of_code_count_total</code></td><td>unit=count</td></tr><tr><td><code>claude_code.code_edit_tool.decision</code></td><td><code>claude_code_code_edit_tool_decision_total</code></td><td>unit=count</td></tr></tbody></table><p>带单位的那 3 个最容易踩坑——按”原 OTel 名替换点”猜会查不到。我第一次跑就栽在 <code>claude_code_cost_usage_total</code> 上,debug 半天才发现要加 <code>_USD</code>。下面的 PromQL 都用了实测过的正确命名。</p><h2 id="加-Grafana，跑一个-demo-dashboard"><a href="#加-Grafana，跑一个-demo-dashboard" class="headerlink" title="加 Grafana，跑一个 demo dashboard"></a>加 Grafana，跑一个 demo dashboard</h2><p>Grafana 用 provisioning 模式自动加 data source + dashboard，比手点省心。</p><p><code>grafana/provisioning/datasources/prometheus.yml</code>：</p><pre class="language-yaml" data-language="yaml"><code class="language-yaml">apiVersion: 1
+datasources:
+  - name: Prometheus
+    type: prometheus
+    access: proxy
+    url: http://prometheus:9090
+    isDefault: true
+    editable: false
+    jsonData:
+      httpMethod: POST
+      timeInterval: 15s</code></pre><p>几条我每天都会看的 PromQL，覆盖”成本 / 产出 / 谁在用”三个维度：</p><pre class="language-promql" data-language="promql"><code class="language-promql"># 1. 各模型每小时 token 消耗（成本归因第一选）
+sum by (model, type) (increase(claude_code_token_usage_tokens_total[1h]))
+
+# 2. 各团队每天的 cost（USD）— 需要前面配了 team resource attribute
+sum by (team) (increase(claude_code_cost_usage_USD_total[1d]))
+
+# 3. 每天有多少独立 session 启动（adoption 跟进）
+sum(increase(claude_code_session_count_total[1d]))
+
+# 4. lines_of_code 增减（产出维度）
+sum(rate(claude_code_lines_of_code_count_total{type="added"}[1h]))
+
+# 5. 工具调用决策分布（被拒绝率，看权限模型健康度）
+sum by (decision) (rate(claude_code_code_edit_tool_decision_total[5m]))</code></pre><p>我自己 dashboard 上最常盯着的是第 2 条 + 第 5 条。前者管钱，后者看 Claude 是不是经常被人按 deny——按 deny 太多说明工具描述写得不好，或者用户对 Claude 不信任，都是要 fix 的信号。</p><blockquote><p>⚠️ <strong>OTLP 累计 counter + <code>increase()</code> 的坑（实测）</strong>：Claude Code 走 OTLP 推的是<strong>累计 counter</strong>，而且只在值<strong>变化时</strong>才推一个样本（稀疏推送）。当某指标在你选的时间窗内只有 1 个样本时，<code>increase(metric[$__range])</code> 因为”两点才能算增量”会<strong>返回空</strong>——dashboard 上就是一片 <code>No data</code>，空闲几分钟后打开尤其明显。两个稳妥替代：</p><ul><li>看”区间累计值”（如总成本、总 token、commit 数）用 <code>sum(last_over_time(metric[$__range]))</code>——取窗口内最后一个样本，顺便绕开 Prometheus 5 分钟 staleness 导致的 instant 查询变空；</li><li>看”窗口增量趋势”，要么把范围拉到足够长让 <code>increase()</code> 有 ≥2 个样本，要么干脆把趋势计算挪到 <strong>Loki 端</strong> <code>sum_over_time({...} | unwrap &lt;字段&gt; [$__interval])</code>——日志侧每条事件都是独立样本，不受稀疏 counter 影响，趋势更准。本文后面 Loki 章节的成本/token 趋势都用后一种。</li></ul></blockquote><p>如果你想直接拿一份现成 dashboard，Anthropic 自己开源了 <code>anthropics/claude-code-monitoring-guide</code> 仓库，里面有 docker-compose + dashboard JSON。我下面这份 docker-compose 是简化版（去掉了它的 Loki 部分，只留 Prometheus + Grafana）：</p><h2 id="Dashboard-自动-provisioning-告警规则"><a href="#Dashboard-自动-provisioning-告警规则" class="headerlink" title="Dashboard 自动 provisioning + 告警规则"></a>Dashboard 自动 provisioning + 告警规则</h2><p>PromQL 写完，下一步是让 Grafana 启动时自动加载 dashboard 和 alert，开发机和生产环境出一份代码就够。</p><p><code>grafana/provisioning/dashboards/dashboards.yml</code>：</p><pre class="language-yaml" data-language="yaml"><code class="language-yaml">apiVersion: 1
+providers:
+  - name: claude-code
+    type: file
+    disableDeletion: true
+    updateIntervalSeconds: 30
+    allowUiUpdates: false
+    options:
+      path: /etc/grafana/provisioning/dashboards/json
+      foldersFromFilesStructure: true</code></pre><p>然后把 dashboard JSON 放到 <code>grafana/provisioning/dashboards/json/cost.json</code>——下面是一个最小可用的成本归因面板骨架（一个 stat + 一个 timeseries + 两个变量 <code>$team</code> 和 <code>$model</code>）：</p><pre class="language-json" data-language="json"><code class="language-json">{
+  "title": "Claude Code Cost Attribution",
+  "templating": {
+    "list": [
+      {"name": "team", "type": "query", "datasource": "Prometheus",
+       "query": "label_values(claude_code_cost_usage_USD_total, team)", "multi": true, "includeAll": true},
+      {"name": "model", "type": "query", "datasource": "Prometheus",
+       "query": "label_values(claude_code_cost_usage_USD_total, model)", "multi": true, "includeAll": true}
+    ]
+  },
+  "panels": [
+    {"id": 1, "type": "stat", "title": "Today's Total Cost (USD)",
+     "targets": [{"expr": "sum(increase(claude_code_cost_usage_USD_total{team=~\"$team\",model=~\"$model\"}[1d]))"}]},
+    {"id": 2, "type": "timeseries", "title": "Hourly Cost by Team",
+     "targets": [{"expr": "sum by (team) (increase(claude_code_cost_usage_USD_total{model=~\"$model\"}[1h]))",
+                  "legendFormat": "{{team}}"}]}
+  ]
+}</code></pre><p><strong>告警规则</strong>——团队成本超阈值时报警，写在 Prometheus 端（也可以用 Grafana 9+ 的 unified alerting）：</p><pre class="language-yaml" data-language="yaml"><code class="language-yaml"># prometheus-rules.yml，挂到 prometheus.yml 的 rule_files: 段
+groups:
+  - name: claude_code_cost
+    interval: 1m
+    rules:
+      - alert: ClaudeCodeTeamCostOverBudget
+        expr: |
+          sum by (team) (increase(claude_code_cost_usage_USD_total[1d])) &gt; 50
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Team {{ $labels.team }} 今日成本 ${{ $value | printf \"%.2f\" }} 超 $50 阈值"
+      - alert: ClaudeCodeDenyRateHigh
+        expr: |
+          sum by (team) (rate(claude_code_code_edit_tool_decision_total{decision="deny"}[15m]))
+            / sum by (team) (rate(claude_code_code_edit_tool_decision_total[15m])) &gt; 0.3
+        for: 10m
+        labels:
+          severity: info
+        annotations:
+          summary: "Team {{ $labels.team }} 工具拒绝率 &gt; 30%，工具描述或权限模型可能要 fix"</code></pre><p>第二条告警是我自己生产里很有价值的一条——deny 率高说明 Claude 推荐的命令经常被否决，要么是 prompt 写得不准，要么是工具描述不清楚，能直接反推 fix 方向。</p><h2 id="Skill-Agent-MCP-使用分布：数据驱动砍-推哪些"><a href="#Skill-Agent-MCP-使用分布：数据驱动砍-推哪些" class="headerlink" title="Skill / Agent / MCP 使用分布：数据驱动砍/推哪些"></a>Skill / Agent / MCP 使用分布：数据驱动砍/推哪些</h2><p>装了 30 个 skill 装了 8 个 MCP server，半年后没人记得到底哪些在跑活，凭印象砍最容易砍错。Claude Code 的 OTel 数据其实把每次调用都打了标签——同一个 <code>claude_code.token.usage</code> metric 上额外带 <code>skill.name</code> / <code>plugin.name</code> / <code>agent.name</code> 维度，按它们 group by 就是一张”谁在烧 token”的天然 dashboard。</p><p><strong>前提是 <code>OTEL_LOG_TOOL_DETAILS=1</code> 必须打开</strong>——不然下面所有 skill/plugin/agent 标签全是空字符串，dashboard 永远看不到：</p><pre class="language-bash" data-language="bash"><code class="language-bash">export OTEL_LOG_TOOL_DETAILS=1
+# 这会上报：Bash 命令字符串、MCP server/tool 名、skill 名、subagent 类型
+# 不含：prompt 正文、tool 输入输出 — 见前面"隐私 + 基数"章节的权衡</code></pre><p>打开之后，Prometheus 端会看到 <code>claude_code_token_usage_tokens_total</code> 上多出三个标签：<code>skill_name</code> / <code>plugin_name</code> / <code>agent_name</code>（OTel 名里的 <code>.</code> 在 Prom 端转成 <code>_</code>）。</p><blockquote><p>⚠️ <strong>重要实测发现</strong>：<code>skill_name</code> 和 <code>plugin_name</code> 标签的<strong>值不是 skill 的具体名</strong>(如 <code>using-superpowers</code>)，而是<strong>分类</strong>(<code>'third-party'</code> / 推测还有 <code>'built-in'</code> 等)。Claude Code 应该不想把私有 skill 名上报到 metric。所以下面这条 <code>topk(10, sum by skill_name)</code> 拿到的是”分类型的 token 分布”(third-party vs built-in)而不是”哪 10 个 skill 最烧 token”——别被 PromQL 表达式骗了。<code>agent_name</code> 倒是具体的（如 <code>general-purpose</code>、自定义 subagent 名）。<strong>想要具体 skill 名（全名）别在 Prometheus 这边死磕——走后面 Loki 章节的 <code>skill_activated</code> 事件，那里 <code>skill_name</code> 是真名。</strong></p></blockquote><p><strong>按 skill 分类看 token 分布</strong>——分清楚是 third-party 插件还是内置 skill 在烧钱：</p><pre class="language-promql" data-language="promql"><code class="language-promql"># 实测值通常只有 1-2 类:third-party / built-in
+sum by (skill_name) (claude_code_token_usage_tokens_total{skill_name!=""})
+
+# 如果只想看本周新增
+sum by (skill_name) (increase(claude_code_token_usage_tokens_total{skill_name!=""}[7d]))</code></pre><p><strong>每个 plugin 分类的成本归因（USD）</strong>——类似上,跟 skill_name 通常一致:</p><pre class="language-promql" data-language="promql"><code class="language-promql">sum by (plugin_name) (claude_code_cost_usage_USD_total{plugin_name!=""})
+
+# 团队 × plugin 分类的二维视图
+sum by (team, plugin_name) (claude_code_cost_usage_USD_total{plugin_name!=""})</code></pre><p><strong>Subagent 调用密度</strong>——<code>agent_name</code> 是真正的具体名（<code>general-purpose</code> / <code>code-reviewer</code> / 自定义 subagent 名），这条最有用：</p><pre class="language-promql" data-language="promql"><code class="language-promql"># Top 10 烧 token 的 subagent
+topk(10,
+  sum by (agent_name) (claude_code_token_usage_tokens_total{agent_name!=""})
+)
+
+# 配合 user_email 看是哪个开发者疯狂调 subagent
+topk(5,
+  sum by (user_email, agent_name) (rate(claude_code_token_usage_tokens_total{agent_name!=""}[1h]))
+)</code></pre><p><strong>要看具体 skill / MCP server / 工具名,走 logs 后端</strong>(Loki/Elastic)最直接。这里有一组<strong>第一版踩过坑、必须讲清楚的事实</strong>：Claude Code 走 OTel 上报时，所有 attribute 经 OTel Collector 写成 Loki 3.x 的 <strong>structured metadata</strong>（既不是 stream label，也不是 JSON body），并且<strong>属性名里的 <code>.</code> 全部转成 <code>_</code></strong>——<code>skill.name</code>→<code>skill_name</code>、<code>process.pid</code>→<code>process_pid</code>、<code>event.name</code>→<code>event_name</code>、<code>server.name</code>→<code>server_name</code>。LogQL 查询一律用下划线名。</p><blockquote><p>🔑 <strong>structured metadata 怎么过滤（关键，纠正一个广为流传的误解）</strong>：</p><ul><li>❌ <strong>不能</strong>放进 stream selector 大括号——<code>{service_name="claude-code", tool_name="Skill"}</code> 直接返 <strong>0</strong>（大括号只认真正的 stream label，本环境只有 <code>service_name</code> 一个）；</li><li>✅ <strong>能</strong>用 <strong>pipeline label filter</strong>（管道符）<code>{service_name="claude-code"} | event_name="tool_result" | tool_name="Skill"</code> 精确过滤，实测稳定返回数据，也能 <code>sum by(tool_name)</code> 聚合、<code>| unwrap duration_ms</code> 取数值。</li></ul><p>一句话：<strong>过滤 structured metadata 用管道符 <code>| key="val"</code>，不是大括号 <code>{key="val"}</code></strong>。记牢这条，下面所有按 skill / agent / server 精确过滤的查询都能跑通——不必退回 <code>|=</code> 子串匹配那种容易误伤的写法。</p></blockquote><p>按 <code>event_name</code> 区分事件类型后，最有价值的几类：</p><ul><li><strong><code>skill_activated</code></strong> — 每次 skill 激活打一条，<strong>直接带具体 skill 名</strong>：<code>skill_name</code>（<code>superpowers:using-superpowers</code> / <code>feishu-docs</code> 这种全名）、<code>skill_source</code>（plugin / userSettings / project）、<code>invocation_trigger</code>（user-slash / nested-skill / claude-proactive）。<strong>这是拿”具体哪个 skill 在跑”的正解</strong>——不用像旧版那样绕 <code>tool_result</code> 按行人工翻（详见下面「找具体 skill 名」小节）。</li><li><strong><code>subagent_completed</code></strong> — 每个子代理跑完打一条，带 per-run 明细：<code>agent_type</code>（general-purpose / Explore / 自定义名）、<code>total_tokens</code>、<code>total_tool_uses</code>、<code>duration_ms</code>、<code>model</code>、<code>agent_source</code>（built-in / 自定义）。比 Prometheus 的 <code>agent_name</code> 聚合多了”每一次跑了多久、用了多少工具/token”的粒度。</li><li><strong><code>mcp_server_connection</code></strong> — 每次 MCP server 连接握手打一条。<code>server_name</code> 是具体名（context7 / sequential-thinking / n8n-mcp 等）；<strong><code>status</code> 是连接结果（connected / failed / disconnected）——这是 MCP 健康度的关键信号</strong>（实测 failed 常常 ≥ connected，多发生在 sse/远程 server）；还有 <code>transport_type</code>（stdio 本地 / sse·claudeai-proxy 远程）、<code>server_scope</code>、<code>duration_ms</code>（握手耗时）。</li><li><strong><code>tool_result</code></strong> — 每次工具调用完打一条。<strong>注意（2.1.x 实际行为）</strong>：<code>tool_name</code> 对 MCP 工具<strong>始终是字符串 <code>mcp_tool</code></strong>（不区分 server），真实 server+tool 名在另一个 structured metadata 字段 <code>tool_parameters</code> 里，是 JSON 字符串，例如 <code>{"mcp_server_name":"context7","mcp_tool_name":"resolve-library-id"}</code>。Loki 的 <code>| json</code> 只能解 log body、解不了 structured metadata 里的 JSON value，要拆 server 出来得在客户端（Python / jq）解，或用 <code>line_format</code> 把整串打出来人工看。</li></ul><blockquote><p>📌 <strong>更正一则旧版误解</strong>:本文早期版本写过”Loki 3.3 下用精确 match 偶尔返空、得退回 line filter <code>|=</code> 子串匹配”——复盘下来，那是把 stream selector <code>{key="val"}</code>（structured metadata 放这里确实返 0）和 pipeline filter <code>| key="val"</code>（完全可行）搞混了。实测 <code>| event_name="mcp_server_connection"</code>、<code>| tool_name="Skill"</code>、<code>| status="failed"</code> 这类<strong>管道符</strong>过滤都稳定生效。下面的例子统一用管道符精确过滤；<code>|=</code> 子串匹配只在”搜某个关键词出现在哪”时才用，不再拿来当 label 过滤的替代。</p></blockquote><p><strong>列出本会话连接过的所有 MCP server</strong>(实测 12 个:context7 / chrome-devtools / mixsearch / sequential-thinking-1 / zread / web-search-prime / web-reader / vibe_kanban / playwright / n8n-mcp / plugin:superpowers-chrome:chrome / sequential-thinking):</p><pre class="language-logql" data-language="logql"><code class="language-logql"># 区间内连接过的 MCP server（管道符精确过滤 event_name）
+sum by (server_name) (
+  count_over_time({service_name="claude-code"} | event_name="mcp_server_connection" [$__range])
+)</code></pre><p><strong>MCP 连接健康度（这是最该上 dashboard 的一张）</strong>——<code>status</code> 维度此前完全被”连接次数”掩盖，实测把它拆出来才发现 <code>failed</code> 往往比 <code>connected</code> 还多：</p><pre class="language-logql" data-language="logql"><code class="language-logql"># 连接状态分布（connected / failed / disconnected）
+sum by (status) (
+  count_over_time({service_name="claude-code"} | event_name="mcp_server_connection" [$__range])
+)
+
+# 哪些 server 在掉线 —— 直接点名排障入口（实测集中在远程 sse server）
+sum by (server_name) (
+  count_over_time({service_name="claude-code"} | event_name="mcp_server_connection" | status="failed" | server_name!="" [$__range])
+)
+
+# 握手延迟 avg by server（unwrap 数值字段，慢连接拖慢启动）
+avg by (server_name) (
+  avg_over_time({service_name="claude-code"} | event_name="mcp_server_connection" | server_name!="" | unwrap duration_ms [$__range])
+)</code></pre><p><strong>每次 MCP 工具调用的延迟、谁调的、参数</strong>(把 <code>tool_parameters</code> 这个 JSON label 解出 <code>mcp_server_name</code> 字段):</p><pre class="language-logql" data-language="logql"><code class="language-logql"># 关键:Loki 3.3 的 | json 只能解 log body,解不了 structured metadata label 里的 JSON value
+# (tool_parameters 是 OTel Collector 写到 Loki structured metadata 的 label)
+# 所以 LogQL 只做 line filter 圈定范围,JSON 解在客户端做
+{service_name="claude-code"} |= "tool_result"
+  | line_format `{{.user_email}} → {{.tool_parameters}} | ok={{.success}} dur={{.duration_ms}}ms | in={{.tool_input_size_bytes}}B out={{.tool_result_size_bytes}}B`</code></pre><p>实测一行: <code>costa9293@gmail.com → {"mcp_server_name":"context7","mcp_tool_name":"resolve-library-id"} | ok=true dur=4763ms | in=43B out=1679B</code> —— 哪个用户在哪个时刻调了哪个 MCP server 的哪个 tool、参数多大、返回多大,白纸黑字。要按 server 拆开看,客户端用 jq / Python 解 <code>tool_parameters</code> 这串 JSON 即可(Loki WebUI 有自带 JSON inspector)。</p><p><strong>按 MCP server 分组看调用次数</strong>(1h,降序):</p><pre class="language-logql" data-language="logql"><code class="language-logql">topk(20,
+  sum by (server_name) (
+    count_over_time({service_name="claude-code"} |= "mcp_server_connection" [1h])
+  )
+)</code></pre><p><strong>只看某个 server 的 tool_result</strong>(如 <code>context7</code>):</p><pre class="language-logql" data-language="logql"><code class="language-logql">{service_name="claude-code"} |= "context7" |= "tool_result"</code></pre><p><strong>每次调用的输入参数</strong>(<code>tool_input</code> 也是 JSON label,审计时重要):LogQL 不解它,直接 <code>|= "query":"&lt;keyword&gt;"</code> 做 substring 搜索最实际:</p><pre class="language-logql" data-language="logql"><code class="language-logql"># 找所有传了 query="fastapi" 的 MCP tool 调用
+{service_name="claude-code"} |= "tool_result" |= "fastapi"</code></pre><p>如果团队关心某个 MCP server 的健康度,直接在 Grafana 里把 <code>server_name</code> 设成变量,配上 <code>rate(count_over_time(...[5m]))</code> 就能看到连接成功率/失败率时间序列。这套组合实测在 Loki 3.3 + OTel Collector 下稳定工作。</p><p><strong>找具体 skill 名：直接查 <code>skill_activated</code>（正解，别再绕 <code>tool_result</code>）</strong></p><p>旧版这里花了很大篇幅教人”用 <code>sum by(tool_name)</code> 拿分布、再到 logs panel 按行人工找 Skill 那一行”——那是当时误以为 structured metadata 不能精确过滤、又没发现有专门事件记这件事。正解是：</p><pre class="language-logql" data-language="logql"><code class="language-logql"># 用了哪些 skill、各多少次（具体全名，不是 third-party/built-in 分类）
+sum by (skill_name) (
+  count_over_time({service_name="claude-code"} | event_name="skill_activated" [$__range])
+)
+
+# skill 来源 / 触发方式分布
+sum by (skill_source)       (count_over_time({service_name="claude-code"} | event_name="skill_activated" [$__range]))
+sum by (invocation_trigger) (count_over_time({service_name="claude-code"} | event_name="skill_activated" [$__range]))</code></pre><p>实测直接拿到 <code>superpowers:using-superpowers</code> / <code>superpowers:systematic-debugging</code> / <code>feishu-docs</code> 这种具体名，外加 <code>skill_source=plugin/userSettings</code>、<code>invocation_trigger=user-slash/nested-skill/claude-proactive</code>——比在 <code>tool_result</code> 里人工翻精确得多。</p><p><strong>子代理 per-run 明细：查 <code>subagent_completed</code></strong></p><p>Prometheus 的 <code>agent_name</code> 只能给”某 agent 累计烧了多少 token”。要看”每一次跑了多久、用了多少工具”，查事件：</p><pre class="language-logql" data-language="logql"><code class="language-logql"># 各子代理类型运行次数
+sum by (agent_type) (
+  count_over_time({service_name="claude-code"} | event_name="subagent_completed" [$__range])
+)
+
+# 每次运行的明细：类型 / 模型 / token / 工具数 / 耗时
+{service_name="claude-code"} | event_name="subagent_completed"
+  | line_format `{{.agent_type}} | {{.model}} | tok={{.total_tokens}} tools={{.total_tool_uses}} dur={{.duration_ms}}ms`</code></pre><p><strong>通用范式：structured metadata 一律用管道符精确过滤</strong>。下面这些旧版以为”Loki 返 0”的需求，换成管道符全部能跑：</p><table><thead><tr><th>想做的事</th><th>❌ 旧版（返 0 / 容易误伤）</th><th>✅ 正确写法</th></tr></thead><tbody><tr><td>只看 Skill 工具调用</td><td><code>{service_name="claude-code", tool_name="Skill"}</code></td><td><code>{service_name="claude-code"} | event_name="tool_result" | tool_name="Skill"</code></td></tr><tr><td>只看某 server 连接</td><td><code>|= "context7"</code> 子串匹配</td><td><code>| event_name="mcp_server_connection" | server_name="context7"</code></td></tr><tr><td>工具失败率</td><td>（旧版做不了）</td><td><code>| event_name="tool_result" | success="false"</code> 占总数</td></tr></tbody></table><blockquote><p>旧版列的那张”❌ 多 label match 返 0 / ✅ 只能 sum by”的表，根因就是<strong>没区分 stream selector <code>{}</code> 和 pipeline filter <code>\|</code></strong>。<code>{key="val"}</code> 对 structured metadata 确实返 0，但那不是 Loki 的限制，是写法放错了位置——挪到管道符后就好。</p></blockquote><p><strong>仍然有效的 <code>tool_result</code> logs panel</strong>（看每次调用的工具/参数/耗时，MCP 真实 server 在 <code>tool_parameters</code> JSON 里，客户端解）：</p><pre class="language-logql" data-language="logql"><code class="language-logql">{service_name="claude-code"} | event_name="tool_result"
+  | line_format `{{.tool_name}} | {{.tool_parameters}} | ok={{.success}} {{.duration_ms}}ms`</code></pre><p>结合 <code>duration_ms</code>、<code>tool_input_size_bytes</code> / <code>tool_result_size_bytes</code> 能快速定位”哪些调用最重”。</p><p>所以”找出 Skill 调用”这种需求,在 Loki 3.3 + OTel Collector 这套组合下,<strong>唯一可靠的方式是 sum by (tool_name) 拿到分布,再用 logs panel 按行人工找 Skill 那一行</strong>。</p><p>也可以简化:只看 metrics 的话,<strong>最实用的是 <code>agent_name</code></strong>——subagent 的具体名能直接 group by 出来,半年下来能看出”哪些自定义 agent 真用了,哪些是装着好看”。skill/plugin 那两个分类标签只能给你”第三方 vs 内置”的粗粒度判断,而且实测在 2.1.153 <strong>永远只有 <code>third-party</code> 一个值</strong>,dashboard 画出来是单色,信息量约等于 0。</p><p>我自己 dashboard 上常驻这三面板(都是确认有真实多样性的 label,不再用 skill/plugin 分类):</p><ul><li><strong>Tokens by Subagent</strong> — <code>sum by (agent_name) (claude_code_token_usage_tokens_total{agent_name!=""})</code>。实测 <code>Explore</code> 和 <code>general-purpose</code> 各 50K+ tokens,两条柱,信息密度高。</li><li><strong>Cost by Model (USD)</strong> — <code>sum by (model) (claude_code_cost_usage_USD_total)</code>。不同模型价格差几倍,这条直接告诉你钱烧在哪类模型上。</li><li><strong>Top 10 Users by Cost (1h)</strong> — <code>topk(10, sum by (user_email) (claude_code_cost_usage_USD_total))</code>。需要 <code>OTEL_METRICS_INCLUDE_USER_EMAIL=true</code> 才能让 <code>user_email</code> 标签有值(默认是 <code>user_id</code> hash)。这条帮我跟 manager 解释钱花在哪——数据胜过 vibe。</li></ul><p>Prometheus 的 <code>skill_name</code> / <code>plugin_name</code> 标签确实只有”第三方 vs 内置”这种粗分类（实测常只有 <code>third-party</code> 一个值，画出来单色、信息量≈0），但<strong>想看具体 skill 名不必退回 <code>tool_result</code> 人工翻——走上面的 <code>skill_activated</code> 事件就好</strong>。MCP 真实 server/tool 仍在 <code>tool_result</code> 的 <code>tool_parameters</code> JSON 里（客户端解）。</p><p><strong>成本归因再进一步：按 <code>query_source</code> 拆”交互 vs 后台自动”</strong></p><p><code>api_request</code> 事件带一个容易被忽略、却极有价值的字段 <code>query_source</code>——标明这次 LLM 调用是谁发起的。实测一拆才发现后台自动调用在悄悄烧钱：</p><pre class="language-logql" data-language="logql"><code class="language-logql"># 成本按来源拆（Loki 端 unwrap cost_usd，精确、不受稀疏 counter 影响）
+sum by (query_source) (
+  sum_over_time({service_name="claude-code"} | event_name="api_request" | unwrap cost_usd [$__range])
+)</code></pre><p>实测分布：<code>repl_main_thread</code>（你手敲的交互）占大头，但 <code>sdk</code>、<code>away_summary</code>（你离开时 Claude 自动写的总结）、<code>agent:*</code>（子代理）、<code>prompt_suggestion</code>、<code>generate_session_title</code> 这些<strong>后台来源加起来能占三到四成</strong>——Prometheus 的 <code>cost_usage</code> 按 model/team 拆完全看不到这一层。想压成本，先看这张图里哪些后台来源能关。</p><h2 id="把-Claude-Code-跑在-Docker-容器里"><a href="#把-Claude-Code-跑在-Docker-容器里" class="headerlink" title="把 Claude Code 跑在 Docker 容器里"></a>把 Claude Code 跑在 Docker 容器里</h2><p>很多人 dev 环境是 host 直跑 Claude Code，但越来越多的团队把它装进容器——一是隔离权限避免一不小心 <code>rm -rf</code> 到宿主机，二是多个项目环境互不污染，三是 OTel 配置可以跟容器走，不污染开发者本地 shell。</p><p><strong>第一步：把 OTel 配置抽到 <code>.env</code> 文件</strong>——容器化的第一收益就是配置和镜像分离：</p><pre class="language-bash" data-language="bash"><code class="language-bash"># otel.env（提交到 git 里也安全，没有 secret）
+CLAUDE_CODE_ENABLE_TELEMETRY=1
+OTEL_METRICS_EXPORTER=otlp
+OTEL_LOGS_EXPORTER=otlp
+OTEL_EXPORTER_OTLP_PROTOCOL=http/protobuf
+OTEL_EXPORTER_OTLP_ENDPOINT=http://prometheus:9090/api/v1/otlp
+OTEL_EXPORTER_OTLP_METRICS_TEMPORALITY_PREFERENCE=cumulative
+OTEL_METRICS_INCLUDE_SESSION_ID=false
+OTEL_METRICS_INCLUDE_ACCOUNT_UUID=false
+OTEL_LOG_TOOL_DETAILS=1
+OTEL_RESOURCE_ATTRIBUTES=team=infra,deployment.environment=dev</code></pre><p>Secret 单独放，永远别和 <code>.env</code> 混在一起：</p><pre class="language-bash" data-language="bash"><code class="language-bash"># otel.secret.env（gitignore 加上！）
+OTEL_EXPORTER_OTLP_HEADERS=Authorization=Bearer xxxxxxxxxxxxx</code></pre><p><strong>第二步：<code>docker run</code> 一次性起一个 Claude Code 容器</strong>——适合临时调一下：</p><pre class="language-bash" data-language="bash"><code class="language-bash">docker run -it --rm \
+  --name claude-dev \
+  --network monitoring \
+  --env-file ./otel.env \
+  --env-file ./otel.secret.env \
+  -v "$HOME/.claude:/root/.claude" \
+  -v "$(pwd):/workspace" \
+  -w /workspace \
+  node:24-bookworm \
+  bash -lc "npm i -g @anthropic-ai/claude-code &gt;/dev/null &amp;&amp; claude"</code></pre><p>三个 <code>-v</code> 挂载点要看清：<code>~/.claude</code> 装登录态和 settings，挂进去之后容器里的 <code>claude</code> 一启动就是登录状态；<code>$(pwd)</code> 是当前项目工作区；<code>--network monitoring</code> 是为了能解析到前面 docker-compose 起的 <code>prometheus</code> 容器名。</p><p><strong>第三步：把 Claude Code 加进 docker-compose</strong>——适合常驻 dev container 模式：</p><pre class="language-yaml" data-language="yaml"><code class="language-yaml"># 加到前面 docker-compose.yml 的 services: 段下
+  claude:
+    image: node:24-bookworm
+    container_name: claude-dev
+    networks: [default]
+    env_file:
+      - otel.env
+      - otel.secret.env
+    volumes:
+      - "$HOME/.claude:/root/.claude"
+      - "$PWD:/workspace"
+    working_dir: /workspace
+    tty: true
+    stdin_open: true
+    command: ["bash", "-lc", "npm i -g @anthropic-ai/claude-code &amp;&amp; sleep infinity"]</code></pre><p>挂上去之后 <code>docker compose up -d claude</code>，再 <code>docker compose exec claude claude</code> 就进入交互式 Claude，OTel 数据自动推到同 compose 里的 Prometheus 容器。</p><p><strong>Secret 管理</strong>：上面用 <code>--env-file otel.secret.env</code> 是最简单的姿势，但 secret 文件还是落盘的。要更严格可以用 Docker secrets（compose 里 <code>secrets:</code> 段）或者在容器里跑一个 <code>OTEL_EXPORTER_OTLP_HEADERS_HELPER</code> 脚本去调云厂商的 KMS 拿临时 token——参考前面”传输进阶”章节那条动态 headers 的写法，把脚本 COPY 进容器即可。</p><h2 id="完整-docker-compose：贴上就能跑"><a href="#完整-docker-compose：贴上就能跑" class="headerlink" title="完整 docker-compose：贴上就能跑"></a>完整 docker-compose：贴上就能跑</h2><p>把这份 <code>docker-compose.yml</code> + 两个配置文件放一个目录，<code>docker compose up</code> 就能起：</p><pre class="language-yaml" data-language="yaml"><code class="language-yaml"># docker-compose.yml
+services:
+  prometheus:
+    image: prom/prometheus:v3.5.0
+    command:
+      - --config.file=/etc/prometheus/prometheus.yml
+      - --web.enable-otlp-receiver
+      - --storage.tsdb.retention.time=30d
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prom_data:/prometheus
+
+  grafana:
+    image: grafana/grafana:12.2.0
+    ports:
+      - "3000:3000"
+    environment:
+      GF_SECURITY_ADMIN_PASSWORD: admin
+      GF_AUTH_ANONYMOUS_ENABLED: "true"
+      GF_AUTH_ANONYMOUS_ORG_ROLE: Viewer
+    volumes:
+      - ./grafana/provisioning:/etc/grafana/provisioning:ro
+      - grafana_data:/var/lib/grafana
+    depends_on:
+      - prometheus
+
+volumes:
+  prom_data:
+  grafana_data:</code></pre><p><code>prometheus.yml</code> 和前一节那份一致，<code>grafana/provisioning/datasources/prometheus.yml</code> 也是前一节那份。目录长这样：</p><pre class="language-bash" data-language="bash"><code class="language-bash">.
+├── docker-compose.yml
+├── prometheus.yml
+└── grafana
+    └── provisioning
+        └── datasources
+            └── prometheus.yml</code></pre><p>起服务 + 在你常用 Claude Code 的 shell 配 env vars 指过去：</p><pre class="language-bash" data-language="bash"><code class="language-bash">docker compose up -d
+export CLAUDE_CODE_ENABLE_TELEMETRY=1
+export OTEL_METRICS_EXPORTER=otlp
+export OTEL_LOGS_EXPORTER=otlp
+export OTEL_EXPORTER_OTLP_PROTOCOL=http/protobuf
+export OTEL_EXPORTER_OTLP_ENDPOINT=http://localhost:9090/api/v1/otlp
+export OTEL_EXPORTER_OTLP_METRICS_TEMPORALITY_PREFERENCE=cumulative
+export OTEL_METRICS_INCLUDE_SESSION_ID=false
+export OTEL_RESOURCE_ATTRIBUTES="team=infra,user.email=$(git config user.email)"
+
+claude  # 用一会儿</code></pre><p>5 分钟后打开浏览器访问 <code>localhost:3000</code>（Grafana），data source 已经自动连好 Prometheus，在 Explore 里输入 <code>claude_code_session_count_total</code> 应该能看到至少 1 个 series。</p><p><img src="/medias/loading.gif" data-original="/images/posts/292_78490e829c18d0fde72b98e4b35572a7.png" alt="anthropics/claude-code-monitoring-guide：官方 ROI 测量指南，覆盖 telemetry / 成本 / 产出 / 团队分析四个维度"></p><p><img src="/medias/loading.gif" data-original="/images/posts/292_bc2779b26e950c7e5b19a531d6b7215b.jpg" alt="Claude Code → Prometheus OTLP → Grafana 三阶段架构图"></p><hr><p>启用 telemetry 容易，把数据通起来难。把 14 个变量按”开关 / 传输 / 隐私 / 基数”四层记，知道每层只解决一个问题，配错了也容易定位是哪一层。</p><p>最大的两个默认值坑：protocol 默认是 gRPC（不是 http/protobuf）、<code>session.id</code> 默认带（基数会爆）。剩下的都是常识。</p><blockquote><p>先收藏再看，里面的 docker-compose 是真能直接 <code>docker compose up</code>、跑得起来的最小集——下次起 OTel 接收端就别再现搜配置了。</p></blockquote><h2 id="来源"><a href="#来源" class="headerlink" title="来源"></a>来源</h2><ul><li>Claude Code 监控配置（含全部 env vars 列表 + metric 名）：在 Anthropic docs 搜「monitoring usage」，路径 <code>code.claude.com/docs/en/monitoring-usage</code></li><li>Prometheus OTLP receiver 文档：搜「prometheus opentelemetry」，主页 <code>prometheus.io/docs/guides/opentelemetry/</code>，关键 flag <code>--web.enable-otlp-receiver</code></li><li>官方监控示例仓库（含 Docker Compose + Grafana dashboard）：GitHub 搜「anthropics claude-code-monitoring-guide」</li><li>Prometheus 仓库：GitHub 搜「prometheus prometheus」（64k stars，2026-06-05 push）</li><li>Grafana 仓库：GitHub 搜「grafana grafana」（74k stars，2026-06-05 push）</li><li>OTel Collector contrib（如果你需要 Path A 加中间件）：GitHub 搜「open-telemetry opentelemetry-collector-contrib」</li></ul></div><hr><div class="reprint" id="reprint-statement"><div class="reprint__author"><span class="reprint-meta" style="font-weight:700"><i class="fas fa-user">文章作者:</i></span> <span class="reprint-info"><a href="/about" rel="external nofollow noreferrer">月影</a></span></div><div class="reprint__type"><span class="reprint-meta" style="font-weight:700"><i class="fas fa-link">文章链接:</i></span> <span class="reprint-info"><a href="https://costalong.com/2026/06/08/292/">https://costalong.com/2026/06/08/292/</a></span></div><div class="reprint__notice"><span class="reprint-meta" style="font-weight:700"><i class="fas fa-copyright">版权声明:</i></span> <span class="reprint-info">本博客所有文章除特別声明外，均采用 <a href="https://creativecommons.org/licenses/by/4.0/deed.zh" rel="external nofollow noreferrer" target="_blank">CC BY 4.0</a> 许可协议。转载请注明来源 <a href="/about" target="_blank">月影</a> !</span></div></div><script async defer>document.addEventListener("copy", function (e) {
+        let toastHTML = '<span>复制成功，请遵循本文的转载规则</span><button class="btn-flat toast-action" onclick="navToReprintStatement()" style="font-size: smaller">查看</a>';
+        M.toast({html: toastHTML})
+      });
+
+      function navToReprintStatement() {
+        $("html, body").animate({scrollTop: $("#reprint-statement").offset().top - 80}, 800);
+      }</script><div class="tag_share" style="display:block"><div class="post-meta__tag-list" style="display:inline-block"><div class="article-tag"><a href="/tags/Claude-Code/"><span class="chip bg-color">Claude Code</span></a> <a href="/tags/OpenTelemetry/"><span class="chip bg-color">OpenTelemetry</span></a> <a href="/tags/Prometheus/"><span class="chip bg-color">Prometheus</span></a> <a href="/tags/Grafana/"><span class="chip bg-color">Grafana</span></a> <a href="/tags/%E5%8F%AF%E8%A7%82%E6%B5%8B%E6%80%A7/"><span class="chip bg-color">可观测性</span></a> <a href="/tags/%E7%9B%91%E6%8E%A7%E8%BF%90%E7%BB%B4/"><span class="chip bg-color linux">监控运维</span></a> <a href="/tags/%E5%AE%9E%E6%88%98%E6%95%99%E7%A8%8B/"><span class="chip bg-color">实战教程</span></a></div></div><div class="post_share" style="zoom:80%;width:fit-content;display:inline-block;float:right;margin:-.15rem 0"><link rel="stylesheet" href="/libs/share/css/share.min.css"><div id="article-share"><div class="social-share" data-sites="twitter,facebook,google,qq,qzone,wechat,weibo,douban,linkedin" data-wechat-qrcode-helper="<p>微信扫一扫即可分享！</p>"></div><script src="/libs/share/js/social-share.min.js"></script></div></div></div><div id="reward"><a href="#rewardModal" class="reward-link modal-trigger btn-floating btn-medium waves-effect waves-light red">赏</a><div id="rewardModal" class="modal"><div class="modal-content"><a class="close modal-close"><i class="fas fa-times"></i></a><h4 class="reward-title">你的赏识是我前进的动力</h4><div class="reward-content"><div class="reward-tabs"><ul class="tabs row"><li class="tab col s6 alipay-tab waves-effect waves-light"><a href="#alipay">支付宝</a></li><li class="tab col s6 wechat-tab waves-effect waves-light"><a href="#wechat">微 信</a></li></ul><div id="alipay"><img src="/images/reward/alipay.jpg" class="reward-img" alt="支付宝打赏二维码"></div><div id="wechat"><img src="/images/reward/wechat.jpg" class="reward-img" alt="微信打赏二维码"></div></div></div></div></div></div><script>$(function(){$(".tabs").tabs()})</script></div></div><style>.valine-card{margin:1.5rem auto}.valine-card .card-content{padding:20px 20px 5px 20px}#vcomments textarea{box-sizing:border-box;background:url(/medias/comment_bg.png) 100% 100% no-repeat}#vcomments p{margin:2px 2px 10px;font-size:1.05rem;line-height:1.78rem}#vcomments blockquote p{text-indent:.2rem}#vcomments a{padding:0 2px;color:#4cbf30;font-weight:500;text-decoration:none}#vcomments img{max-width:100%;height:auto;cursor:pointer}#vcomments ol li{list-style-type:decimal}#vcomments ol,ul{display:block;padding-left:2em;word-spacing:.05rem}#vcomments ul li,ol li{display:list-item;line-height:1.8rem;font-size:1rem}#vcomments ul li{list-style-type:disc}#vcomments ul ul li{list-style-type:circle}#vcomments table,td,th{padding:12px 13px;border:1px solid #dfe2e5}#vcomments table,td,th{border:0}table tr:nth-child(2n),thead{background-color:#fafafa}#vcomments table th{background-color:#f2f2f2;min-width:80px}#vcomments table td{min-width:80px}#vcomments h1{font-size:1.85rem;font-weight:700;line-height:2.2rem}#vcomments h2{font-size:1.65rem;font-weight:700;line-height:1.9rem}#vcomments h3{font-size:1.45rem;font-weight:700;line-height:1.7rem}#vcomments h4{font-size:1.25rem;font-weight:700;line-height:1.5rem}#vcomments h5{font-size:1.1rem;font-weight:700;line-height:1.4rem}#vcomments h6{font-size:1rem;line-height:1.3rem}#vcomments p{font-size:1rem;line-height:1.5rem}#vcomments hr{margin:12px 0;border:0;border-top:1px solid #ccc}#vcomments blockquote{margin:15px 0;border-left:5px solid #42b983;padding:1rem .8rem .3rem .8rem;color:#666;background-color:rgba(66,185,131,.1)}#vcomments pre{font-family:monospace,monospace;padding:1.2em;margin:.5em 0;background:#272822;overflow:auto;border-radius:.3em;tab-size:4}#vcomments code{font-family:monospace,monospace;padding:1px 3px;font-size:.92rem;color:#e96900;background-color:#f8f8f8;border-radius:2px}#vcomments pre code{font-family:monospace,monospace;padding:0;color:#e8eaf6;background-color:#272822}#vcomments pre[class*=language-]{padding:1.2em;margin:.5em 0}#vcomments code[class*=language-],pre[class*=language-]{color:#e8eaf6}#vcomments [type=checkbox]:not(:checked),[type=checkbox]:checked{position:inherit;margin-left:-1.3rem;margin-right:.4rem;margin-top:-1px;vertical-align:middle;left:unset;visibility:visible}#vcomments b,strong{font-weight:700}#vcomments dfn{font-style:italic}#vcomments small{font-size:85%}#vcomments cite{font-style:normal}#vcomments mark{background-color:#fcf8e3;padding:.2em}#vcomments table,td,th{padding:12px 13px;border:1px solid #dfe2e5}table tr:nth-child(2n),thead{background-color:#fafafa}#vcomments table th{background-color:#f2f2f2;min-width:80px}#vcomments table td{min-width:80px}#vcomments [type=checkbox]:not(:checked),[type=checkbox]:checked{position:inherit;margin-left:-1.3rem;margin-right:.4rem;margin-top:-1px;vertical-align:middle;left:unset;visibility:visible}</style><div class="card valine-card" data-aos="fade-up"><div class="comment_headling" style="font-size:20px;font-weight:700;padding:20px 20px 8px 20px"><i class="fas fa-comments fa-fw" aria-hidden="true"></i> <span>评论</span></div><div id="vcomments" class="card-content" style="display:grid"></div></div><script src="/libs/valine/av-min.js"></script><script src="/libs/valine/Valine.min.js"></script><script>new Valine({el:"#vcomments",appId:"wCf5tlcDtIMPMtrnfln6u3fL-MdYXbMMI",appKey:"pvzhB4VvZzNeC5gtXTaIv0oo",serverURLs:"https://wcf5tlcd.api.lncldglobal.com",notify:!1,verify:!1,visitor:!0,avatar:"mm",pageSize:"10",lang:"zh-cn",placeholder:"just go go"})</script><article id="prenext-posts" class="prev-next articles"><div class="row article-row"><div class="article col s12 m6" data-aos="fade-up"><div class="article-badge left-badge text-color"><i class="fas fa-chevron-left"></i> &nbsp;上一篇</div><div class="card"><a href="/2026/06/22/16gb-bie-peng-24gb-cou-he-32gb-cai-shi-sheng-chan-li-ben-di-bian-cheng-llm-de-2026-zhen-xiang/"><div class="card-image card-image-V"><div class="box-content"><p class="title">阅读全文</p><span class="post" style="width:180px">16GB 别碰、24GB 凑合、32GB+ 才是生产力：本地编程 LLM 的 2026 真相</span></div><img src="/images/posts/19_39102f06a7b410b3a8daafcd40c907e6.jpg" width="400" height="300" loading="lazy" class="responsive-img" alt="16GB 别碰、24GB 凑合、32GB+ 才是生产力：本地编程 LLM 的 2026 真相"> <span class="card-title title-V">16GB 别碰、24GB 凑合、32GB+ 才是生产力：本地编程 LLM 的 2026 真相</span></div></a><div class="card-content article-content"><div class="summary block-with-text">2026 年本地写代码的模型，认真测下来能打的只有 Qwen3.6-27B。这篇把四款模型的真实任务表现、内存带宽瓶颈、Ollama 的 num_ctx 坑和按内存分级的选型建议讲透。</div><div class="publish-info"><span class="publish-date"><i class="far fa-clock fa-fw icon-date"></i> 2026-06-22</span><span class="publish-author"><i class="fas fa-bookmark fa-fw icon-category"></i> <a href="/categories/%E6%A8%A1%E5%9E%8B%E4%B8%8E%E8%AF%84%E6%B5%8B/" class="post-category">模型与评测</a></span></div></div><div class="card-action article-tags"><a href="/tags/%E6%9C%AC%E5%9C%B0LLM/"><span class="chip bg-color ai">本地LLM</span></a> <a href="/tags/Qwen3-6/"><span class="chip bg-color ai">Qwen3.6</span></a> <a href="/tags/Ollama/"><span class="chip bg-color ai">Ollama</span></a> <a href="/tags/%E7%BC%96%E7%A8%8B%E6%A8%A1%E5%9E%8B/"><span class="chip bg-color ai">编程模型</span></a> <a href="/tags/%E6%A8%A1%E5%9E%8B%E9%80%89%E5%9E%8B/"><span class="chip bg-color ai">模型选型</span></a> <a href="/tags/%E9%87%8F%E5%8C%96%E9%83%A8%E7%BD%B2/"><span class="chip bg-color">量化部署</span></a></div></div></div><div class="article col s12 m6" data-aos="fade-up"><div class="article-badge right-badge text-color">下一篇&nbsp;<i class="fas fa-chevron-right"></i></div><div class="card"><a href="/2026/06/04/hermes-web-ui-shi-yong-jiao-cheng/"><div class="card-image card-image-V"><div class="box-content"><p class="title">阅读全文</p><span class="post" style="width:180px">hermes-web-ui 使用教程</span></div><img src="/images/posts/1_317f5e4a392d2718f6afd27f528610fa.jpg" width="400" height="300" loading="lazy" class="responsive-img" alt="hermes-web-ui 使用教程"> <span class="card-title title-V">hermes-web-ui 使用教程</span></div></a><div class="card-content article-content"><div class="summary block-with-text">全功能 Hermes Agent Web 管理面板，支持 AI 对话、会话管理、平台渠道配置、定时任务、使用分析等。</div><div class="publish-info"><span class="publish-date"><i class="far fa-clock fa-fw icon-date"></i> 2026-06-04</span><span class="publish-author"><i class="fas fa-bookmark fa-fw icon-category"></i> <a href="/categories/AI/" class="post-category">AI</a></span></div></div><div class="card-action article-tags"><a href="/tags/Hermes/"><span class="chip bg-color">Hermes</span></a> <a href="/tags/AI/"><span class="chip bg-color ai">AI</span></a> <a href="/tags/Web-UI/"><span class="chip bg-color">Web UI</span></a> <a href="/tags/Vue3/"><span class="chip bg-color">Vue3</span></a> <a href="/tags/Dashboard/"><span class="chip bg-color">Dashboard</span></a></div></div></div></div></article></div><script src="/libs/codeBlock/codeBlockFuction.js"></script><script src="/libs/prism/prism.min.js"></script><script src="/libs/codeBlock/codeLang.js"></script><script src="/libs/codeBlock/codeCopy.js"></script><script src="/libs/codeBlock/codeShrink.js"></script><script>!function(){function t(n){var t=n.closest?n.closest(".img-item"):null;if(t){var e=t.nextElementSibling;e&&e.classList.contains("caption")&&(e.style.display="none"),t.style.display="none"}else n.style.display="none"}$(function(){setTimeout(function(){document.querySelectorAll("#articleContent img").forEach(function(n){n.addEventListener("error",function(){t(this)},{once:!0}),n.complete&&0===n.naturalWidth&&t(n)})},0)})}()</script><script>$(function(){$("#read_mode i, #read_mode span").on("click",function(a){if(a.target===this){$("#artDetail .card").first().toggleClass("card-block-fullscreen"),$("html").toggleClass("card-block-fullscreen-html-scroll");var s=$(this).is("i")?$(this):$(this).prev("i");s.hasClass("fa-expand-arrows-alt")?s.removeClass("fa-expand-arrows-alt").addClass("fa-compress-arrows-alt"):s.removeClass("fa-compress-arrows-alt").addClass("fa-expand-arrows-alt")}})})</script><script>!function(){var t=document.querySelector("#articleContent > h1:first-child");if(t){var e=document.querySelector("#post-title");e&&n(t.textContent)===n(e.textContent)&&(t.style.display="none")}function n(t){return t.trim().replace(/\s+/g," ")}}()</script></div><div id="toc-aside" class="expanded col l3 hide-on-med-and-down"><div class="toc-widget card"><div class="toc-title"><i class="far fa-list-alt"></i>&nbsp;&nbsp;目录</div><div id="toc-content"></div></div></div></div><div id="floating-toc-btn"><a class="btn-floating btn-large bg-color"><i class="fas fa-list-ul"></i></a></div><div id="mobile-toc-overlay" class="mobile-toc-overlay"></div><div id="mobile-toc-drawer" class="mobile-toc-drawer"><div class="mobile-toc-header"><span class="mobile-toc-title"><i class="far fa-list-alt"></i> &nbsp;&nbsp;目录</span><a id="mobile-toc-close" class="mobile-toc-close"><i class="fas fa-times"></i></a></div><div class="mobile-toc-body" id="mobile-toc-body"></div></div><script src="/libs/tocbot/tocbot.min.js"></script><script>$(function () {
+        tocbot.init({
+            tocSelector: '#toc-content',
+            contentSelector: '#articleContent',
+            headingsOffset: -($(window).height() * 0.4 - 45),
+            collapseDepth: Number('0'),
+            headingSelector: 'h2, h3, h4'
+        });
+
+        // Set scroll toc fixed.
+        let tocHeight = parseInt($(window).height() * 0.4 - 64);
+        let $tocWidget = $('.toc-widget');
+        $(window).scroll(function () {
+            let scroll = $(window).scrollTop();
+            /* add post toc fixed. */
+            if (scroll > tocHeight) {
+                $tocWidget.addClass('toc-fixed');
+            } else {
+                $tocWidget.removeClass('toc-fixed');
+            }
+        });
+
+        
+        /* 修复文章卡片 div 的宽度. */
+        let fixPostCardWidth = function (srcId, targetId) {
+            let srcDiv = $('#' + srcId);
+            if (srcDiv.length === 0) {
+                return;
+            }
+
+            let w = srcDiv.width();
+            if (w >= 450) {
+                w = w + 21;
+            } else if (w >= 350 && w < 450) {
+                w = w + 18;
+            } else if (w >= 300 && w < 350) {
+                w = w + 16;
+            } else {
+                w = w + 14;
+            }
+            $('#' + targetId).width(w);
+        };
+
+        // 切换TOC目录展开收缩的相关操作.
+        const expandedClass = 'expanded';
+        let $tocAside = $('#toc-aside');
+        let $mainContent = $('#main-content');
+
+        // 移动端 TOC 抽屉逻辑
+        let $overlay = $('#mobile-toc-overlay');
+        let $drawer = $('#mobile-toc-drawer');
+        let $drawerBody = $('#mobile-toc-body');
+        let drawerOpen = false;
+
+        function openMobileDrawer() {
+            // 克隆桌面端 TOC 内容到抽屉
+            $drawerBody.html($('#toc-content').html());
+            $overlay.addClass('active');
+            $drawer.addClass('active');
+            $('body').css('overflow', 'hidden');
+            drawerOpen = true;
+
+            // 点击抽屉内链接后自动关闭
+            $drawerBody.find('.toc-link').on('click', function() {
+                closeMobileDrawer();
+            });
+        }
+
+        function closeMobileDrawer() {
+            $overlay.removeClass('active');
+            $drawer.removeClass('active');
+            $('body').css('overflow', '');
+            drawerOpen = false;
+        }
+
+        $overlay.on('click', closeMobileDrawer);
+        $('#mobile-toc-close').on('click', closeMobileDrawer);
+
+        $('#floating-toc-btn .btn-floating').click(function () {
+            // 移动端（<=992px）打开抽屉
+            if ($(window).width() <= 992) {
+                if (drawerOpen) {
+                    closeMobileDrawer();
+                } else {
+                    openMobileDrawer();
+                }
+                return;
+            }
+
+            // 桌面端保持原有折叠逻辑
+            if ($tocAside.hasClass(expandedClass)) {
+                $tocAside.removeClass(expandedClass).hide();
+                $mainContent.removeClass('l9');
+            } else {
+                $tocAside.addClass(expandedClass).show();
+                $mainContent.addClass('l9');
+            }
+            fixPostCardWidth('artDetail', 'prenext-posts');
+        });
+        
+    });</script></main><div class="progress-bar"></div><footer class="dp-footer page-footer"><div class="dp-wrap dp-foot-grid"><div class="l">&copy; <span id="year">2023-2026</span> <b>翼舞成梦</b> · costalong.com — 用 <a href="https://hexo.io/" target="_blank">Hexo</a> 构建，内容均为原创工程笔记。</div><div class="dp-foot-links"><a href="/atom.xml">RSS</a> <a href="/archives">归档</a> <a href="/about">关于</a> <a href="https://github.com/costa92" target="_blank">GitHub</a> <a href="/sitemap.xml">sitemap</a></div></div><div class="dp-wrap" style="margin-top:16px;display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;font-size:12.5px;color:var(--text-mut)"><div class="footer-social"><a href="https://github.com/costa92" class="tooltipped" target="_blank" data-tooltip="访问我的GitHub" data-position="top" data-delay="50"><i class="fab fa-github"></i></a><a href="mailto:costa9293@gmail.com" class="tooltipped" target="_blank" data-tooltip="邮件联系我" data-position="top" data-delay="50"><i class="fas fa-envelope-open"></i></a><a href="tencent://AddContact/?fromId=50&fromSubId=1&subcmd=all&uin=944310536" class="tooltipped" target="_blank" data-tooltip="QQ联系我: 944310536" data-position="top" data-delay="50"><i class="fab fa-qq"></i></a><a href="/atom.xml" class="tooltipped" target="_blank" data-tooltip="RSS 订阅" data-position="top" data-delay="50"><i class="fas fa-rss"></i></a></div><div class="footer-stats" style="font-family:var(--font-mono)"><span id="busuanzi_container_site_pv"><i class="far fa-eye"></i> &nbsp;<span id="busuanzi_value_site_pv"></span></span> <span id="busuanzi_container_site_uv">&nbsp;&middot;&nbsp;<i class="fas fa-users"></i>&nbsp;<span id="busuanzi_value_site_uv"></span></span> &nbsp;&middot;&nbsp;<a href="https://beian.miit.gov.cn/#/Integrated/index" target="_blank">湘ICP备15006875号</a></div></div></footer><div id="searchModal" class="modal"><div class="modal-content"><div class="search-header"><span class="title"><i class="fas fa-search"></i> &nbsp;&nbsp;搜索</span> <input type="search" id="searchInput" name="s" placeholder="请输入搜索的关键字" class="search-input"></div><div id="searchResult"></div></div></div><script>$(function(){!function(t,a,s){"use strict";$.ajax({url:t,dataType:"xml",success:function(t){var e=$("entry",t).map(function(){return{title:$("title",this).text(),content:$("content",this).text(),url:$("url",this).text()}}).get(),r=document.getElementById(a),n=document.getElementById(s);r.addEventListener("input",function(){var f='<ul class="search-result-list">',m=this.value.trim().toLowerCase().split(/[\s\-]+/);n.innerHTML="",this.value.trim().length<=0||(e.forEach(function(t){var r=!0,n=t.title.trim().toLowerCase(),a=t.content.trim().replace(/<[^>]+>/g,"").toLowerCase(),e=t.url;e=0===e.indexOf("/")?t.url:"/"+e;var s=-1,i=-1,l=-1;if(""!==n&&""!==a&&m.forEach(function(t,e){s=n.indexOf(t),i=a.indexOf(t),s<0&&i<0?r=!1:(i<0&&(i=0),0===e&&(l=i))}),r){f+="<li><a href='"+e+"' class='search-result-title'>"+n+"</a>";var c=t.content.trim().replace(/<[^>]+>/g,"");if(0<=l){var u=l-20,o=l+80;u<0&&(u=0),0===u&&(o=100),o>c.length&&(o=c.length);var h=c.substr(u,o);m.forEach(function(t){var e=new RegExp(t,"gi");h=h.replace(e,'<em class="search-keyword">'+t+"</em>")}),f+='<p class="search-result">'+h+"...</p>"}f+="</li>"}}),f+="</ul>",n.innerHTML=f)})}})}("/search.xml","searchInput","searchResult")})</script><div class="stars-con"><div id="stars"></div><div id="stars2"></div><div id="stars3"></div></div><script>function switchNightMode(){$('<div class="Cuteen_DarkSky"><div class="Cuteen_DarkPlanet"></div></div>').appendTo($("body")),setTimeout(function(){$("body").hasClass("DarkMode")?($("body").removeClass("DarkMode"),localStorage.setItem("isDark","0"),$("#sum-moon-icon").removeClass("fa-sun").addClass("fa-moon")):($("body").addClass("DarkMode"),localStorage.setItem("isDark","1"),$("#sum-moon-icon").addClass("fa-sun").removeClass("fa-moon")),setTimeout(function(){$(".Cuteen_DarkSky").fadeOut(1e3,function(){$(this).remove()})},2e3)})}</script><div id="backTop" class="top-scroll"><a class="btn-floating btn-large waves-effect waves-light" href="#!"><i class="fas fa-arrow-up"></i></a></div><script src="/libs/materialize/materialize.min.js"></script><script src="/libs/masonry/masonry.pkgd.min.js"></script><script src="/libs/aos/aos.js"></script><script src="/libs/scrollprogress/scrollProgress.min.js"></script><script src="/libs/lightGallery/js/lightgallery-all.min.js"></script><script src="/js/matery.js"></script><script src="/js/infinite-scroll.js"></script><link rel="alternate" type="application/rss+xml" title="翼舞成梦" href="https://costalong.com/rss.xml%7D"><link rel="alternate" type="application/atom+xml" title="翼舞成梦" href="https://costalong.com/atom.xml"><link rel="alternate" type="application/json" title="翼舞成梦" href="https://costalong.com/feed.json"><script src="/libs/mermaid/mermaid.min.js"></script><script>window.mermaid&&(mermaid.initialize({theme:"forest",startOnLoad:!1}),document.addEventListener("DOMContentLoaded",function(){setTimeout(function(){var e=document.querySelectorAll("pre.mermaid");0<e.length&&(e.forEach(function(e){e.textContent=e.textContent;var t=e.closest(".code-area");if(t){var n=t.parentNode,i=t.previousElementSibling;i&&i.classList.contains("code_lang")&&i.remove(),n.insertBefore(e,t),t.remove()}}),mermaid.init(void 0,"pre.mermaid"))},50)}))</script><script src="https://ssl.captcha.qq.com/TCaptcha.js"></script><script src="/libs/others/TencentCaptcha.js"></script><button id="TencentCaptcha" data-appid="xxxxxxxxxx" data-cbfn="callback" type="button" hidden></button><script>var _hmt=_hmt||[];!function(){var e=document.createElement("script");e.src="https://hm.baidu.com/hm.js?d47e14d67fd7fb300f145d70a5a68b70";var t=document.getElementsByTagName("script")[0];t.parentNode.insertBefore(e,t)}()</script><script>!function(){var t=document.createElement("script"),e=window.location.protocol.split(":")[0];t.src="https"===e?"https://zz.bdstatic.com/linksubmit/push.js":"http://push.zhanzhang.baidu.com/push.js";var s=document.getElementsByTagName("script")[0];s.parentNode.insertBefore(t,s)}()</script><script src="/js/fireworks.js" async></script><script async src="/libs/others/busuanzi.pure.mini.js"></script><script color="110,80,255" pointcolor="80,140,255" opacity="0.28" zindex="-1" count="80" src="/libs/background/canvas-nest.js"></script><script src="/libs/instantpage/instantpage.js" type="module"></script><script src="//cdn.jsdelivr.net/npm/js-base64/base64.min.js"></script><script>const hasAttr = (e,a) => a.some(_=> e.attr(_)!==undefined);
+        $('a').each(function() {
+          const $this = $(this);
+          if(hasAttr($this,["data-fancybox","ignore-external-link"])) return;
+          const href = $this.attr('href');
+          if (href && href.match('^((http|https|thunder|qqdl|ed2k|Flashget|qbrowser|ftp|rtsp|mms)://)')) {
+            const strs = href.split('/');
+            if (strs.length >= 3) {
+                const host = strs[2];
+                if (host !== 'https://costalong.com' || window.location.host) {
+                    $this.attr('href', '/go.html?u='+Base64.encode(href)+'').attr('rel', 'external nofollow noopener noreferrer');
+                    if (true) {
+                        $this.attr('target', '_blank');
+                    }
+                }
+            }
+          }
+        });</script><style>[bg-lazy]{background-image:none!important;background-color:#eee!important}</style><script>window.imageLazyLoadSetting={isSPA:!1,preloadRatio:1,processImages:null}</script><script>window.addEventListener("load",function(){var t=/\.(gif|jpg|jpeg|tiff|png)$/i,r=/^data:image\/[a-z\d\-\.\+]+;base64,/;Array.prototype.slice.call(document.querySelectorAll("img[data-original]")).forEach(function(a){var e=a.parentNode;"A"===e.tagName&&(t.test(e.href)||r.test(e.href))&&(e.href=a.dataset.original)})})</script><script>(r=>{r.imageLazyLoadSetting.processImages=t;var a=r.imageLazyLoadSetting.isSPA,o=r.imageLazyLoadSetting.preloadRatio||1,d=i();function i(){var t=Array.prototype.slice.call(document.querySelectorAll("img[data-original]")),e=Array.prototype.slice.call(document.querySelectorAll("[bg-lazy]"));return t.concat(e)}function t(t){(a||t)&&(d=i());for(var e,n=0;n<d.length;n++)0<=(e=(e=d[n]).getBoundingClientRect()).bottom&&0<=e.left&&e.top<=(r.innerHeight*o||document.documentElement.clientHeight*o)&&(()=>{var t,e,a,o,i=d[n];e=function(){d=d.filter(function(t){return i!==t}),r.imageLazyLoadSetting.onImageLoaded&&r.imageLazyLoadSetting.onImageLoaded(i)},(t=i).dataset.loaded||(t.hasAttribute("bg-lazy")?(t.removeAttribute("bg-lazy"),e&&e()):(a=new Image,o=t.getAttribute("data-original"),a.onload=function(){t.src=o,t.removeAttribute("data-original"),t.setAttribute("data-loaded",!0),e&&e()},a.onerror=function(){t.removeAttribute("data-original"),t.setAttribute("data-loaded",!1),t.src=o},t.src!==o&&(a.src=o)))})()}function e(){clearTimeout(t.tId),t.tId=setTimeout(t,500)}t(),document.addEventListener("scroll",e),r.addEventListener("resize",e),r.addEventListener("orientationchange",e)})(this);</script></body></html>
