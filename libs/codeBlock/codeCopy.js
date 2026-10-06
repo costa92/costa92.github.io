@@ -1,7 +1,9 @@
 // 代码块一键复制
 
 $(function () {
-    var $copyIcon = $('<i class="fas fa-copy code_copy" title="复制代码" aria-hidden="true"></i>')
+    // 用 <button> 而不是 <i>：<i> 不可聚焦、Tab 到不了，且原先的
+    // aria-hidden="true" 会让读屏用户完全感知不到「复制代码」这个功能。
+    var $copyIcon = $('<button type="button" class="fas fa-copy code_copy" title="复制代码" aria-label="复制代码"></button>')
     var $notice = $('<div class="codecopy_notice"></div>')
     $('.code-area').prepend($copyIcon)
     $('.code-area').prepend($notice)

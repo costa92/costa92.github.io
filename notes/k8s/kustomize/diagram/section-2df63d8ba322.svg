@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 360 575" role="img" aria-labelledby="title desc">
+<title id="title">base 与 overlay 的文件关系</title>
+<desc id="desc">先预览最终对象再部署。</desc>
+<defs><pattern id="grid" width="32" height="32" patternUnits="userSpaceOnUse"><path d="M32 0 L0 0 0 32" fill="none" stroke="#1e293b" stroke-width=".6"/></pattern><marker id="arrow" markerWidth="9" markerHeight="7" refX="8" refY="3.5" orient="auto"><path d="M0 0 L9 3.5 L0 7Z" fill="#94a3b8"/></marker></defs>
+<rect width="360" height="575" rx="16" fill="#0f172a"/>
+<rect width="360" height="575" rx="16" fill="url(#grid)"/>
+<text x="24" y="32" fill="#f8fafc" font-family="'PingFang SC','Noto Sans SC','Microsoft YaHei',sans-serif" font-size="17" font-weight="700">base 与 overlay 的文件关系</text>
+<text x="24" y="54" fill="#94a3b8" font-family="'PingFang SC','Noto Sans SC','Microsoft YaHei',sans-serif" font-size="11">建立目录</text>
+<rect x="25" y="92" width="310" height="92" rx="11" fill="#142238" stroke="#334155"/>
+<rect x="25" y="92" width="5" height="92" rx="2" fill="#22d3ee"/>
+<text x="91" y="143.0" text-anchor="middle" font-family="'PingFang SC','Noto Sans SC','Microsoft YaHei',sans-serif" font-size="14" font-weight="600" fill="#f8fafc">base/</text>
+<line x1="151" y1="107" x2="151" y2="169" stroke="#334155"/>
+<text x="243" y="142.0" text-anchor="middle" font-family="'PingFang SC','Noto Sans SC','Microsoft YaHei',sans-serif" font-size="12" font-weight="400" fill="#cbd5e1">通用清单</text>
+<rect x="25" y="197" width="310" height="92" rx="11" fill="#142238" stroke="#334155"/>
+<rect x="25" y="197" width="5" height="92" rx="2" fill="#34d399"/>
+<text x="91" y="248.0" text-anchor="middle" font-family="'PingFang SC','Noto Sans SC','Microsoft YaHei',sans-serif" font-size="14" font-weight="600" fill="#f8fafc">overlays/dev/</text>
+<line x1="151" y1="212" x2="151" y2="274" stroke="#334155"/>
+<text x="243" y="247.0" text-anchor="middle" font-family="'PingFang SC','Noto Sans SC','Microsoft YaHei',sans-serif" font-size="12" font-weight="400" fill="#cbd5e1">开发环境补丁</text>
+<rect x="25" y="302" width="310" height="92" rx="11" fill="#142238" stroke="#334155"/>
+<rect x="25" y="302" width="5" height="92" rx="2" fill="#a78bfa"/>
+<text x="91" y="344.6" text-anchor="middle" font-family="'PingFang SC','Noto Sans SC','Microsoft YaHei',sans-serif" font-size="14" font-weight="600" fill="#f8fafc">kustomization.</text>
+<text x="91" y="361.4" text-anchor="middle" font-family="'PingFang SC','Noto Sans SC','Microsoft YaHei',sans-serif" font-size="14" font-weight="600" fill="#f8fafc">yaml</text>
+<line x1="151" y1="317" x2="151" y2="379" stroke="#334155"/>
+<text x="243" y="352.0" text-anchor="middle" font-family="'PingFang SC','Noto Sans SC','Microsoft YaHei',sans-serif" font-size="12" font-weight="400" fill="#cbd5e1">声明资源和补丁</text>
+<rect x="25" y="407" width="310" height="92" rx="11" fill="#142238" stroke="#334155"/>
+<rect x="25" y="407" width="5" height="92" rx="2" fill="#fbbf24"/>
+<text x="91" y="458.0" text-anchor="middle" font-family="'PingFang SC','Noto Sans SC','Microsoft YaHei',sans-serif" font-size="14" font-weight="600" fill="#f8fafc">build</text>
+<line x1="151" y1="422" x2="151" y2="484" stroke="#334155"/>
+<text x="243" y="457.0" text-anchor="middle" font-family="'PingFang SC','Noto Sans SC','Microsoft YaHei',sans-serif" font-size="12" font-weight="400" fill="#cbd5e1">得到环境专属清单</text>
+<text x="180" y="524.0" text-anchor="middle" font-family="'PingFang SC','Noto Sans SC','Microsoft YaHei',sans-serif" font-size="11" font-weight="400" fill="#fbbf24">先预览最终对象再部署。</text>
+<line x1="24" y1="542" x2="336" y2="542" stroke="#334155"/>
+<text x="24" y="561" fill="#94a3b8" font-family="'PingFang SC','Noto Sans SC','Microsoft YaHei',sans-serif" font-size="10">costalong.com · Kubernetes 笔记</text>
+</svg>

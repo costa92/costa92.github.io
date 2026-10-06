@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 360 500" role="img" aria-labelledby="diagram-title diagram-desc">
+<title id="diagram-title">kubeadm 升级检查清单</title><desc id="diagram-desc">按控制平面、工作节点和附加组件梳理 kubeadm 集群升级的前提、顺序与验收，不把示例版本当成通用命令。</desc>
+<defs><pattern id="grid" width="32" height="32" patternUnits="userSpaceOnUse"><path d="M32 0 L0 0 0 32" fill="none" stroke="#1e293b" stroke-width=".6"/></pattern>
+<marker id="arrow" markerWidth="9" markerHeight="7" refX="8" refY="3.5" orient="auto"><path d="M0 0 L9 3.5 L0 7Z" fill="#94a3b8"/></marker></defs>
+<rect width="360" height="500" rx="16" fill="#0f172a"/><rect width="360" height="500" rx="16" fill="url(#grid)"/>
+<text x="24" y="29" fill="#f8fafc" font-family="'PingFang SC','Noto Sans SC',sans-serif" font-size="17" font-weight="700">kubeadm 升级检查清单</text>
+<text x="24" y="51" fill="#94a3b8" font-family="'PingFang SC','Noto Sans SC',sans-serif" font-size="11.5">每阶段验收后继续</text>
+<rect x="24" y="74" width="312" height="60" rx="10" fill="#152338" stroke="#22d3ee" stroke-width="1.4"/>
+<text x="180.0" y="100.0" text-anchor="middle" font-family="'PingFang SC','Noto Sans SC',sans-serif" font-size="14" fill="#f8fafc" font-weight="700">升级前检查</text>
+<text x="180.0" y="116.0" text-anchor="middle" font-family="'PingFang SC','Noto Sans SC',sans-serif" font-size="12" fill="#cbd5e1">版本路径、备份与健康</text>
+<path d="M180 134 V184" fill="none" stroke="#64748b" stroke-width="1.8" marker-end="url(#arrow)"/>
+<rect x="24" y="184" width="312" height="60" rx="10" fill="#152338" stroke="#34d399" stroke-width="1.4"/>
+<text x="180.0" y="210.0" text-anchor="middle" font-family="'PingFang SC','Noto Sans SC',sans-serif" font-size="14" fill="#f8fafc" font-weight="700">升级一台控制平面</text>
+<text x="180.0" y="226.0" text-anchor="middle" font-family="'PingFang SC','Noto Sans SC',sans-serif" font-size="12" fill="#cbd5e1">完成后立即验收</text>
+<path d="M180 244 V278 H98 V312" fill="none" stroke="#a78bfa" stroke-width="1.8" marker-end="url(#arrow)"/>
+<path d="M180 278 H262 V312" fill="none" stroke="#fb7185" stroke-width="1.8" marker-end="url(#arrow)"/>
+<rect x="24" y="312" width="148" height="100" rx="10" fill="#152338" stroke="#a78bfa" stroke-width="1.4"/>
+<text x="98.0" y="358.0" text-anchor="middle" font-family="'PingFang SC','Noto Sans SC',sans-serif" font-size="14" fill="#f8fafc" font-weight="700">验收通过</text>
+<text x="98.0" y="374.0" text-anchor="middle" font-family="'PingFang SC','Noto Sans SC',sans-serif" font-size="12" fill="#cbd5e1">继续下台节点</text>
+<rect x="188" y="312" width="148" height="100" rx="10" fill="#152338" stroke="#fb7185" stroke-width="1.4"/>
+<text x="262.0" y="358.0" text-anchor="middle" font-family="'PingFang SC','Noto Sans SC',sans-serif" font-size="14" fill="#f8fafc" font-weight="700">验收失败</text>
+<text x="262.0" y="374.0" text-anchor="middle" font-family="'PingFang SC','Noto Sans SC',sans-serif" font-size="12" fill="#cbd5e1">停止后续升级并排查</text>
+<text x="180" y="448" text-anchor="middle" fill="#cbd5e1" font-family="'PingFang SC','Noto Sans SC',sans-serif" font-size="10">工作节点逐台升级时也重复验收</text>
+<line x1="24" y1="465" x2="336" y2="465" stroke="#334155"/>
+<text x="24" y="485" fill="#94a3b8" font-family="'PingFang SC','Noto Sans SC',sans-serif" font-size="10">costalong.com · Kubernetes 笔记</text></svg>

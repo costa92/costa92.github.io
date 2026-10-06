@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 360 570" role="img" aria-labelledby="title desc">
+<title id="title">Service 后端从哪里来</title>
+<desc id="desc">Service 存在时后端也可能为空。</desc>
+<defs><pattern id="grid" width="32" height="32" patternUnits="userSpaceOnUse"><path d="M32 0 L0 0 0 32" fill="none" stroke="#1e293b" stroke-width=".6"/></pattern><marker id="arrow" markerWidth="9" markerHeight="7" refX="8" refY="3.5" orient="auto"><path d="M0 0 L9 3.5 L0 7Z" fill="#94a3b8"/></marker></defs>
+<rect width="360" height="570" rx="16" fill="#0f172a"/>
+<rect width="360" height="570" rx="16" fill="url(#grid)"/>
+<text x="24" y="32" fill="#f8fafc" font-family="'PingFang SC','Noto Sans SC','Microsoft YaHei',sans-serif" font-size="17" font-weight="700">Service 后端从哪里来</text>
+<text x="24" y="54" fill="#94a3b8" font-family="'PingFang SC','Noto Sans SC','Microsoft YaHei',sans-serif" font-size="11">Service：稳定地找到 Pod</text>
+<rect x="24" y="83" width="312" height="75" rx="11" fill="#142238" stroke="#22d3ee" stroke-width="1.5"/>
+<text x="180.0" y="113.5" text-anchor="middle" font-family="'PingFang SC','Noto Sans SC','Microsoft YaHei',sans-serif" font-size="15" font-weight="600" fill="#f8fafc">Service selector</text>
+<text x="180.0" y="134.5" text-anchor="middle" font-family="'PingFang SC','Noto Sans SC','Microsoft YaHei',sans-serif" font-size="12" font-weight="400" fill="#cbd5e1">匹配 app=demo-web</text>
+<path d="M180 158 V197 H98 V229" fill="none" stroke="#34d399" stroke-width="2" marker-end="url(#arrow)"/>
+<path d="M180 197 H262 V229" fill="none" stroke="#a78bfa" stroke-width="2" marker-end="url(#arrow)"/>
+<rect x="24" y="229" width="148" height="104" rx="11" fill="#142238" stroke="#34d399" stroke-width="1.5"/>
+<text x="98.0" y="274.0" text-anchor="middle" font-family="'PingFang SC','Noto Sans SC','Microsoft YaHei',sans-serif" font-size="15" font-weight="600" fill="#f8fafc">Pod 标签</text>
+<text x="98.0" y="295.0" text-anchor="middle" font-family="'PingFang SC','Noto Sans SC','Microsoft YaHei',sans-serif" font-size="12" font-weight="400" fill="#cbd5e1">提供匹配集合</text>
+<rect x="188" y="229" width="148" height="104" rx="11" fill="#142238" stroke="#a78bfa" stroke-width="1.5"/>
+<text x="262.0" y="274.0" text-anchor="middle" font-family="'PingFang SC','Noto Sans SC','Microsoft YaHei',sans-serif" font-size="15" font-weight="600" fill="#f8fafc">就绪状态</text>
+<text x="262.0" y="295.0" text-anchor="middle" font-family="'PingFang SC','Noto Sans SC','Microsoft YaHei',sans-serif" font-size="12" font-weight="400" fill="#cbd5e1">只把可用后端接入流量</text>
+<path d="M98 333 V370 H180 V400" fill="none" stroke="#34d399" stroke-width="2" marker-end="url(#arrow)"/>
+<path d="M262 333 V370 H180 V400" fill="none" stroke="#a78bfa" stroke-width="2" marker-end="url(#arrow)"/>
+<rect x="24" y="400" width="312" height="72" rx="11" fill="#142238" stroke="#fbbf24" stroke-width="1.5"/>
+<text x="180.0" y="429.0" text-anchor="middle" font-family="'PingFang SC','Noto Sans SC','Microsoft YaHei',sans-serif" font-size="15" font-weight="600" fill="#f8fafc">EndpointSlice</text>
+<text x="180.0" y="450.0" text-anchor="middle" font-family="'PingFang SC','Noto Sans SC','Microsoft YaHei',sans-serif" font-size="12" font-weight="400" fill="#cbd5e1">记录后端地址</text>
+<text x="180" y="519.0" text-anchor="middle" font-family="'PingFang SC','Noto Sans SC','Microsoft YaHei',sans-serif" font-size="11" font-weight="400" fill="#fbbf24">Service 存在时后端也可能为空。</text>
+<line x1="24" y1="537" x2="336" y2="537" stroke="#334155"/>
+<text x="24" y="556" fill="#94a3b8" font-family="'PingFang SC','Noto Sans SC','Microsoft YaHei',sans-serif" font-size="10">costalong.com · Kubernetes 笔记</text>
+</svg>

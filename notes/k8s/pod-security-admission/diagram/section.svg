@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 360 500" role="img" aria-labelledby="title desc">
+<title id="title">restricted 示例需满足哪些条件</title>
+<desc id="desc">Namespace 的 enforce 标签会拒绝违规 Pod。</desc>
+<defs><pattern id="grid" width="32" height="32" patternUnits="userSpaceOnUse"><path d="M32 0 L0 0 0 32" fill="none" stroke="#1e293b" stroke-width=".6"/></pattern><marker id="arrow" markerWidth="9" markerHeight="7" refX="8" refY="3.5" orient="auto"><path d="M0 0 L9 3.5 L0 7Z" fill="#94a3b8"/></marker></defs>
+<rect width="360" height="500" rx="16" fill="#0f172a"/>
+<rect width="360" height="500" rx="16" fill="url(#grid)"/>
+<text x="24" y="32" fill="#f8fafc" font-family="'PingFang SC','Noto Sans SC','Microsoft YaHei',sans-serif" font-size="17" font-weight="700">restricted 示例需满足哪些条件</text>
+<text x="24" y="54" fill="#94a3b8" font-family="'PingFang SC','Noto Sans SC','Microsoft YaHei',sans-serif" font-size="11">创建符合要求的 Pod</text>
+<rect x="57" y="91" width="279" height="86" rx="11" fill="#142238" stroke="#22d3ee" stroke-width="1.5"/>
+<text x="196.5" y="127.0" text-anchor="middle" font-family="'PingFang SC','Noto Sans SC','Microsoft YaHei',sans-serif" font-size="15" font-weight="600" fill="#f8fafc">非 root</text>
+<text x="196.5" y="148.0" text-anchor="middle" font-family="'PingFang SC','Noto Sans SC','Microsoft YaHei',sans-serif" font-size="12" font-weight="400" fill="#cbd5e1">避免以 root 身份运行</text>
+<circle cx="37" cy="134" r="12" fill="#142238" stroke="#22d3ee" stroke-width="1.5"/>
+<text x="37" y="139.0" text-anchor="middle" font-family="'PingFang SC','Noto Sans SC','Microsoft YaHei',sans-serif" font-size="13" font-weight="600" fill="#22d3ee">1</text>
+<rect x="57" y="201" width="279" height="86" rx="11" fill="#142238" stroke="#34d399" stroke-width="1.5"/>
+<text x="196.5" y="237.0" text-anchor="middle" font-family="'PingFang SC','Noto Sans SC','Microsoft YaHei',sans-serif" font-size="15" font-weight="600" fill="#f8fafc">禁止提权</text>
+<text x="196.5" y="258.0" text-anchor="middle" font-family="'PingFang SC','Noto Sans SC','Microsoft YaHei',sans-serif" font-size="12" font-weight="400" fill="#cbd5e1">allowPrivilegeEscalation=false</text>
+<circle cx="37" cy="244" r="12" fill="#142238" stroke="#34d399" stroke-width="1.5"/>
+<text x="37" y="249.0" text-anchor="middle" font-family="'PingFang SC','Noto Sans SC','Microsoft YaHei',sans-serif" font-size="13" font-weight="600" fill="#34d399">2</text>
+<rect x="57" y="311" width="279" height="86" rx="11" fill="#142238" stroke="#a78bfa" stroke-width="1.5"/>
+<text x="196.5" y="347.0" text-anchor="middle" font-family="'PingFang SC','Noto Sans SC','Microsoft YaHei',sans-serif" font-size="15" font-weight="600" fill="#f8fafc">seccomp / capabilities</text>
+<text x="196.5" y="368.0" text-anchor="middle" font-family="'PingFang SC','Noto Sans SC','Microsoft YaHei',sans-serif" font-size="12" font-weight="400" fill="#cbd5e1">设置受限的进程边界</text>
+<circle cx="37" cy="354" r="12" fill="#142238" stroke="#a78bfa" stroke-width="1.5"/>
+<text x="37" y="359.0" text-anchor="middle" font-family="'PingFang SC','Noto Sans SC','Microsoft YaHei',sans-serif" font-size="13" font-weight="600" fill="#a78bfa">3</text>
+<text x="180" y="449.0" text-anchor="middle" font-family="'PingFang SC','Noto Sans SC','Microsoft YaHei',sans-serif" font-size="11" font-weight="400" fill="#fbbf24">Namespace 的 enforce 标签会拒绝违规 Pod。</text>
+<line x1="24" y1="467" x2="336" y2="467" stroke="#334155"/>
+<text x="24" y="486" fill="#94a3b8" font-family="'PingFang SC','Noto Sans SC','Microsoft YaHei',sans-serif" font-size="10">costalong.com · Kubernetes 笔记</text>
+</svg>

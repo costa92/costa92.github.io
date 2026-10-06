@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 360 488" role="img" aria-labelledby="diagram-title diagram-desc">
+<title id="diagram-title">探针影响什么</title><desc id="diagram-desc">就绪探针影响流量接入；存活探针影响容器重启，两者用途不同。</desc>
+<defs><pattern id="grid" width="32" height="32" patternUnits="userSpaceOnUse"><path d="M32 0 L0 0 0 32" fill="none" stroke="#1e293b" stroke-width=".6"/></pattern>
+<marker id="arrow" markerWidth="9" markerHeight="7" refX="8" refY="3.5" orient="auto"><path d="M0 0 L9 3.5 L0 7Z" fill="#94a3b8"/></marker></defs>
+<rect width="360" height="488" rx="16" fill="#0f172a"/><rect width="360" height="488" rx="16" fill="url(#grid)"/>
+<text x="24" y="29" fill="#f8fafc" font-family="'PingFang SC','Noto Sans SC',sans-serif" font-size="17" font-weight="700">探针影响什么</text>
+<text x="24" y="51" fill="#94a3b8" font-family="'PingFang SC','Noto Sans SC',sans-serif" font-size="11.5">启动成功后并行检查</text>
+<rect x="24" y="78" width="312" height="62" rx="10" fill="#152338" stroke="#22d3ee" stroke-width="1.4"/>
+<text x="180.0" y="105.0" text-anchor="middle" font-family="'PingFang SC','Noto Sans SC',sans-serif" font-size="14" fill="#f8fafc" font-weight="700">启动探针 startup</text>
+<text x="180.0" y="121.0" text-anchor="middle" font-family="'PingFang SC','Noto Sans SC',sans-serif" font-size="12" fill="#cbd5e1">启动期间检查；成功后放行</text>
+<path d="M180 140 V174 H98 V210" fill="none" stroke="#fb7185" stroke-width="1.8" marker-end="url(#arrow)"/>
+<path d="M180 174 H262 V210" fill="none" stroke="#34d399" stroke-width="1.8" marker-end="url(#arrow)"/>
+<rect x="24" y="210" width="148" height="82" rx="10" fill="#152338" stroke="#fb7185" stroke-width="1.4"/>
+<text x="98.0" y="247.0" text-anchor="middle" font-family="'PingFang SC','Noto Sans SC',sans-serif" font-size="14" fill="#f8fafc" font-weight="700">失败达阈值</text>
+<text x="98.0" y="263.0" text-anchor="middle" font-family="'PingFang SC','Noto Sans SC',sans-serif" font-size="12" fill="#cbd5e1">重启容器</text>
+<rect x="188" y="210" width="148" height="82" rx="10" fill="#152338" stroke="#34d399" stroke-width="1.4"/>
+<text x="262.0" y="247.0" text-anchor="middle" font-family="'PingFang SC','Noto Sans SC',sans-serif" font-size="14" fill="#f8fafc" font-weight="700">启动成功</text>
+<text x="262.0" y="263.0" text-anchor="middle" font-family="'PingFang SC','Noto Sans SC',sans-serif" font-size="12" fill="#cbd5e1">启用另两种探针</text>
+<path d="M262 292 V323 H98 V348" fill="none" stroke="#a78bfa" stroke-width="1.8" marker-end="url(#arrow)"/>
+<path d="M262 323 V348" fill="none" stroke="#fbbf24" stroke-width="1.8" marker-end="url(#arrow)"/>
+<rect x="24" y="348" width="148" height="80" rx="10" fill="#152338" stroke="#a78bfa" stroke-width="1.4"/>
+<text x="98.0" y="384.0" text-anchor="middle" font-family="'PingFang SC','Noto Sans SC',sans-serif" font-size="14" fill="#f8fafc" font-weight="700">就绪探针</text>
+<text x="98.0" y="400.0" text-anchor="middle" font-family="'PingFang SC','Noto Sans SC',sans-serif" font-size="12" fill="#cbd5e1">失败：移出服务后端</text>
+<rect x="188" y="348" width="148" height="80" rx="10" fill="#152338" stroke="#fbbf24" stroke-width="1.4"/>
+<text x="262.0" y="384.0" text-anchor="middle" font-family="'PingFang SC','Noto Sans SC',sans-serif" font-size="14" fill="#f8fafc" font-weight="700">存活探针</text>
+<text x="262.0" y="400.0" text-anchor="middle" font-family="'PingFang SC','Noto Sans SC',sans-serif" font-size="12" fill="#cbd5e1">失败：重启容器</text>
+<line x1="24" y1="453" x2="336" y2="453" stroke="#334155"/>
+<text x="24" y="473" fill="#94a3b8" font-family="'PingFang SC','Noto Sans SC',sans-serif" font-size="10">costalong.com · Kubernetes 笔记</text></svg>
