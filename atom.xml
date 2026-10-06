@@ -16,7 +16,7 @@
       <name>costalong</name>
     </author>
     <category term="博客运营" scheme="https://costalong.com/categories/%E5%8D%9A%E5%AE%A2%E8%BF%90%E8%90%A5/"/>
-    <category term="Hexo" scheme="https://costalong.com/tags/Hexo/"/>
+    <category term="Hexo" scheme="https://costalong.com/tags/hexo-framework/"/>
     <category term="AdSense" scheme="https://costalong.com/tags/AdSense/"/>
     <category term="广告合作" scheme="https://costalong.com/tags/%E5%B9%BF%E5%91%8A%E5%90%88%E4%BD%9C/"/>
     <content>
@@ -339,7 +339,7 @@
     </author>
     <category term="AI" scheme="https://costalong.com/categories/AI/"/>
     <category term="Hermes" scheme="https://costalong.com/tags/Hermes/"/>
-    <category term="AI" scheme="https://costalong.com/tags/AI/"/>
+    <category term="AI" scheme="https://costalong.com/tags/artificial-intelligence/"/>
     <category term="Web UI" scheme="https://costalong.com/tags/Web-UI/"/>
     <category term="Vue3" scheme="https://costalong.com/tags/Vue3/"/>
     <category term="Dashboard" scheme="https://costalong.com/tags/Dashboard/"/>
