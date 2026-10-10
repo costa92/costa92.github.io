@@ -1,0 +1,328 @@
+<!DOCTYPE HTML><html lang="zh-CN"><head><meta charset="utf-8"><meta name="keywords" content="CLAUDE.md 别写成许愿墙：200 行是红线, costalong, 翼舞成梦, 后端开发, Go语言, Kubernetes, K8s, Linux, AI, 学习笔记"><meta name="description" content="对照 Claude Code 官方 memory 文档，讲清 CLAUDE.md 的 5 层加载与拼接顺序、@ 导入的 4 条限制、为什么要压在 200 行内、如何用 .claude/rules 按路径分流规则，以及它和 auto memory、hook 的分工，附三份可直接改用的模板。"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="renderer" content="webkit|ie-stand|ie-comp"><meta name="mobile-web-app-capable" content="yes"><meta name="format-detection" content="telephone=no"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><meta name="referrer" content="strict-origin-when-cross-origin"><meta name="google-adsense-account" content="ca-pub-8990123471955885"><script>!function(){if(!new URLSearchParams(location.search).has("style-audit-preview")){var n=!1;document.addEventListener("DOMContentLoaded",function(){if(!("IntersectionObserver"in window))return t();var n=new IntersectionObserver(function(e){e.some(function(e){return e.isIntersecting})&&(n.disconnect(),t())},{rootMargin:"200px 0px"});document.querySelectorAll("ins.adsbygoogle").forEach(function(e){n.observe(e)})}),window.addEventListener("load",function(){(window.requestIdleCallback||function(e){setTimeout(e,2e3)})(t,{timeout:4e3})})}function t(){if(!n){n=!0;var e=document.createElement("script");e.async=!0,e.src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8990123471955885",e.crossOrigin="anonymous",document.head.appendChild(e)}}}()</script><title>CLAUDE.md 别写成许愿墙：200 行是红线 | 翼舞成梦</title><meta property="og:site_name" content="翼舞成梦"><meta property="og:locale" content="zh_CN"><meta property="og:type" content="article"><meta property="og:title" content="CLAUDE.md 别写成许愿墙：200 行是红线"><meta property="og:description" content="对照 Claude Code 官方 memory 文档，讲清 CLAUDE.md 的 5 层加载与拼接顺序、@ 导入的 4 条限制、为什么要压在 200 行内、如何用 .claude/rules 按路径分流规则，以及它和 auto memory、hook 的分工，附三份可直接改用的模板。"><meta property="og:url" content="https://costalong.com/2026/07/06/claude-md-configuration-playbook/"><meta property="og:image" content="https://costalong.com/images/posts/claude-md-configuration-playbook_a8e6ed5cd745.jpg"><meta name="twitter:card" content="summary_large_image"><script type="application/ld+json">{"@context":"https://schema.org","@type":"BlogPosting","headline":"CLAUDE.md 别写成许愿墙：200 行是红线","description":"对照 Claude Code 官方 memory 文档，讲清 CLAUDE.md 的 5 层加载与拼接顺序、@ 导入的 4 条限制、为什么要压在 200 行内、如何用 .claude/rules 按路径分流规则，以及它和 auto memory、hook 的分工，附三份可直接改用的模板。","image":"https://costalong.com/images/posts/claude-md-configuration-playbook_a8e6ed5cd745.jpg","url":"https://costalong.com/2026/07/06/claude-md-configuration-playbook/","datePublished":"2026-07-06T04:00:00.000Z","dateModified":"2026-07-06T04:00:00.000Z","author":{"@type":"Person","name":"costalong"},"publisher":{"@type":"Person","name":"costalong"}}</script><link rel="canonical" href="https://costalong.com/2026/07/06/claude-md-configuration-playbook/"><link rel="alternate" type="application/atom+xml" title="翼舞成梦" href="https://costalong.com/atom.xml"><link rel="alternate" type="application/json" title="翼舞成梦" href="https://costalong.com/feed.json"><link rel="icon" type="image/png" href="/favicon.png"><link rel="stylesheet" href="/css/fonts.css?v=864fc7ac"><link rel="preload" href="/libs/awesome/webfonts/fa-solid-900.woff2" as="font" type="font/woff2" crossorigin><link rel="stylesheet" href="/libs/awesome/css/all.min.css"><link rel="stylesheet" href="/libs/materialize/materialize.min.css"><link rel="stylesheet" href="/libs/aos/aos.css"><link rel="stylesheet" href="/libs/animate/animate.min.css" media="print" onload='this.media="all"'><link rel="stylesheet" href="/libs/lightGallery/css/lightgallery.min.css" media="print" onload='this.media="all"'><link rel="stylesheet" href="/css/matery.css"><link rel="stylesheet" href="/css/my.css"><link rel="stylesheet" href="/css/dark.css" media="none" onload='"all"!=media&&(media="all")'><link rel="stylesheet" href="/css/infinite-scroll.css"><link rel="stylesheet" href="/css/sidebar.css"><link rel="stylesheet" href="/css/navbar.css"><link rel="stylesheet" href="/libs/tocbot/tocbot.css"><link rel="stylesheet" href="/css/post.css"><link rel="stylesheet" href="/css/reward.css" media="print" onload='this.media="all"'><link rel="stylesheet" href="/css/obsidian.css?v=fee1bba1"><link rel="stylesheet" href="/css/darkpremium.css?v=c801dadc"><link rel="stylesheet" href="/css/post-darkpremium.css?v=c09ea248"><script>!function(o){var t=[];o.$=o.jQuery=function(n){if("function"!=typeof n)throw new Error("jQuery 尚未加载：请写在 $(function () {...}) 里");t.push(n)},document.addEventListener("DOMContentLoaded",function(){o.jQuery.fn&&t.forEach(function(n){o.jQuery(n)})})}(window)</script><script src="/libs/jquery/jquery-3.6.0.min.js" defer></script><script>new MutationObserver(function(t){t.forEach(function(t){"attributes"===t.type&&"aria-hidden"===t.attributeName&&"true"===document.body.getAttribute("aria-hidden")&&document.body.removeAttribute("aria-hidden")})}).observe(document.documentElement,{attributes:!0,subtree:!0,attributeFilter:["aria-hidden"]}),window.addEventListener("DOMContentLoaded",function(){"true"===document.body.getAttribute("aria-hidden")&&document.body.removeAttribute("aria-hidden")})</script><meta name="generator" content="Hexo 8.1.2"><style>.github-emoji{position:relative;display:inline-block;width:1.2em;min-height:1.2em;overflow:hidden;vertical-align:top;color:transparent}.github-emoji>span{position:relative;z-index:10}.github-emoji .fancybox,.github-emoji img{margin:0!important;padding:0!important;border:none!important;outline:0!important;text-decoration:none!important;user-select:none!important;cursor:auto!important}.github-emoji img{height:1.2em!important;width:1.2em!important;position:absolute!important;left:50%!important;top:50%!important;transform:translate(-50%,-50%)!important;user-select:none!important;cursor:auto!important}.github-emoji-fallback{color:inherit}.github-emoji-fallback img{opacity:0!important}</style></head><body><a class="skip-link" href="#content-start">跳到正文</a><header class="dp-nav"><div class="dp-wrap"><div class="dp-nav-inner"><a class="dp-brand" href="/"><span class="mark"><img src="/medias/logo.webp" alt="" width="22" height="22"></span><span><span class="name">翼舞成梦</span><br><span class="dom">costalong.com</span></span></a><div class="dp-nav-links" role="navigation" aria-label="主导航"><a href="/">首页</a> <a href="/archives/">归档</a> <a href="/moments">Moments</a> <a href="/about/">关于</a> <a href="/explore/">探索</a> <a href="/galleries/">相册</a> <a href="/notes/">笔记</a> <a href="/contact/">留言板</a> <a href="/friends/">友情链接</a></div><div class="dp-nav-actions"><a href="#searchModal" class="icon-btn modal-trigger" title="搜索" aria-label="搜索"><i class="fas fa-search" aria-hidden="true"></i></a><a class="dp-nav-cta" href="/atom.xml"><i class="fas fa-rss" style="margin-right:6px" aria-hidden="true"></i> 订阅更新</a> <button type="button" data-target="mobile-nav" class="icon-btn dp-burger sidenav-trigger button-collapse" aria-label="打开菜单" aria-expanded="false" aria-controls="mobile-nav"><i class="fas fa-bars" aria-hidden="true"></i></button></div></div></div><div id="mobile-nav" class="side-nav sidenav"><div class="mobile-head bg-color"><img src="/medias/logo.webp" class="logo-img circle responsive-img" alt="网站头像"><div class="logo-name">翼舞成梦</div><div class="logo-desc">翼舞成梦的个人博客，专注于后端开发、K8s 容器化技术、Linux 运维以及人工智能学习笔记分享。</div></div><ul class="menu-list mobile-menu-list"><li class="m-nav-item"><a href="/" class="waves-effect waves-light"><i class="fa-fw fas fa-home"></i> 首页</a></li><li class="m-nav-item"><a href="/archives/" class="waves-effect waves-light"><i class="fa-fw fas fa-archive"></i> 归档</a></li><li class="m-nav-item"><a href="/moments" class="waves-effect waves-light"><i class="fa-fw fas fa-bolt"></i> Moments</a></li><li class="m-nav-item"><button type="button" class="m-nav-toggle" aria-expanded="false" aria-controls="mobile-submenu-3"><i class="fa-fw fas fa-compass" aria-hidden="true"></i> Discover<span class="m-icon" aria-hidden="true"><i class="fas fa-chevron-right"></i></span></button><ul id="mobile-submenu-3"><li><a href="/categories" class="m-sub-link"><i class="fa m-sub-icon fas fa-bookmark"></i> <span>分类</span></a></li><li><a href="/tags" class="m-sub-link"><i class="fa m-sub-icon fas fa-tags"></i> <span>标签</span></a></li></ul></li><li class="m-nav-item"><a href="/about/" class="waves-effect waves-light"><i class="fa-fw fas fa-user-circle"></i> 关于</a></li><li class="m-nav-item"><a href="/explore/" class="waves-effect waves-light"><i class="fa-fw fas fa-compass"></i> 探索</a></li><li class="m-nav-item"><a href="/galleries/" class="waves-effect waves-light"><i class="fa-fw fas fa-image"></i> 相册</a></li><li class="m-nav-item"><a href="/notes/" class="waves-effect waves-light"><i class="fa-fw fas fa-book-reader"></i> 笔记</a></li><li class="m-nav-item"><a href="/contact/" class="waves-effect waves-light"><i class="fa-fw fas fa-comments"></i> 留言板</a></li><li class="m-nav-item"><a href="/friends/" class="waves-effect waves-light"><i class="fa-fw fas fa-address-book"></i> 友情链接</a></li></ul></div></header><div id="content-start" tabindex="-1"></div><div class="dp-bg-field"><div class="glow v"></div><div class="glow c"></div><div class="glow i"></div></div><div class="dp"><header class="dp-page-hero dp-wrap post-dp-hero"><span class="eyebrow"><span class="dot"></span><i class="fas fa-folder-open"></i> &nbsp;Coding-Agent</span><h1 id="post-title" class="post-title"><span class="grad">CLAUDE.md 别写成许愿墙：200 行是红线</span></h1><div class="meta"><span><i class="far fa-calendar-minus"></i> &nbsp;2026-07-06</span><span><i class="fas fa-bookmark"></i> &nbsp;<a href="/categories/Coding-Agent/"><b>Coding-Agent</b></a></span> <span class="hero-tags"><a href="/tags/Claude-Code/"><span class="chip">Claude Code</span></a> <a href="/tags/AI%E7%BC%96%E7%A8%8B/"><span class="chip ai">AI编程</span></a> <a href="/tags/CLAUDE-md/"><span class="chip">CLAUDE.md</span></a> <a href="/tags/%E4%B8%8A%E4%B8%8B%E6%96%87%E5%B7%A5%E7%A8%8B/"><span class="chip">上下文工程</span></a></span></div></header></div><main class="post-container content"><div class="row"><div id="main-content" class="col s12 m12 l9"><div id="artDetail"><div class="card"><div class="card-content article-info"><div class="row tag-cate"><div class="col s7"><div class="article-tag"><a href="/tags/Claude-Code/"><span class="chip bg-color">Claude Code</span></a> <a href="/tags/AI%E7%BC%96%E7%A8%8B/"><span class="chip bg-color ai">AI编程</span></a> <a href="/tags/CLAUDE-md/"><span class="chip bg-color">CLAUDE.md</span></a> <a href="/tags/%E4%B8%8A%E4%B8%8B%E6%96%87%E5%B7%A5%E7%A8%8B/"><span class="chip bg-color">上下文工程</span></a> <a href="/tags/%E9%85%8D%E7%BD%AE%E5%AE%9E%E6%88%98/"><span class="chip bg-color">配置实战</span></a></div></div><div class="col s5 right-align"><div class="post-cate"><i class="fas fa-bookmark fa-fw icon-category"></i> <a href="/categories/Coding-Agent/" class="post-category">Coding-Agent</a></div></div></div><div class="post-info"><div class="info-break-policy post-meta-words"><i class="far fa-file-word fa-fw"></i> <span class="post-meta-label">文章字数:&nbsp;&nbsp;</span> 5.9k</div><div id="busuanzi_container_page_pv" class="info-break-policy post-meta-views"><i class="far fa-eye fa-fw"></i> <span class="post-meta-label">阅读次数:&nbsp;&nbsp;</span><span id="busuanzi_value_page_pv"></span></div><div id="read_mode" class="info-break-policy post-meta-read-mode" style="display:inline" role="button" tabindex="0" aria-label="切换阅读模式" aria-pressed="false"><i class="fas fa-expand-arrows-alt" title="【进入/离开】 阅读模式" aria-hidden="true"></i> &nbsp;&nbsp; <span title="【进入/离开】阅读模式" aria-hidden="true">阅读模式</span></div></div></div><hr class="clearfix"><link rel="stylesheet" href="/libs/prism/prism.min.css"><div class="card-content article-card-content"><div id="articleContent"><p><img width="1280" height="720" style="--img-ar:1.7778" fetchpriority="high" decoding="async" src="/images/posts/claude-md-configuration-playbook_a8e6ed5cd745.webp" alt="封面图，一份交接文档在两次会话之间搭桥"></p><p>同一个仓库，昨天 Claude 写得挺好，今天开个新会话，它又开始瞎猜你的包管理器、把上周纠正过的错再犯一遍。不是模型变笨了，是它每次都从白纸开始，上一轮记忆全丢了。</p><p><code>CLAUDE.md</code> 就是用来补这张白纸的那份文件，它把项目规则、命令、约定塞进每一次会话的开场。我先把最容易被误解的一句话摆在前面：<strong>CLAUDE.md 是上下文，不是强制配置</strong>。官方文档（<a target="_blank" rel="noopener" href="https://code.claude.com/docs/en/memory">code.claude.com/docs/en/memory</a>）原文写得很直白——“Claude treats them as context, not enforced configuration”。你不是在给机器写规则，你是在给一个很能干、但每次上班都失忆的新队友写交接文档。想清楚这一点，后面所有的取舍都顺了。</p><blockquote><p><strong>这篇讲什么</strong></p><ul><li>CLAUDE.md 的 5 层加载顺序，以及”拼接不覆盖”到底怎么拼</li><li><code>@-imports</code> 的四条硬约束（最坑的是”不省 token”）</li><li>200 行红线背后的两笔成本，以及瘦身的四招</li><li>最优结构的 7 个区块 + path-scoped rules</li><li>官方现在把”记忆”框成了<strong>两套系统</strong>，大多数人只知道一半</li></ul></blockquote><hr><h2 id="一、它到底是什么：上下文，不是开关"><a href="#一、它到底是什么：上下文，不是开关" class="headerlink" title="一、它到底是什么：上下文，不是开关"></a>一、它到底是什么：上下文，不是开关</h2><p>先说我的暴论：大多数人的 CLAUDE.md 都写成了<strong>许愿墙</strong>——塞满一堆 Claude 本来就会做的事，真正重要的三条规则淹没在噪声里。许愿墙长这样：</p><pre class="language-text" data-language="text"><code class="language-text">- 写干净、可维护、高性能的代码
+- 遵循最佳实践
+- 注意错误处理，保持一致性</code></pre><p>这三条对 Claude 等于没说。它本来就在”尽量写干净的代码”，你把这几行堆在 <code>## Code style</code> 底下，只是白占 token，还顺手把真正该被看见的规则往下挤。这种文件越长，Claude 越不听话。</p><p>为什么？因为 CLAUDE.md 的内容不是以 system prompt 的身份进场的。官方排障小节说得很清楚：它是 “delivered as a user message after the system prompt”——system prompt 之后的一条 user message。Claude 读到了、会尽量遵守，但没有强制力，规则一模糊、一互相打架，它就随机挑一个。</p><p>所以当你真的需要”每次 commit 前必须跑 lint”这种<strong>不容商量</strong>的动作，别写进 CLAUDE.md 的 bullet 里，那只是许愿。去写 hook：</p><pre class="language-json" data-language="json"><code class="language-json"><span class="token punctuation">{</span>
+  <span class="token property">"hooks"</span><span class="token operator">:</span> <span class="token punctuation">{</span>
+    <span class="token property">"PreToolUse"</span><span class="token operator">:</span> <span class="token punctuation">[</span>
+      <span class="token punctuation">{</span>
+        <span class="token property">"matcher"</span><span class="token operator">:</span> <span class="token string">"Bash"</span><span class="token punctuation">,</span>
+        <span class="token property">"hooks"</span><span class="token operator">:</span> <span class="token punctuation">[</span>
+          <span class="token punctuation">{</span>
+            <span class="token property">"type"</span><span class="token operator">:</span> <span class="token string">"command"</span><span class="token punctuation">,</span>
+            <span class="token property">"if"</span><span class="token operator">:</span> <span class="token string">"Bash(git commit *)"</span><span class="token punctuation">,</span>
+            <span class="token property">"command"</span><span class="token operator">:</span> <span class="token string">"make lint &gt;&amp;2 || exit 2"</span>
+          <span class="token punctuation">}</span>
+        <span class="token punctuation">]</span>
+      <span class="token punctuation">}</span>
+    <span class="token punctuation">]</span>
+  <span class="token punctuation">}</span>
+<span class="token punctuation">}</span></code></pre><p>两个细节容易写错：<code>matcher</code> 只匹配工具名（<code>Bash</code>、<code>Edit|Write</code>），<code>git commit</code> 这种参数条件要写进 <code>if</code> 字段（权限规则语法）；hook 只有以退出码 2 结束才会拦下这次工具调用，其他非零退出码只算非阻塞错误，所以上面用 <code>|| exit 2</code> 把 lint 失败转成拦截。</p><p>区别在于：hook 由客户端在固定生命周期节点强制执行，不管 Claude 怎么想；CLAUDE.md 只塑形，不兜底。同样是许愿墙里最常见的一条——“永远用 pnpm，不要用 npm”——如果你要的是硬拦截，正确位置是 settings 里的 <code>permissions.deny</code>（比如 <code>"Bash(npm *)"</code>），而不是一句 markdown。</p><p>一句话记住这条边界：<strong>要引导，写 CLAUDE.md；要强制，写 hook 或 settings。</strong> 分不清这两者，是我见过的配置翻车里占比最高的一类。</p><hr><h2 id="二、Claude-怎么加载它：5-层，拼接不覆盖"><a href="#二、Claude-怎么加载它：5-层，拼接不覆盖" class="headerlink" title="二、Claude 怎么加载它：5 层，拼接不覆盖"></a>二、Claude 怎么加载它：5 层，拼接不覆盖</h2><p>CLAUDE.md 不止一个文件。它按作用域分 5 层，从最广到最窄，加载顺序也是从广到窄——广的先进场，窄的后进场，所以离你启动目录越近的指令越”后被读到”。</p><table><thead><tr><th>作用域</th><th>位置</th><th>共享给谁</th></tr></thead><tbody><tr><td><strong>Managed policy</strong></td><td>macOS: <code>/Library/Application Support/ClaudeCode/CLAUDE.md</code>；Linux/WSL: <code>/etc/claude-code/CLAUDE.md</code>；Windows: <code>C:\Program Files\ClaudeCode\CLAUDE.md</code></td><td>组织内所有人</td></tr><tr><td><strong>User instructions</strong></td><td><code>~/.claude/CLAUDE.md</code></td><td>你，所有项目</td></tr><tr><td><strong>Project instructions</strong></td><td><code>./CLAUDE.md</code> 或 <code>./.claude/CLAUDE.md</code></td><td>团队（走版本控制）</td></tr><tr><td><strong>Local instructions</strong></td><td><code>./CLAUDE.local.md</code>（记得进 <code>.gitignore</code>）</td><td>你，当前项目</td></tr><tr><td><strong>Nested</strong></td><td>子目录里的 <code>CLAUDE.md</code></td><td>按需，读到该目录文件时才载入</td></tr></tbody></table><p>这里最反直觉的是<strong>拼接不覆盖</strong>。很多人以为项目级会”盖掉”用户级，其实不会——所有被发现的文件全部 concatenate 进上下文。Claude 从当前工作目录向上走目录树，逐层收集 <code>CLAUDE.md</code> 和 <code>CLAUDE.local.md</code>，然后按文件系统根 → 工作目录的顺序拼起来。假设你在 <code>foo/bar/</code> 里启动：</p><pre class="language-text" data-language="text"><code class="language-text">foo/CLAUDE.md            先进场（离根更近）
+foo/bar/CLAUDE.md        后进场（离启动目录更近）
+foo/bar/CLAUDE.local.md  同目录内，local 永远排在 CLAUDE.md 之后</code></pre><p>因为是”拼接”，所以你的个人偏好（user 层）和项目规则（project 层）会同时在场、同时生效——它们不是二选一。这也意味着两层写了互相打架的规则时，Claude 不会自动帮你仲裁，它只会挑一个，这是后面”多文件打架”那个坑的根子。我踩过一次：user 层写了默认 pnpm，某个老项目的 project 层又写了用 npm，结果我每开一个会话，Claude 挑的还不一样。</p><p>nested（子目录）这层单独说一句：它<strong>不在启动时载入</strong>，只有当 Claude 真的去读那个子目录里的文件时才纳入上下文。这也是为什么 monorepo 能用一棵 CLAUDE.md 树——根目录放通用约定，各子包放各自的规则，Claude 走到哪读到哪。</p><p>如果仓库里已经有给其他编码工具写的 <code>AGENTS.md</code>，v2.1.277 起的 Claude Code 也能直接读取它，不必再复制一份成 CLAUDE.md。</p><p>想确认到底哪些文件被载入了？别猜，用 <code>/memory</code>：</p><pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 会话里直接敲，列出当前载入的所有 CLAUDE.md / CLAUDE.local.md / rules 文件</span>
+/memory</code></pre><p>如果某个文件没出现在列表里，Claude 就是看不见它，十有八九是位置放错了。我排”Claude 怎么不听我 CLAUDE.md”的问题，第一步永远是 <code>/memory</code> 确认它真被载入了，而不是急着改措辞。我发现有一半的”不听话”其实是”根本没读到”。</p><p><img width="1280" height="720" style="--img-ar:1.7778" loading="lazy" decoding="async" src="/images/posts/claude-md-configuration-playbook_ce4a98d0034f.webp" alt="5 层加载作用域从组织到本地逐层收窄"></p><hr><h2 id="三、-imports-的四条硬约束"><a href="#三、-imports-的四条硬约束" class="headerlink" title="三、@-imports 的四条硬约束"></a>三、@-imports 的四条硬约束</h2><p>CLAUDE.md 可以用 <code>@path/to/file</code> 把别的文件拉进上下文，方便你把长指令拆成模块。语法很简单，但有四条硬约束，踩中任何一条都白折腾：</p><pre class="language-text" data-language="text"><code class="language-text">See @README for project overview and @package.json for available commands.
+
+- git workflow @docs/git-instructions.md
+- 跨 worktree 共享个人偏好 @~/.claude/my-project-instructions.md</code></pre><p><strong>第一条，最多 4 跳（four hops）。</strong> 被导入的文件可以再导入别的文件，但递归深度上限是 4。超过就断，别指望搭一座七层塔。</p><p><strong>第二条，相对路径相对于”文件本身”，不是工作目录。</strong> <code>@docs/git-instructions.md</code> 是相对于<strong>包含这行 import 的那个文件</strong>去找，不是相对于你启动 Claude 的目录。这条我踩过——我在把 import 从根 CLAUDE.md 挪进子目录后，路径全断了，就是因为参照系跟着文件走了。</p><p><strong>第三条，代码块里的 <code>@</code> 不解析。</strong> import 解析会跳过 markdown 的 code span 和 fenced code block。所以你想在文里”提一嘴”某个路径而不真的导入它，用反引号包起来就行：</p><pre class="language-text" data-language="text"><code class="language-text">写带反引号的 @README（外面有一对反引号）只是字面文本，不会导入；
+写不带反引号的 @README 才会把 README 拉进上下文。</code></pre><p><strong>第四条，也是最反直觉的一条：import 不省 token。</strong> 很多人拆 import 是为了”减小主文件、省上下文”——省不了。被导入的文件在启动时一样会展开、一样进上下文窗口。import 只帮你<strong>组织</strong>，不帮你<strong>减负</strong>。真要减 token，得靠后面讲的 path-scoped rules 和瘦身，不是靠 import。这是对 import 最常见的误会，拆了半天文件以为省了上下文，其实一个 token 没省下。</p><p>补一个安全提示：第一次遇到<strong>外部 import</strong>（比如指向 <code>~/.claude/</code> 或仓库外的文件），Claude Code 会弹一个批准对话框列出这些文件。你要是点了拒绝，imports 就此停用，而且对话框不再出现——想反悔得自己去设置里找。</p><hr><h2 id="四、200-行红线：两笔成本"><a href="#四、200-行红线：两笔成本" class="headerlink" title="四、200 行红线：两笔成本"></a>四、200 行红线：两笔成本</h2><p>官方给了一个明确数字：<strong>target under 200 lines per CLAUDE.md file</strong>——每个 CLAUDE.md 控制在 200 行以内。这不是洁癖，是两笔实打实的成本叠加。</p><p>第一笔是 <strong>token 成本</strong>。<code>CLAUDE.md</code> 每次会话开场都全量载入，一份 300 行的文件，占的 token 从第一个字就开始吃你的工作上下文。第二笔更隐蔽，是<strong>注意力成本</strong>：文件越长，真正重要的规则越容易被埋在中间，模型对”上下文正中间”的内容处理得最不稳。官方原话——“Longer files consume more context and reduce adherence”，长文件降低遵守率。这句话的分量在于，它把”文件太长”从”不够优雅”升级成了”直接掉遵守率”，是能被观察到的行为退化。</p><p>所以红线的正解不是”写到 199 行为止”，而是<strong>主动砍</strong>。我给一个能立刻上手的判断顺序，砍不动的时候按这四招分流：</p><pre class="language-text" data-language="text"><code class="language-text">删：Claude 已经稳定做对的规则 → 直接删，别留着占地方
+移进 skill：多步操作流程（比如"发版流程 8 步"）→ 按需加载，不常驻
+移进 path-scoped rule：只对某类文件生效的规则 → 只在碰到匹配文件时载入
+移进 hook：必须在固定时机跑的（每次 commit 前）→ 强制执行，且不吃上下文</code></pre><p>判断”这条该不该留”的时候，我会用一个反问：<strong>这条规则，Claude 上次是不是已经做对了？</strong> 是的话就删——留着它唯一的作用是稀释真正需要提醒的那几条。想量化就直接数行数：</p><pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 超过 200 行就该动手瘦身了</span>
+<span class="token function">wc</span> <span class="token parameter variable">-l</span> CLAUDE.md</code></pre><p>超过 200 行的 CLAUDE.md，回头看很少是”必须这么长”——多半是懒得删攒出来的。该删的是 Claude 早就做对的通用规矩，该留的是几条它真会猜错的项目约定。好的 CLAUDE.md 随时间是<strong>越写越短</strong>的。我会给自己定一条硬线：150 行，留 50 行 buffer，一超就逼自己坐下来砍。如果你的文件半年只增不减，那不是配置在进化，是垃圾在堆积。</p><p><img width="1280" height="720" style="--img-ar:1.7778" loading="lazy" decoding="async" src="/images/posts/claude-md-configuration-playbook_303dba298e8c.webp" alt="一份文档超过阈值红线后内容溢出被稀释"></p><hr><h2 id="五、最优结构：7-个区块-具体压倒模糊"><a href="#五、最优结构：7-个区块-具体压倒模糊" class="headerlink" title="五、最优结构：7 个区块 + 具体压倒模糊"></a>五、最优结构：7 个区块 + 具体压倒模糊</h2><p>200 行以内该放什么？一份好用的项目 CLAUDE.md，大致就这 7 个区块，多一个都要问自己”真需要吗”：</p><pre class="language-text" data-language="text"><code class="language-text"># Project: 一句话说清这是什么
+
+## Stack        —— 技术栈 + 明确写死包管理器（pnpm, never npm）
+## Commands     —— build / test / lint / typecheck 的确切命令
+## Code style   —— 可验证的规则：缩进、命名、格式化工具
+## Architecture —— 具体位置：API handlers 放 src/api/handlers/
+## Do / Don't   —— 硬偏好和已知的坑
+## Data model   —— 数据密集型项目才需要</code></pre><p>真正决定 Claude 听不听话的，不是区块多全，而是每一条<strong>够不够具体到可验证</strong>。官方给了三组对照，我会建议你逐条对照自己的文件：</p><table><thead><tr><th>模糊（Claude 没法照做）</th><th>具体（Claude 能验证）</th></tr></thead><tbody><tr><td>“Format code properly”</td><td>“Use 2-space indentation”</td></tr><tr><td>“Test your changes”</td><td>“Run <code>npm test</code> before committing”</td></tr><tr><td>“Keep files organized”</td><td>“API handlers live in <code>src/api/handlers/</code>“</td></tr></tbody></table><p>差别在哪？”格式化好代码”是个态度，Claude 无从下手；”用 2 个空格缩进”是个可以照做、可以检验的动作。你写的每一条规则，都该能被一句”做到了没有”直接判定。做不到这一点的规则，删了它，它只是在凑字数。我在对照这 7 个区块删自己文件时，第一个下手的永远是 Code style 里那几行正确的废话。</p><p>还有一个几乎没人用的小技巧：<strong>块级 HTML 注释会在注入上下文前被剥离</strong>。也就是说你可以在 CLAUDE.md 里给人类维护者留话，而不花 Claude 一个 token：</p><pre class="language-text" data-language="text"><code class="language-text">&lt;!-- 维护者注意：下面这条是 2026-07 加的，等 CI 迁移完就删 --&gt;
+- 临时规则：跳过 e2e 测试直到 CI 修好</code></pre><p>代码块<strong>内部</strong>的注释会保留，用 Read 工具直接打开文件时注释也可见——只有注入模型上下文那一刻才被剥掉。拿它写”给人看、不给模型看”的维护笔记，很顺手。</p><hr><h2 id="六、path-scoped-rules：让规则只在需要时出现"><a href="#六、path-scoped-rules：让规则只在需要时出现" class="headerlink" title="六、path-scoped rules：让规则只在需要时出现"></a>六、path-scoped rules：让规则只在需要时出现</h2><p>瘦身的主力工具是 <code>.claude/rules/</code>。把指令拆成一个文件一个主题，放进这个目录，Claude 会递归发现所有 <code>.md</code>：</p><pre class="language-text" data-language="text"><code class="language-text">your-project/
+  .claude/
+    CLAUDE.md          主项目指令
+    rules/
+      code-style.md    代码风格
+      testing.md       测试约定
+      security.md      安全要求</code></pre><p>不带 <code>paths</code> 的 rule 跟 <code>.claude/CLAUDE.md</code> 同优先级、启动即载入。真正省上下文的是带 <code>paths</code> frontmatter 的<strong>路径作用域规则</strong>——只有当 Claude 碰到匹配的文件时才载入：</p><pre class="language-text" data-language="text"><code class="language-text">---
+paths:
+  - "src/api/**/*.ts"
+---
+
+# API Development Rules
+- All API endpoints must include input validation
+- Use the standard error response format
+- Include OpenAPI documentation comments</code></pre><p>这条规则平时不占任何上下文，只有 Claude 真去改 <code>src/api/</code> 下的 TypeScript 时才浮现。glob 支持得挺全，够覆盖绝大多数分流需求：</p><table><thead><tr><th>模式</th><th>匹配</th></tr></thead><tbody><tr><td><code>**/*.ts</code></td><td>任意目录下所有 TS 文件</td></tr><tr><td><code>src/**/*</code></td><td><code>src/</code> 下所有文件</td></tr><tr><td><code>*.md</code></td><td>项目根目录的 Markdown</td></tr><tr><td><code>src/**/*.{ts,tsx}</code></td><td>brace 展开，一条顶两条</td></tr></tbody></table><p>再补两个进阶点。一是<strong>用户级</strong> <code>~/.claude/rules/</code> 对你机器上所有项目生效，适合放跟项目无关的个人偏好；用户级先于项目级载入，所以项目规则出现在上下文更靠后的位置。但官方说得很清楚：两者<strong>谁也不覆盖谁</strong>，冲突时 Claude 可能遵循任意一条，所以要保持一致。二是 <code>.claude/rules/</code> 支持 symlink，你可以维护一套团队公共规则，软链进每个项目：</p><pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token function">ln</span> <span class="token parameter variable">-s</span> ~/team-standards/security.md .claude/rules/security.md</code></pre><p>注意：链接目标在工作目录之外时，Claude Code 会把它当成外部 import 处理，要先在项目里批准外部导入才会载入，而且批准后也只载入不带 <code>paths</code> 的那些规则。</p><p>我推荐稍有规模的项目一上来就建 <code>.claude/rules/</code>，因为主文件迟早会膨胀，晚拆不如早拆——等它超了 200 行再来救火，规则之间往往已经开始互相打架了。做法是：CLAUDE.md 只留”每次都要知道”的通用约定，一切”只在改某类文件时才相关”的规则全下沉到 path-scoped rules。这一招是把 200 行红线真正落地的关键。</p><hr><h2 id="七、三个可复制模板"><a href="#七、三个可复制模板" class="headerlink" title="七、三个可复制模板"></a>七、三个可复制模板</h2><p>光讲规则太虚，给三份能直接抄的骨架。这是社区里流传的常见结构，我拿来当范例——照着填你自己的栈就行。</p><p>Web 应用（Next.js / TypeScript）：</p><pre class="language-text" data-language="text"><code class="language-text"># Project: Acme Dashboard
+Customer-facing analytics dashboard. Next.js + TypeScript + Tailwind.
+
+## Stack
+- Next.js 15 (App Router), React 19, TypeScript (strict)
+- Package manager: pnpm (never npm or yarn)
+
+## Commands
+- Dev: pnpm dev   Build: pnpm build   Test: pnpm test
+- Lint + typecheck: pnpm lint &amp;&amp; pnpm typecheck
+
+## Architecture
+- Never call DB from client components; use server actions in app/**/actions.ts
+
+## Do / Don't
+- DO run pnpm lint &amp;&amp; pnpm typecheck before declaring done
+- DON'T edit generated files in lib/generated/</code></pre><p>移动端（Expo / React Native）——注意它把”平台特有约定”写死了，这正是 Claude 最容易猜错的地方：</p><pre class="language-text" data-language="text"><code class="language-text"># Project: Trailhead (Expo / React Native)
+Cross-platform hiking companion app. Expo + Expo Router.
+
+## Commands
+- Start: pnpm expo start   iOS: pnpm expo run:ios
+- Typecheck: pnpm tsc --noEmit
+
+## Architecture
+- Platform-specific: *.ios.tsx / *.android.tsx
+
+## Do / Don't
+- DO use expo-image, not the RN Image component
+- DON'T import Node-only modules; runs in Hermes</code></pre><p>数据 / Python 项目（uv）——数据类项目一定要写死”哪些目录只读、哪些绝不提交”：</p><pre class="language-text" data-language="text"><code class="language-text"># Project: churn-model
+ML pipeline for customer churn prediction. Python 3.12 + uv.
+
+## Commands
+- Install: uv sync   Test: uv run pytest
+- Lint + format: uv run ruff check . &amp;&amp; uv run ruff format .
+
+## Architecture
+- Notebooks exploratory only—never import from them
+- Raw data in data/raw/ is read-only
+
+## Do / Don't
+- DO keep data loading deterministic (set random_state)
+- DON'T commit anything from data/ or models/artifacts/</code></pre><p>三份模板的共同点，不是区块一样，而是<strong>每一条都指向一个具体位置或一个确切命令</strong>——没有一句”写好代码”。这就是能用的 CLAUDE.md 和许愿墙的区别。新项目抄一份改栈名就能出第一版，剩下的靠后面几次纠正慢慢长。</p><p>不想从零写？直接 <code>/init</code>，Claude 会分析代码库、把发现的构建命令、测试指令、项目约定生成一份初稿。已经有 CLAUDE.md 的话，<code>/init</code> 是给改进建议而不是覆盖。想要更细的交互流程，开这个环境变量：</p><pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 启用交互式多阶段 /init（设好后在会话里运行 /init）</span>
+<span class="token assign-left variable">CLAUDE_CODE_NEW_INIT</span><span class="token operator">=</span><span class="token number">1</span> claude</code></pre><p>但记住 <code>/init</code> 给的是<strong>草稿不是成品</strong>。它能发现的只是代码库里明面上的东西，那些 Claude 自己猜不到的约定——你团队的隐性规矩、踩过的坑——还得你手动补。用 <code>/init</code> 起草后，记得按上一节的标准删掉 Claude 本来就会做的那部分。</p><hr><h2 id="八、Auto-memory：官方现在讲的是”两套记忆系统”"><a href="#八、Auto-memory：官方现在讲的是”两套记忆系统”" class="headerlink" title="八、Auto memory：官方现在讲的是”两套记忆系统”"></a>八、Auto memory：官方现在讲的是”两套记忆系统”</h2><p>这一节是很多 CLAUDE.md 教程没提、但值得知道的。官方文档现在把标题就叫 “How Claude remembers your project”，并且明确框成<strong>两套互补的记忆系统</strong>：</p><table><thead><tr><th></th><th>CLAUDE.md files</th><th>Auto memory</th></tr></thead><tbody><tr><td><strong>谁写</strong></td><td>你</td><td>Claude 自己</td></tr><tr><td><strong>装什么</strong></td><td>指令和规则</td><td>学到的经验和模式</td></tr><tr><td><strong>载入</strong></td><td>每次会话，全量</td><td>每次会话（MEMORY.md 前 200 行或 25KB）</td></tr><tr><td><strong>用于</strong></td><td>编码标准、工作流、架构</td><td>构建命令、调试洞察、它发现的偏好</td></tr></tbody></table><p>CLAUDE.md 是你写给 Claude 的；auto memory 是 Claude 写给自己的。它在工作时自动记下构建命令、调试心得、代码风格偏好这类东西，按”未来会话是否用得上”决定存不存——不是每次都存。存储位置按项目分：</p><pre class="language-text" data-language="text"><code class="language-text">~/.claude/projects/&lt;project&gt;/memory/
+  MEMORY.md          索引入口，每次会话载入（前 200 行 / 25KB）
+  debugging.md       详细调试笔记，按需读
+  api-conventions.md API 设计决策</code></pre><p>有个关键细节容易搞混：<strong>前 200 行 / 25KB 的限制只对 <code>MEMORY.md</code></strong>——它是索引，Claude 靠它知道详细内容存在哪个主题文件里，超出部分不在开场载入。而 CLAUDE.md 不论多长都全量载入（只是短的遵守率更好）。两个”200”含义完全不同，别混：一个是”记忆索引的载入上限”，一个是”你手写指令的建议上限”。</p><p>auto memory 在本地会话里默认开启，可以在 <code>/memory</code> 里切换开关（会写入 <code>~/.claude/settings.json</code> 的 <code>autoMemoryEnabled</code>），也可以在项目 settings 里单独关掉：</p><pre class="language-json" data-language="json"><code class="language-json"><span class="token punctuation">{</span> <span class="token property">"autoMemoryEnabled"</span><span class="token operator">:</span> <span class="token boolean">false</span> <span class="token punctuation">}</span></code></pre><pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 或者用环境变量整机关闭</span>
+<span class="token builtin class-name">export</span> <span class="token assign-left variable">CLAUDE_CODE_DISABLE_AUTO_MEMORY</span><span class="token operator">=</span><span class="token number">1</span></code></pre><p>还有一点值得先知道，免得踩坑：auto memory 是<strong>机器本地</strong>的，<code>&lt;project&gt;</code> 路径从 git 仓库推导，所以同一个仓库的所有 worktree 和子目录共享同一个 memory 目录，但它不跨机器、不跨云环境同步。换句话说，你本机让 Claude 记住的东西，换台机器、进 CI 就没了。真正要团队共享、要跨环境生效的规则，还是得写进进版本控制的 CLAUDE.md，别指望 auto memory 帮你带过去。</p><p>我的用法是把 auto memory 当草稿本：定期在 <code>/memory</code> 里扫一眼，有用的提升进 CLAUDE.md，剩下的删掉。分工上，auto memory 适合让 Claude 沉淀”它自己摸索出来的东西”（比如”这个测试要先起本地 Redis”），而 CLAUDE.md 适合放”团队共识、要进版本控制”的规则。当你在会话里说”记住以后用 pnpm 不用 npm”，Claude 默认会存进 auto memory；你要是想让它进 CLAUDE.md（团队共享），得明说”加到 CLAUDE.md 里”。搞清楚这个分工，才不会把该共享的规则丢进只有自己机器可见的 auto memory——那是团队协作里很隐蔽的一个漏点，规则明明写了，同事却拿不到。</p><hr><h2 id="九、常见失败模式-10-分钟行动清单"><a href="#九、常见失败模式-10-分钟行动清单" class="headerlink" title="九、常见失败模式 + 10 分钟行动清单"></a>九、常见失败模式 + 10 分钟行动清单</h2><p>把最高频的几个坑和对应修法列一张表，出问题时对着查：</p><table><thead><tr><th>症状</th><th>根因</th><th>修法</th></tr></thead><tbody><tr><td>Claude 不听 CLAUDE.md</td><td>规则模糊或互相矛盾；它是 user message 不是 system prompt</td><td><code>/memory</code> 确认载入；把规则改具体；查跨文件矛盾</td></tr><tr><td>规则太虚</td><td>“格式化好” 没法照做</td><td>换成 “用 2 空格缩进” 这种可验证的</td></tr><tr><td>多文件打架</td><td>主文件、nested、rules 之间冲突</td><td>定期审所有 CLAUDE.md；monorepo 用 <code>claudeMdExcludes</code> 跳无关的</td></tr><tr><td>有条规则必须每次都跑</td><td>CLAUDE.md 只引导不强制</td><td>写成 hook</td></tr><tr><td><code>/compact</code> 后指令像丢了</td><td>nested 文件不自动重注入</td><td>项目根 CLAUDE.md 会从磁盘重读续存；nested 下次读到才重载</td></tr></tbody></table><p>这里补一句 <code>/compact</code> 的细节，因为它最容易被误判成”配置失效”：项目根 CLAUDE.md 在压缩后会从磁盘重读、重新注入，所以它是稳的；真正会”消失”的是子目录里的 nested 文件，它们要等 Claude 下次读到那个目录的文件才重载。如果某条指令 compact 后像是丢了，先想想它是不是只在对话里说过、根本没落进任何 CLAUDE.md——那种才是真的没了。</p><p>monorepo 里被别的团队的 CLAUDE.md 污染，是大仓最烦的一类。<code>claudeMdExcludes</code> 按绝对路径的 glob 跳过这些文件，放 <code>.claude/settings.local.json</code> 可以让排除只在你本机生效：</p><pre class="language-json" data-language="json"><code class="language-json"><span class="token punctuation">{</span>
+  <span class="token property">"claudeMdExcludes"</span><span class="token operator">:</span> <span class="token punctuation">[</span>
+    <span class="token string">"**/monorepo/CLAUDE.md"</span><span class="token punctuation">,</span>
+    <span class="token string">"/home/user/monorepo/other-team/.claude/rules/**"</span>
+  <span class="token punctuation">]</span>
+<span class="token punctuation">}</span></code></pre><p>组织级还有一招：<code>claudeMd</code> key 能把 managed CLAUDE.md 内容直接塞进 <code>managed-settings.json</code>（只在 managed/policy 设置里生效，写在用户或项目设置里无效）。和 managed CLAUDE.md 文件一样，它<strong>不能被 <code>claudeMdExcludes</code> 排除</strong>：</p><pre class="language-json" data-language="json"><code class="language-json"><span class="token punctuation">{</span>
+  <span class="token property">"claudeMd"</span><span class="token operator">:</span> <span class="token string">"Always run `make lint` before committing.\nNever push directly to main."</span>
+<span class="token punctuation">}</span></code></pre><p>最后给一份我自己在用的 10 分钟清单，新项目照着走一遍就有一份能用的配置：</p><pre class="language-text" data-language="text"><code class="language-text">1. 跑 /init 生成初稿
+2. 砍到 200 行以内，每条规则改到"可验证"
+3. 只对某类文件生效的 → 下沉到 .claude/rules/ 带 paths
+4. 分层：~/.claude/CLAUDE.md 放跨项目个人偏好，项目 CLAUDE.md 放团队规则
+5. /memory 确认全部载入
+6. 提交到版本控制（团队一起受益）
+7. 养成习惯：同一个纠正说第二次就写进去，过期的立刻删</code></pre><p>最常被跳过的是第 5 步和第 7 步，而第 7 条恰恰最重要，也最难坚持。CLAUDE.md 不是写一次就锁死的配置，它是一份跟着项目长的活文档：Claude 第二次犯同样的错、code review 抓到它本该知道的常识、你又一次把同样的纠正打进聊天框——这些都是该往里加一条的信号。同样，Claude 已经稳定做对的、过期的规则，该删就删。</p><p>配 CLAUDE.md 别上来就追求大而全。周末写个小脚本，犯不着套 200 行的仪式；真正复杂的团队仓库，才值得你认真分层。<strong>把功夫花在配置的规模匹配项目的规模上</strong>——这比任何模板都管用。装好之后别忘了做那件最容易被跳过的事：<code>/memory</code> 打开看一眼，确认 Claude 真的读到了你写的东西，而不是又在白纸上瞎猜。</p><p>本文的技术细节以官方文档 <a target="_blank" rel="noopener" href="https://code.claude.com/docs/en/memory">code.claude.com/docs/en/memory</a> 和 <a target="_blank" rel="noopener" href="https://code.claude.com/docs/en/hooks">hooks</a> 为准（截至 2026-10，Claude Code v2.1.295）。官方文档已从 <code>docs.anthropic.com</code> 迁到 <code>code.claude.com</code>，引用时直接用新域名。</p></div><hr><div class="hexo-ad" aria-label="赞助内容"><div class="hexo-ad-script"><style>.hexo-article-ad-slot{display:block;width:100%;max-width:320px;height:100px;margin:0 auto}@media (min-width:500px){.hexo-article-ad-slot{max-width:468px;height:60px}}@media (min-width:800px){.hexo-article-ad-slot{max-width:728px;height:90px}}</style><ins class="adsbygoogle hexo-article-ad-slot" style="display:block" data-ad-client="ca-pub-8990123471955885" data-ad-slot="4326698678"></ins><script>(adsbygoogle=window.adsbygoogle||[]).push({})</script></div></div><style>.hexo-ad{margin:1.2rem auto;text-align:center}.hexo-ad-img{max-width:100%;height:auto;border-radius:8px;box-shadow:0 2px 8px rgba(0,0,0,.08)}.hexo-ad-script{margin:0 auto}</style><div class="reprint" id="reprint-statement"><div class="reprint__author"><span class="reprint-meta" style="font-weight:700"><i class="fas fa-user">文章作者:</i></span> <span class="reprint-info"><a href="/about" rel="external nofollow noreferrer">costalong</a></span></div><div class="reprint__type"><span class="reprint-meta" style="font-weight:700"><i class="fas fa-link">文章链接:</i></span> <span class="reprint-info"><a href="https://costalong.com/2026/07/06/claude-md-configuration-playbook/">https://costalong.com/2026/07/06/claude-md-configuration-playbook/</a> <button class="reprint-copy-link" type="button" data-copy-url="https://costalong.com/2026/07/06/claude-md-configuration-playbook/" aria-label="复制文章链接" title="复制文章链接"><i class="fas fa-copy" aria-hidden="true"></i> <span>复制链接</span></button><span class="reprint-copy-status" role="status" aria-live="polite"></span></span></div><div class="reprint__notice"><span class="reprint-meta" style="font-weight:700"><i class="fas fa-copyright">版权声明:</i></span> <span class="reprint-info">本博客所有文章除特別声明外，均采用 <a href="https://creativecommons.org/licenses/by/4.0/deed.zh" rel="external nofollow noreferrer" target="_blank">CC BY 4.0</a> 许可协议。转载请注明来源 <a href="/about" target="_blank">costalong</a> !</span></div></div><script async defer>document.addEventListener("copy", function (e) {
+        if (window.__articlePermalinkCopy) return;
+        let toastHTML = '<span>复制成功，请遵循本文的转载规则</span><button class="btn-flat toast-action" onclick="navToReprintStatement()" style="font-size: smaller">查看</a>';
+        M.toast({html: toastHTML})
+      });
+
+      document.addEventListener("click", async function (e) {
+        const button = e.target.closest(".reprint-copy-link");
+        if (!button) return;
+
+        const row = button.closest(".reprint__type .reprint-info");
+        const permalink = button.dataset.copyUrl;
+        if (!row || !permalink) return;
+
+        const status = row.querySelector(".reprint-copy-status");
+        const fallbackCopy = function (text) {
+          const textarea = document.createElement("textarea");
+          textarea.value = text;
+          textarea.setAttribute("readonly", "");
+          textarea.style.position = "fixed";
+          textarea.style.opacity = "0";
+          document.body.appendChild(textarea);
+          textarea.select();
+          window.__articlePermalinkCopy = true;
+          let copied = false;
+          try {
+            copied = document.execCommand("copy");
+          } finally {
+            window.__articlePermalinkCopy = false;
+            textarea.remove();
+          }
+          if (!copied) throw new Error("Clipboard copy failed");
+        };
+
+        try {
+          if (navigator.clipboard && navigator.clipboard.writeText) {
+            try {
+              await navigator.clipboard.writeText(permalink);
+            } catch (error) {
+              fallbackCopy(permalink);
+            }
+          } else {
+            fallbackCopy(permalink);
+          }
+          status.textContent = "已复制";
+          button.classList.add("is-copied");
+        } catch (error) {
+          status.textContent = "复制失败，请长按链接复制";
+        }
+
+        window.setTimeout(function () {
+          status.textContent = "";
+          button.classList.remove("is-copied");
+        }, 2200);
+      });
+
+      function navToReprintStatement() {
+        $("html, body").animate({scrollTop: $("#reprint-statement").offset().top - 80}, 800);
+      }</script><div class="tag_share" style="display:block"><div class="post-meta__tag-list" style="display:inline-block"><div class="article-tag"><a href="/tags/Claude-Code/"><span class="chip bg-color">Claude Code</span></a> <a href="/tags/AI%E7%BC%96%E7%A8%8B/"><span class="chip bg-color ai">AI编程</span></a> <a href="/tags/CLAUDE-md/"><span class="chip bg-color">CLAUDE.md</span></a> <a href="/tags/%E4%B8%8A%E4%B8%8B%E6%96%87%E5%B7%A5%E7%A8%8B/"><span class="chip bg-color">上下文工程</span></a> <a href="/tags/%E9%85%8D%E7%BD%AE%E5%AE%9E%E6%88%98/"><span class="chip bg-color">配置实战</span></a></div></div><div class="post_share" style="zoom:80%;width:fit-content;display:inline-block;float:right;margin:-.15rem 0"><link rel="stylesheet" href="/libs/share/css/share.min.css"><div id="article-share"><div class="social-share" data-sites="twitter,facebook,google,qq,qzone,wechat,weibo,douban,linkedin" data-wechat-qrcode-helper="<p>微信扫一扫即可分享！</p>"></div><script src="/libs/share/js/social-share.min.js"></script></div></div></div><div id="reward"><a href="#rewardModal" class="reward-link modal-trigger btn-floating btn-medium waves-effect waves-light red">赏</a><div id="rewardModal" class="modal"><div class="modal-content"><a class="close modal-close"><i class="fas fa-times"></i></a><h4 class="reward-title">你的赏识是我前进的动力</h4><div class="reward-content"><div class="reward-tabs"><ul class="tabs row"><li class="tab col s6 alipay-tab waves-effect waves-light"><a href="#alipay">支付宝</a></li><li class="tab col s6 wechat-tab waves-effect waves-light"><a href="#wechat">微 信</a></li></ul><div id="alipay"><img src="/images/reward/alipay.jpg" class="reward-img" loading="lazy" alt="支付宝打赏二维码"></div><div id="wechat"><img src="/images/reward/wechat.jpg" class="reward-img" loading="lazy" alt="微信打赏二维码"></div></div></div></div></div></div><script>$(function(){$(".tabs").tabs()})</script></div></div><section class="post-related" aria-labelledby="post-related-title"><h2 id="post-related-title">继续阅读</h2><div class="post-related-grid"><a class="post-related-card" href="/2026/06/29/317/"><span class="post-related-date">2026-06-29</span> <strong>CodeGraph 进阶：装好之后，这 4 个用法才是真省事</strong> <span class="post-related-summary">上一篇把 CodeGraph 装好接上了，这篇讲装好之后的进阶玩法：怎么把 explore 问到点子上、改代码前用 impact/affected 看炸到谁、把它当库嵌进自己的工具…</span></a> <a class="post-related-card" href="/2026/06/28/315/"><span class="post-related-date">2026-06-28</span> <strong>CodeGraph 实战：给 AI agent 装上代码地图，tool calls 砍掉一半</strong> <span class="post-related-summary">AI coding agent 干活前总要 grep、ls、read 翻半天文件。CodeGraph 把整个代码库预建成 SQLite 知识图谱，通过 MCP 喂给 Claude …</span></a> <a class="post-related-card" href="/2026/06/16/claude-octopus-multi-llm-orchestration/"><span class="post-related-date">2026-06-16</span> <strong>单模型 review 的死穴：Claude Octopus 怎么让多个 LLM 投票</strong> <span class="post-related-summary">拆解 Claude Code 插件 Claude Octopus 如何用多模型 75% 共识门、对抗式审查和 git worktree 隔离来对付单模型自审的盲区，对照 2026-…</span></a></div></section><style>.valine-card{margin:1.5rem auto}.valine-card .card-content{padding:20px 20px 5px 20px}#vcomments textarea{box-sizing:border-box;background:url(/medias/comment_bg.png) 100% 100% no-repeat}#vcomments p{margin:2px 2px 10px;font-size:1.05rem;line-height:1.78rem}#vcomments blockquote p{text-indent:.2rem}#vcomments a{padding:0 2px;color:#4cbf30;font-weight:500;text-decoration:none}#vcomments img{max-width:100%;height:auto;cursor:pointer}#vcomments ol li{list-style-type:decimal}#vcomments ol,ul{display:block;padding-left:2em;word-spacing:.05rem}#vcomments ul li,ol li{display:list-item;line-height:1.8rem;font-size:1rem}#vcomments ul li{list-style-type:disc}#vcomments ul ul li{list-style-type:circle}#vcomments table,td,th{padding:12px 13px;border:1px solid #dfe2e5}#vcomments table,td,th{border:0}table tr:nth-child(2n),thead{background-color:#fafafa}#vcomments table th{background-color:#f2f2f2;min-width:80px}#vcomments table td{min-width:80px}#vcomments h1{font-size:1.85rem;font-weight:700;line-height:2.2rem}#vcomments h2{font-size:1.65rem;font-weight:700;line-height:1.9rem}#vcomments h3{font-size:1.45rem;font-weight:700;line-height:1.7rem}#vcomments h4{font-size:1.25rem;font-weight:700;line-height:1.5rem}#vcomments h5{font-size:1.1rem;font-weight:700;line-height:1.4rem}#vcomments h6{font-size:1rem;line-height:1.3rem}#vcomments p{font-size:1rem;line-height:1.5rem}#vcomments hr{margin:12px 0;border:0;border-top:1px solid #ccc}#vcomments blockquote{margin:15px 0;border-left:5px solid #42b983;padding:1rem .8rem .3rem .8rem;color:#666;background-color:rgba(66,185,131,.1)}#vcomments pre{font-family:monospace,monospace;padding:1.2em;margin:.5em 0;background:#272822;overflow:auto;border-radius:.3em;tab-size:4}#vcomments code{font-family:monospace,monospace;padding:1px 3px;font-size:.92rem;color:#e96900;background-color:#f8f8f8;border-radius:2px}#vcomments pre code{font-family:monospace,monospace;padding:0;color:#e8eaf6;background-color:#272822}#vcomments pre[class*=language-]{padding:1.2em;margin:.5em 0}#vcomments code[class*=language-],pre[class*=language-]{color:#e8eaf6}#vcomments [type=checkbox]:not(:checked),[type=checkbox]:checked{position:inherit;margin-left:-1.3rem;margin-right:.4rem;margin-top:-1px;vertical-align:middle;left:unset;visibility:visible}#vcomments b,strong{font-weight:700}#vcomments dfn{font-style:italic}#vcomments small{font-size:85%}#vcomments cite{font-style:normal}#vcomments mark{background-color:#fcf8e3;padding:.2em}#vcomments table,td,th{padding:12px 13px;border:1px solid #dfe2e5}table tr:nth-child(2n),thead{background-color:#fafafa}#vcomments table th{background-color:#f2f2f2;min-width:80px}#vcomments table td{min-width:80px}#vcomments [type=checkbox]:not(:checked),[type=checkbox]:checked{position:inherit;margin-left:-1.3rem;margin-right:.4rem;margin-top:-1px;vertical-align:middle;left:unset;visibility:visible}</style><div class="card valine-card" data-aos="fade-up"><div class="comment_headling" style="font-size:20px;font-weight:700;padding:20px 20px 8px 20px"><i class="fas fa-comments fa-fw" aria-hidden="true"></i> <span>评论</span></div><div id="vcomments" class="card-content" style="display:grid"></div></div><script>!function(){var e=document.getElementById("vcomments"),t=["/libs/valine/av-min.js","/libs/valine/Valine.min.js"];function i(e){if(e!==t.length){var n=document.createElement("script");n.src=t[e],n.onload=function(){i(e+1)},document.body.appendChild(n)}else new Valine({el:"#vcomments",appId:"wCf5tlcDtIMPMtrnfln6u3fL-MdYXbMMI",appKey:"pvzhB4VvZzNeC5gtXTaIv0oo",serverURLs:"https://wcf5tlcd.api.lncldglobal.com",notify:!1,verify:!1,visitor:!0,recordIP:!1,avatar:"mm",pageSize:"10",lang:"zh-cn",placeholder:"有什么想说的，在这里留言…"})}if(!("IntersectionObserver"in window))return i(0);var n=new IntersectionObserver(function(e){e[0].isIntersecting&&(n.disconnect(),i(0))},{rootMargin:"600px 0px"});n.observe(e)}()</script><article id="prenext-posts" class="prev-next articles"><div class="row article-row"><div class="article col s12 m6" data-aos="fade-up"><div class="article-badge left-badge text-color"><i class="fas fa-chevron-left"></i> &nbsp;上一篇</div><div class="card"><a href="/2026/07/22/moment-2026-07-22-pai-ban-yu-zhuan-huan-yin-qing-zeng-qiang-shang-xian/"><div class="card-image card-image-V"><div class="box-content"><p class="title">阅读全文</p><span class="post" style="width:180px">排版与转换引擎增强上线</span></div><img src="/medias/featureimages/16.jpg" width="400" height="300" loading="lazy" class="responsive-img" alt="排版与转换引擎增强上线"> <span class="card-title title-V">排版与转换引擎增强上线</span></div></a><div class="card-content article-content"><div class="summary block-with-text">成功为转换引擎添加了微信原生 Section 风格 Callout 提示框卡片与正文外链自动转上标/文末参考链接功能！</div><div class="publish-info"><span class="publish-date"><i class="far fa-clock fa-fw icon-date"></i> 2026-07-22</span><span class="publish-author"><i class="fas fa-bookmark fa-fw icon-category"></i> <a href="/categories/moments/" class="post-category">moments</a></span></div></div><div class="card-action article-tags"><a href="/tags/%E6%8E%92%E7%89%88/"><span class="chip bg-color">排版</span></a> <a href="/tags/%E7%B3%BB%E7%BB%9F%E5%A2%9E%E5%BC%BA/"><span class="chip bg-color">系统增强</span></a></div></div></div><div class="article col s12 m6" data-aos="fade-up"><div class="article-badge right-badge text-color">下一篇&nbsp;<i class="fas fa-chevron-right"></i></div><div class="card"><a href="/2026/07/02/claude-fable-5-recall-postmortem/"><div class="card-image card-image-V"><div class="box-content"><p class="title">阅读全文</p><span class="post" style="width:180px">发布 3 天被政府下架：Fable 5 的 22 天复活复盘</span></div><img src="/images/posts/claude-fable-5-recall-postmortem_31b2505b4a1c-card.webp" width="400" height="300" loading="lazy" class="responsive-img" alt="发布 3 天被政府下架：Fable 5 的 22 天复活复盘"> <span class="card-title title-V">发布 3 天被政府下架：Fable 5 的 22 天复活复盘</span></div></a><div class="card-content article-content"><div class="summary block-with-text">按 Anthropic 官方公告还原 Claude Fable 5 从发布、被出口管制下架到 7 月 1 日恢复的 22 天时间线，讲清触发管制的越狱报告、四项越狱严重程度标准、复活后的分类器误拦代价，以及 API 侧怎么配 fallbac…</div><div class="publish-info"><span class="publish-date"><i class="far fa-clock fa-fw icon-date"></i> 2026-07-02</span><span class="publish-author"><i class="fas fa-bookmark fa-fw icon-category"></i> <a href="/categories/AI/" class="post-category">AI</a></span></div></div><div class="card-action article-tags"><a href="/tags/Claude/"><span class="chip bg-color">Claude</span></a> <a href="/tags/Fable-5/"><span class="chip bg-color">Fable 5</span></a> <a href="/tags/Anthropic/"><span class="chip bg-color">Anthropic</span></a> <a href="/tags/%E5%87%BA%E5%8F%A3%E7%AE%A1%E5%88%B6/"><span class="chip bg-color">出口管制</span></a> <a href="/tags/AI%E5%AE%89%E5%85%A8/"><span class="chip bg-color ai">AI安全</span></a> <a href="/tags/%E6%A8%A1%E5%9E%8B%E5%A4%8D%E7%9B%98/"><span class="chip bg-color ai">模型复盘</span></a></div></div></div></div></article></div><script src="/libs/codeBlock/codeBlockFuction.js"></script><script src="/libs/codeBlock/codeLang.js"></script><script src="/libs/codeBlock/codeCopy.js"></script><script src="/libs/codeBlock/codeShrink.js"></script><script>!function(){function t(n){var t=n.closest?n.closest(".img-item"):null;if(t){var e=t.nextElementSibling;e&&e.classList.contains("caption")&&(e.style.display="none"),t.style.display="none"}else n.style.display="none"}$(function(){setTimeout(function(){document.querySelectorAll("#articleContent img").forEach(function(n){n.addEventListener("error",function(){t(this)},{once:!0}),n.complete&&0===n.naturalWidth&&t(n)})},0)})}()</script><script>$(function(){$("#read_mode").on("click",function(){var a=$("#artDetail .card").first();a.toggleClass("card-block-fullscreen"),$("html").toggleClass("card-block-fullscreen-html-scroll"),$(this).attr("aria-pressed",String(a.hasClass("card-block-fullscreen")));var s=$(this).find("i");s.hasClass("fa-expand-arrows-alt")?s.removeClass("fa-expand-arrows-alt").addClass("fa-compress-arrows-alt"):s.removeClass("fa-compress-arrows-alt").addClass("fa-expand-arrows-alt")}).on("keydown",function(a){"Enter"!==a.key&&" "!==a.key||(a.preventDefault(),$(this).trigger("click"))})})</script></div><div id="toc-aside" class="expanded col l3 hide-on-med-and-down"><div class="toc-widget card"><div class="toc-title"><i class="far fa-list-alt"></i>&nbsp;&nbsp;目录</div><div id="toc-content"></div></div></div></div><div id="floating-toc-btn"><button type="button" class="btn-floating btn-large bg-color" aria-label="打开文章目录" aria-controls="toc-aside mobile-toc-drawer" aria-expanded="false"><i class="fas fa-list-ul" aria-hidden="true"></i></button></div><div id="mobile-toc-overlay" class="mobile-toc-overlay" aria-hidden="true"></div><div id="mobile-toc-drawer" class="mobile-toc-drawer" role="dialog" aria-modal="true" aria-label="文章目录" aria-hidden="true" inert><div class="mobile-toc-header"><span class="mobile-toc-title"><i class="far fa-list-alt"></i> &nbsp;&nbsp;目录</span> <button type="button" id="mobile-toc-close" class="mobile-toc-close" aria-label="关闭文章目录"><i class="fas fa-times" aria-hidden="true"></i></button></div><div class="mobile-toc-body" id="mobile-toc-body"></div></div><script src="/libs/tocbot/tocbot.min.js"></script><script>$(function () {
+        tocbot.init({
+            tocSelector: '#toc-content',
+            contentSelector: '#articleContent',
+            headingsOffset: -($(window).height() * 0.4 - 45),
+            collapseDepth: Number('3'),
+            headingSelector: 'h2, h3, h4'
+        });
+
+        // Set scroll toc fixed.
+        let tocHeight = parseInt($(window).height() * 0.4 - 64);
+        let $tocWidget = $('.toc-widget');
+        $(window).scroll(function () {
+            let scroll = $(window).scrollTop();
+            /* add post toc fixed. */
+            if (scroll > tocHeight) {
+                $tocWidget.addClass('toc-fixed');
+            } else {
+                $tocWidget.removeClass('toc-fixed');
+            }
+        });
+
+        
+        /* 修复文章卡片 div 的宽度. */
+        let fixPostCardWidth = function (srcId, targetId) {
+            let srcDiv = $('#' + srcId);
+            if (srcDiv.length === 0) {
+                return;
+            }
+
+            let w = srcDiv.width();
+            if (w >= 450) {
+                w = w + 21;
+            } else if (w >= 350 && w < 450) {
+                w = w + 18;
+            } else if (w >= 300 && w < 350) {
+                w = w + 16;
+            } else {
+                w = w + 14;
+            }
+            $('#' + targetId).width(w);
+        };
+
+        // 切换TOC目录展开收缩的相关操作.
+        const expandedClass = 'expanded';
+        let $tocAside = $('#toc-aside');
+        let $mainContent = $('#main-content');
+
+        /* 目录只有一两条时，侧栏几乎是空的，右侧留下一大片空白。
+           这种情况直接不要侧栏，让正文占满整行（正文自身仍有 measure 行宽上限，
+           由 .no-toc 负责居中）。 */
+        if ($('#toc-content .toc-link').length < 3) {
+            $tocAside.removeClass(expandedClass).hide();
+            $mainContent.removeClass('l9').addClass('no-toc');
+            $('#floating-toc-btn').hide();
+        }
+
+        // 移动端 TOC 抽屉逻辑
+        let $overlay = $('#mobile-toc-overlay');
+        let $drawer = $('#mobile-toc-drawer');
+        let $drawerBody = $('#mobile-toc-body');
+        let $tocTrigger = $('#floating-toc-btn .btn-floating');
+        let drawerOpen = false;
+
+        function openMobileDrawer() {
+            // 克隆桌面端 TOC 内容到抽屉
+            $drawerBody.html($('#toc-content').html());
+            $overlay.addClass('active');
+            $drawer.addClass('active').attr('aria-hidden', 'false').removeAttr('inert');
+            $tocTrigger.attr({'aria-expanded': 'true', 'aria-label': '关闭文章目录'});
+            $('body').css('overflow', 'hidden');
+            drawerOpen = true;
+            $('#mobile-toc-close').trigger('focus');
+
+            // 点击抽屉内链接后自动关闭
+            $drawerBody.find('.toc-link').on('click', function() {
+                closeMobileDrawer(false);
+            });
+        }
+
+        function closeMobileDrawer(restoreFocus) {
+            $overlay.removeClass('active');
+            $drawer.removeClass('active').attr('aria-hidden', 'true');
+            // Let a clicked TOC anchor complete its native hash navigation before making it inert.
+            if (restoreFocus === false) {
+                window.setTimeout(function () { $drawer.attr('inert', ''); }, 0);
+            } else {
+                $drawer.attr('inert', '');
+            }
+            $tocTrigger.attr({'aria-expanded': 'false', 'aria-label': '打开文章目录'});
+            $('body').css('overflow', '');
+            drawerOpen = false;
+            if (restoreFocus !== false) $tocTrigger.trigger('focus');
+        }
+
+        $overlay.on('click', function () { closeMobileDrawer(); });
+        $('#mobile-toc-close').on('click', function () { closeMobileDrawer(); });
+        $(document).on('keydown', function (event) {
+            if (drawerOpen && event.key === 'Escape') closeMobileDrawer();
+        });
+
+        $(window).on('resize', function () {
+            if ($(window).width() > 1199 && drawerOpen) closeMobileDrawer(false);
+            if ($(window).width() > 1199) {
+                const expanded = $tocAside.hasClass(expandedClass);
+                $tocTrigger.attr({'aria-expanded': String(expanded), 'aria-label': expanded ? '收起文章目录' : '展开文章目录'});
+            } else if (!drawerOpen) {
+                $tocTrigger.attr({'aria-expanded': 'false', 'aria-label': '打开文章目录'});
+            }
+        });
+
+        if ($(window).width() > 1199 && $tocAside.hasClass(expandedClass)) {
+            $tocTrigger.attr({'aria-expanded': 'true', 'aria-label': '收起文章目录'});
+        }
+
+        $tocTrigger.on('click', function () {
+            // 1199px 及以下打开抽屉：993–1199 侧栏太窄，CSS 已把它隐藏
+            if ($(window).width() <= 1199) {
+                if (drawerOpen) {
+                    closeMobileDrawer();
+                } else {
+                    openMobileDrawer();
+                }
+                return;
+            }
+
+            // 桌面端保持原有折叠逻辑
+            if ($tocAside.hasClass(expandedClass)) {
+                $tocAside.removeClass(expandedClass).hide();
+                $tocTrigger.attr({'aria-expanded': 'false', 'aria-label': '展开文章目录'});
+                // 只去掉 l9 会让 col s12 m12 在大屏退回整行宽度，正文行宽从 788px
+                // 涨到 1092px（中文行太长且不居中，右侧空一大片）。补一个类来封顶并居中。
+                $mainContent.removeClass('l9').addClass('toc-collapsed');
+            } else {
+                $tocAside.addClass(expandedClass).show();
+                $tocTrigger.attr({'aria-expanded': 'true', 'aria-label': '收起文章目录'});
+                $mainContent.addClass('l9').removeClass('toc-collapsed');
+            }
+            fixPostCardWidth('artDetail', 'prenext-posts');
+        });
+        
+    });</script></main><div class="progress-bar"></div><footer class="dp-footer page-footer"><div class="dp-wrap dp-foot-grid"><div class="l">&copy; <span id="year">2023-2026</span> <b>翼舞成梦</b> · costalong.com — 用 <a href="https://hexo.io/" target="_blank" rel="noopener">Hexo</a> 构建，内容均为原创工程笔记。</div><div class="dp-foot-links"><a href="/advertise/">广告合作</a> <a href="/privacy/">隐私政策</a> <a href="/atom.xml">RSS</a> <a href="/archives">归档</a> <a href="/about">关于</a> <a href="https://github.com/costa92" target="_blank" rel="noopener">GitHub</a> <a href="/sitemap.xml">sitemap</a></div></div><div class="dp-wrap" style="margin-top:16px;display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;font-size:12.5px;color:var(--text-mut)"><div class="footer-social"><a href="https://github.com/costa92" class="tooltipped" aria-label="访问我的GitHub" target="_blank" rel="noopener" data-tooltip="访问我的GitHub" data-position="top" data-delay="50"><i class="fab fa-github"></i></a><a href="mailto:costa9293@gmail.com" class="tooltipped" aria-label="邮件联系我" target="_blank" rel="noopener" data-tooltip="邮件联系我" data-position="top" data-delay="50"><i class="fas fa-envelope-open"></i></a><a href="tencent://AddContact/?fromId=50&fromSubId=1&subcmd=all&uin=944310536" class="tooltipped" aria-label="QQ联系我" target="_blank" rel="noopener" data-tooltip="QQ联系我: 944310536" data-position="top" data-delay="50"><i class="fab fa-qq"></i></a><a href="/atom.xml" class="tooltipped" aria-label="RSS 订阅" target="_blank" rel="noopener" data-tooltip="RSS 订阅" data-position="top" data-delay="50"><i class="fas fa-rss"></i></a></div><div class="footer-stats" style="font-family:var(--font-mono)"><span id="busuanzi_container_site_pv"><i class="far fa-eye"></i> &nbsp;<span id="busuanzi_value_site_pv"></span></span> <span id="busuanzi_container_site_uv">&nbsp;&middot;&nbsp;<i class="fas fa-users"></i>&nbsp;<span id="busuanzi_value_site_uv"></span></span> &nbsp;&middot;&nbsp;<a href="https://beian.miit.gov.cn/#/Integrated/index" target="_blank" rel="noopener">湘ICP备15006875号</a></div></div></footer><div id="searchModal" class="modal" role="dialog" aria-modal="true" aria-labelledby="searchTitle"><div class="modal-content"><div class="search-header"><label for="searchInput" id="searchTitle" class="title"><i class="fas fa-search" aria-hidden="true"></i> &nbsp;&nbsp;搜索</label> <input type="search" id="searchInput" name="s" placeholder="请输入搜索的关键字" class="search-input" aria-controls="searchResult"></div><div id="searchStatus" class="search-status" role="status" aria-live="polite"></div><div id="searchResult"></div></div></div><script>$(function(){"use strict";var n=document.getElementById("searchInput"),l=document.getElementById("searchResult"),t=document.getElementById("searchStatus"),a=null,c=!1;function o(e){t.textContent=e}function e(){l.replaceChildren();var e=n.value.trim().toLocaleLowerCase();if(e)if(a){var r=e.split(/[\s\-]+/).filter(Boolean),t=a.filter(function(t){return r.every(function(e){return t.searchText.includes(e)})}).slice(0,20);if(t.length){o("找到 "+t.length+" 条相关内容"+(20===t.length?"（最多显示 20 条）":""));var i=document.createElement("ul");i.className="search-result-list",t.forEach(function(e){var t=document.createElement("li"),n=document.createElement("a");if(n.className="search-result-title",n.href=e.url,n.textContent=e.title,t.appendChild(n),e.content){var l=e.content.toLocaleLowerCase().indexOf(r[0]),a=Math.max(0,l-35),c=document.createElement("p");c.className="search-result",c.textContent=(a?"…":"")+e.content.slice(a,a+130)+(a+130<e.content.length?"…":""),t.appendChild(c)}i.appendChild(t)}),l.appendChild(i)}else o("没有找到相关内容，请换个关键词试试。")}else o(c?"正在加载搜索索引…":"搜索索引暂时不可用，请稍后重试。");else o("")}function r(){a||c||(c=!0,e(),$.ajax({url:"/search.xml",dataType:"xml"}).done(function(e){a=$("entry",e).map(function(){var e,t=$("title",this).text().trim(),n=(e=$("content",this).text(),String(e||"").replace(/<[^>]*>/g," ").replace(/\s+/g," ").trim()),l=$("url",this).text().trim();return t&&l?{title:t,content:n,url:"/"===l.charAt(0)?l:"/"+l,searchText:(t+" "+n).toLocaleLowerCase()}:null}).get()}).fail(function(){a=null}).always(function(){c=!1,e()}))}n.addEventListener("input",function(){r(),e()}),n.addEventListener("focus",r),$('a[href="#searchModal"], .search-btn').on("click",r)})</script><div class="stars-con"><div id="stars"></div><div id="stars2"></div><div id="stars3"></div></div><script>function switchNightMode(){$('<div class="Cuteen_DarkSky"><div class="Cuteen_DarkPlanet"></div></div>').appendTo($("body")),setTimeout(function(){$("body").hasClass("DarkMode")?($("body").removeClass("DarkMode"),localStorage.setItem("isDark","0"),$("#sum-moon-icon").removeClass("fa-sun").addClass("fa-moon")):($("body").addClass("DarkMode"),localStorage.setItem("isDark","1"),$("#sum-moon-icon").addClass("fa-sun").removeClass("fa-moon")),setTimeout(function(){$(".Cuteen_DarkSky").fadeOut(1e3,function(){$(this).remove()})},2e3)})}</script><div id="backTop" class="top-scroll"><button type="button" class="btn-floating btn-large waves-effect waves-light" aria-label="回到顶部"><i class="fas fa-arrow-up" aria-hidden="true"></i></button></div><script src="/libs/materialize/materialize.min.js" defer></script><script src="/libs/masonry/masonry.pkgd.min.js" defer></script><script src="/libs/aos/aos.js"></script><script src="/libs/lightGallery/js/lightgallery-all.min.js" defer></script><script src="/libs/scrollprogress/scrollProgress.min.js"></script><script src="/js/matery.js?v=3f7ec091" defer></script><script src="/js/responsive-tables.js?v=6ebf2b5e"></script><script src="/js/infinite-scroll.js?v=b6f5ebe2" defer></script><script>!function(){var t=document.createElement("script");t.src="https://zz.bdstatic.com/linksubmit/push.js";var e=document.getElementsByTagName("script")[0];e.parentNode.insertBefore(t,e)}()</script><script src="/js/fireworks.js" async></script><script>!function(){if(!new URLSearchParams(location.search).has("style-audit-preview")){var e=document.createElement("script");e.src="https://events.vercount.one/js",document.head.appendChild(e)}}()</script><script color="110,80,255" pointcolor="80,140,255" opacity="0.28" zindex="-1" count="80" src="/libs/background/canvas-nest.js"></script><script src="/libs/instantpage/instantpage.js" type="module"></script><script>window.Base64=window.Base64||{encode:function(e){return btoa(unescape(encodeURIComponent(e)))}}</script><script>$(function () {
+        const hasAttr = (e,a) => a.some(_=> e.attr(_)!==undefined);
+        $('a').each(function() {
+          const $this = $(this);
+          if(hasAttr($this,["data-fancybox","ignore-external-link"])) return;
+          const href = $this.attr('href');
+          if (href && href.match('^((http|https|thunder|qqdl|ed2k|Flashget|qbrowser|ftp|rtsp|mms)://)')) {
+            const strs = href.split('/');
+            if (strs.length >= 3) {
+                const host = strs[2];
+                if (host !== 'https://costalong.com' || window.location.host) {
+                    $this.attr('href', '/go.html?u='+Base64.encode(href)+'').attr('rel', 'external nofollow noopener noreferrer');
+                    if (true) {
+                        $this.attr('target', '_blank');
+                    }
+                }
+            }
+          }
+        });
+        });</script></body></html>

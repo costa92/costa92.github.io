@@ -1,0 +1,651 @@
+<!DOCTYPE HTML><html lang="zh-CN"><head><meta charset="utf-8"><meta name="keywords" content="传统 RAG vs 树形 RAG：RAPTOR、MCTS-RAG 与父子块检索, costalong, 翼舞成梦, 后端开发, Go语言, Kubernetes, K8s, Linux, AI, 学习笔记"><meta name="description" content="对比扁平向量检索与树形层级检索的机制和适用场景，拆解 RAPTOR 递归摘要树、MCTS-RAG 推理搜索和父子块检索三种方案，附示意代码、LangChain 用法和两篇论文报告的真实实验数据。"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="renderer" content="webkit|ie-stand|ie-comp"><meta name="mobile-web-app-capable" content="yes"><meta name="format-detection" content="telephone=no"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><meta name="referrer" content="strict-origin-when-cross-origin"><meta name="google-adsense-account" content="ca-pub-8990123471955885"><script>!function(){if(!new URLSearchParams(location.search).has("style-audit-preview")){var n=!1;document.addEventListener("DOMContentLoaded",function(){if(!("IntersectionObserver"in window))return t();var n=new IntersectionObserver(function(e){e.some(function(e){return e.isIntersecting})&&(n.disconnect(),t())},{rootMargin:"200px 0px"});document.querySelectorAll("ins.adsbygoogle").forEach(function(e){n.observe(e)})}),window.addEventListener("load",function(){(window.requestIdleCallback||function(e){setTimeout(e,2e3)})(t,{timeout:4e3})})}function t(){if(!n){n=!0;var e=document.createElement("script");e.async=!0,e.src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8990123471955885",e.crossOrigin="anonymous",document.head.appendChild(e)}}}()</script><title>传统 RAG vs 树形 RAG：RAPTOR、MCTS-RAG 与父子块检索 | 翼舞成梦</title><meta property="og:site_name" content="翼舞成梦"><meta property="og:locale" content="zh_CN"><meta property="og:type" content="article"><meta property="og:title" content="传统 RAG vs 树形 RAG：RAPTOR、MCTS-RAG 与父子块检索"><meta property="og:description" content="对比扁平向量检索与树形层级检索的机制和适用场景，拆解 RAPTOR 递归摘要树、MCTS-RAG 推理搜索和父子块检索三种方案，附示意代码、LangChain 用法和两篇论文报告的真实实验数据。"><meta property="og:url" content="https://costalong.com/2026/01/24/tree-rag-vs-traditional-rag/"><meta property="og:image" content="https://costalong.com/images/posts/tree-rag-vs-traditional-rag_51877db48f74.png"><meta name="twitter:card" content="summary_large_image"><script type="application/ld+json">{"@context":"https://schema.org","@type":"BlogPosting","headline":"传统 RAG vs 树形 RAG：RAPTOR、MCTS-RAG 与父子块检索","description":"对比扁平向量检索与树形层级检索的机制和适用场景，拆解 RAPTOR 递归摘要树、MCTS-RAG 推理搜索和父子块检索三种方案，附示意代码、LangChain 用法和两篇论文报告的真实实验数据。","image":"https://costalong.com/images/posts/tree-rag-vs-traditional-rag_51877db48f74.png","url":"https://costalong.com/2026/01/24/tree-rag-vs-traditional-rag/","datePublished":"2026-01-24T04:00:00.000Z","dateModified":"2026-01-24T04:00:00.000Z","author":{"@type":"Person","name":"costalong"},"publisher":{"@type":"Person","name":"costalong"}}</script><link rel="canonical" href="https://costalong.com/2026/01/24/tree-rag-vs-traditional-rag/"><link rel="alternate" type="application/atom+xml" title="翼舞成梦" href="https://costalong.com/atom.xml"><link rel="alternate" type="application/json" title="翼舞成梦" href="https://costalong.com/feed.json"><link rel="icon" type="image/png" href="/favicon.png"><link rel="stylesheet" href="/css/fonts.css?v=864fc7ac"><link rel="preload" href="/libs/awesome/webfonts/fa-solid-900.woff2" as="font" type="font/woff2" crossorigin><link rel="stylesheet" href="/libs/awesome/css/all.min.css"><link rel="stylesheet" href="/libs/materialize/materialize.min.css"><link rel="stylesheet" href="/libs/aos/aos.css"><link rel="stylesheet" href="/libs/animate/animate.min.css" media="print" onload='this.media="all"'><link rel="stylesheet" href="/libs/lightGallery/css/lightgallery.min.css" media="print" onload='this.media="all"'><link rel="stylesheet" href="/css/matery.css"><link rel="stylesheet" href="/css/my.css"><link rel="stylesheet" href="/css/dark.css" media="none" onload='"all"!=media&&(media="all")'><link rel="stylesheet" href="/css/infinite-scroll.css"><link rel="stylesheet" href="/css/sidebar.css"><link rel="stylesheet" href="/css/navbar.css"><link rel="stylesheet" href="/libs/tocbot/tocbot.css"><link rel="stylesheet" href="/css/post.css"><link rel="stylesheet" href="/css/reward.css" media="print" onload='this.media="all"'><link rel="stylesheet" href="/css/obsidian.css?v=fee1bba1"><link rel="stylesheet" href="/css/darkpremium.css?v=c801dadc"><link rel="stylesheet" href="/css/post-darkpremium.css?v=c09ea248"><script>!function(o){var t=[];o.$=o.jQuery=function(n){if("function"!=typeof n)throw new Error("jQuery 尚未加载：请写在 $(function () {...}) 里");t.push(n)},document.addEventListener("DOMContentLoaded",function(){o.jQuery.fn&&t.forEach(function(n){o.jQuery(n)})})}(window)</script><script src="/libs/jquery/jquery-3.6.0.min.js" defer></script><script>new MutationObserver(function(t){t.forEach(function(t){"attributes"===t.type&&"aria-hidden"===t.attributeName&&"true"===document.body.getAttribute("aria-hidden")&&document.body.removeAttribute("aria-hidden")})}).observe(document.documentElement,{attributes:!0,subtree:!0,attributeFilter:["aria-hidden"]}),window.addEventListener("DOMContentLoaded",function(){"true"===document.body.getAttribute("aria-hidden")&&document.body.removeAttribute("aria-hidden")})</script><meta name="generator" content="Hexo 8.1.2"><style>.github-emoji{position:relative;display:inline-block;width:1.2em;min-height:1.2em;overflow:hidden;vertical-align:top;color:transparent}.github-emoji>span{position:relative;z-index:10}.github-emoji .fancybox,.github-emoji img{margin:0!important;padding:0!important;border:none!important;outline:0!important;text-decoration:none!important;user-select:none!important;cursor:auto!important}.github-emoji img{height:1.2em!important;width:1.2em!important;position:absolute!important;left:50%!important;top:50%!important;transform:translate(-50%,-50%)!important;user-select:none!important;cursor:auto!important}.github-emoji-fallback{color:inherit}.github-emoji-fallback img{opacity:0!important}</style></head><body><a class="skip-link" href="#content-start">跳到正文</a><header class="dp-nav"><div class="dp-wrap"><div class="dp-nav-inner"><a class="dp-brand" href="/"><span class="mark"><img src="/medias/logo.webp" alt="" width="22" height="22"></span><span><span class="name">翼舞成梦</span><br><span class="dom">costalong.com</span></span></a><div class="dp-nav-links" role="navigation" aria-label="主导航"><a href="/">首页</a> <a href="/archives/">归档</a> <a href="/moments">Moments</a> <a href="/about/">关于</a> <a href="/explore/">探索</a> <a href="/galleries/">相册</a> <a href="/notes/">笔记</a> <a href="/contact/">留言板</a> <a href="/friends/">友情链接</a></div><div class="dp-nav-actions"><a href="#searchModal" class="icon-btn modal-trigger" title="搜索" aria-label="搜索"><i class="fas fa-search" aria-hidden="true"></i></a><a class="dp-nav-cta" href="/atom.xml"><i class="fas fa-rss" style="margin-right:6px" aria-hidden="true"></i> 订阅更新</a> <button type="button" data-target="mobile-nav" class="icon-btn dp-burger sidenav-trigger button-collapse" aria-label="打开菜单" aria-expanded="false" aria-controls="mobile-nav"><i class="fas fa-bars" aria-hidden="true"></i></button></div></div></div><div id="mobile-nav" class="side-nav sidenav"><div class="mobile-head bg-color"><img src="/medias/logo.webp" class="logo-img circle responsive-img" alt="网站头像"><div class="logo-name">翼舞成梦</div><div class="logo-desc">翼舞成梦的个人博客，专注于后端开发、K8s 容器化技术、Linux 运维以及人工智能学习笔记分享。</div></div><ul class="menu-list mobile-menu-list"><li class="m-nav-item"><a href="/" class="waves-effect waves-light"><i class="fa-fw fas fa-home"></i> 首页</a></li><li class="m-nav-item"><a href="/archives/" class="waves-effect waves-light"><i class="fa-fw fas fa-archive"></i> 归档</a></li><li class="m-nav-item"><a href="/moments" class="waves-effect waves-light"><i class="fa-fw fas fa-bolt"></i> Moments</a></li><li class="m-nav-item"><button type="button" class="m-nav-toggle" aria-expanded="false" aria-controls="mobile-submenu-3"><i class="fa-fw fas fa-compass" aria-hidden="true"></i> Discover<span class="m-icon" aria-hidden="true"><i class="fas fa-chevron-right"></i></span></button><ul id="mobile-submenu-3"><li><a href="/categories" class="m-sub-link"><i class="fa m-sub-icon fas fa-bookmark"></i> <span>分类</span></a></li><li><a href="/tags" class="m-sub-link"><i class="fa m-sub-icon fas fa-tags"></i> <span>标签</span></a></li></ul></li><li class="m-nav-item"><a href="/about/" class="waves-effect waves-light"><i class="fa-fw fas fa-user-circle"></i> 关于</a></li><li class="m-nav-item"><a href="/explore/" class="waves-effect waves-light"><i class="fa-fw fas fa-compass"></i> 探索</a></li><li class="m-nav-item"><a href="/galleries/" class="waves-effect waves-light"><i class="fa-fw fas fa-image"></i> 相册</a></li><li class="m-nav-item"><a href="/notes/" class="waves-effect waves-light"><i class="fa-fw fas fa-book-reader"></i> 笔记</a></li><li class="m-nav-item"><a href="/contact/" class="waves-effect waves-light"><i class="fa-fw fas fa-comments"></i> 留言板</a></li><li class="m-nav-item"><a href="/friends/" class="waves-effect waves-light"><i class="fa-fw fas fa-address-book"></i> 友情链接</a></li></ul></div></header><div id="content-start" tabindex="-1"></div><div class="dp-bg-field"><div class="glow v"></div><div class="glow c"></div><div class="glow i"></div></div><div class="dp"><header class="dp-page-hero dp-wrap post-dp-hero"><span class="eyebrow"><span class="dot"></span><i class="fas fa-robot"></i> &nbsp;AI</span><h1 id="post-title" class="post-title"><span class="grad">传统 RAG vs 树形 RAG：RAPTOR、MCTS-RAG 与父子块检索</span></h1><div class="meta"><span><i class="far fa-calendar-minus"></i> &nbsp;2026-01-24</span><span><i class="fas fa-bookmark"></i> &nbsp;<a href="/categories/AI/"><b>AI</b></a></span> <span class="hero-tags"><a href="/tags/RAG/"><span class="chip">RAG</span></a> <a href="/tags/AI%E6%9E%B6%E6%9E%84/"><span class="chip ai">AI架构</span></a> <a href="/tags/%E6%A3%80%E7%B4%A2%E5%A2%9E%E5%BC%BA/"><span class="chip">检索增强</span></a> <a href="/tags/RAPTOR/"><span class="chip">RAPTOR</span></a></span></div></header></div><main class="post-container content"><div class="row"><div id="main-content" class="col s12 m12 l9"><div id="artDetail"><div class="card"><div class="card-content article-info"><div class="row tag-cate"><div class="col s7"><div class="article-tag"><a href="/tags/RAG/"><span class="chip bg-color">RAG</span></a> <a href="/tags/AI%E6%9E%B6%E6%9E%84/"><span class="chip bg-color ai">AI架构</span></a> <a href="/tags/%E6%A3%80%E7%B4%A2%E5%A2%9E%E5%BC%BA/"><span class="chip bg-color">检索增强</span></a> <a href="/tags/RAPTOR/"><span class="chip bg-color">RAPTOR</span></a> <a href="/tags/MCTS/"><span class="chip bg-color">MCTS</span></a></div></div><div class="col s5 right-align"><div class="post-cate"><i class="fas fa-bookmark fa-fw icon-category"></i> <a href="/categories/AI/" class="post-category">AI</a></div></div></div><div class="post-info"><div class="info-break-policy post-meta-words"><i class="far fa-file-word fa-fw"></i> <span class="post-meta-label">文章字数:&nbsp;&nbsp;</span> 5.2k</div><div id="busuanzi_container_page_pv" class="info-break-policy post-meta-views"><i class="far fa-eye fa-fw"></i> <span class="post-meta-label">阅读次数:&nbsp;&nbsp;</span><span id="busuanzi_value_page_pv"></span></div><div id="read_mode" class="info-break-policy post-meta-read-mode" style="display:inline" role="button" tabindex="0" aria-label="切换阅读模式" aria-pressed="false"><i class="fas fa-expand-arrows-alt" title="【进入/离开】 阅读模式" aria-hidden="true"></i> &nbsp;&nbsp; <span title="【进入/离开】阅读模式" aria-hidden="true">阅读模式</span></div></div></div><hr class="clearfix"><link rel="stylesheet" href="/libs/prism/prism.min.css"><div class="card-content article-card-content"><div id="articleContent"><p><img width="1442" height="586" style="--img-ar:2.4608" fetchpriority="high" decoding="async" src="/images/posts/tree-rag-vs-traditional-rag_51877db48f74.webp" alt="封面插画：左侧漩涡代表传统 RAG，右侧分叉的树代表树形 RAG"></p><blockquote><p><strong>核心要点</strong><br>在处理海量长文本时，传统 RAG 依赖向量相似度检索，往往只能命中”表层相似”，却难以捕捉跨段落、跨层级的逻辑结构。<strong>树形 RAG 正是为解决这一问题而生</strong>。</p></blockquote><p><img width="1024" height="1024" style="--img-ar:1.0000" loading="lazy" decoding="async" src="/images/posts/tree-rag-vs-traditional-rag_8641d95ab0a6.webp" alt="扁平检索与层级树形检索对比示意图：左侧查询直接命中散落的文档块，右侧沿树逐层下钻"></p><hr><h2 id="两种范式的本质区别"><a href="#两种范式的本质区别" class="headerlink" title="两种范式的本质区别"></a>两种范式的本质区别</h2><h3 id="传统扁平-RAG"><a href="#传统扁平-RAG" class="headerlink" title="传统扁平 RAG"></a>传统扁平 RAG</h3><blockquote><p><strong>核心机制</strong><br>基于<strong>向量相似度</strong>的平面检索，将文档切分为等长 chunks 后进行独立编码和检索。</p></blockquote><h4 id="核心特点"><a href="#核心特点" class="headerlink" title="核心特点"></a>核心特点</h4><ul><li><strong>机制</strong>：语义相似度匹配 (KNN/ANN 检索)</li><li><strong>视野</strong>：局部视角，仅看碎片块</li><li><strong>数据结构</strong>：线性列表，无层级关系</li><li><strong>检索方式</strong>：Top-K 向量相似度排序</li></ul><h4 id="优势"><a href="#优势" class="headerlink" title="优势"></a>优势</h4><ul><li>部署快，检索延迟低（一次向量检索）</li><li>成本低，只需切块和向量化，不需要 LLM 预处理</li><li>技术成熟，生态工具丰富</li><li>适合简单的事实查询</li></ul><h4 id="短板"><a href="#短板" class="headerlink" title="短板"></a>短板</h4><ul><li>容易出现”盲人摸象”：每个块单独看都相关，拼不出全貌</li><li>难以回答全局总结类问题</li><li>跨段落、跨章节的逻辑推理能力弱</li><li>块与块之间的上下文关联在切分时就丢了</li></ul><p><strong>典型失效场景：</strong></p><pre class="language-text" data-language="text"><code class="language-text">问题："这本书的主要论点是什么？"
+传统 RAG：返回若干相似段落，但无法提供整体论述
+树形 RAG：从顶层摘要节点直接回答，涵盖全局结构</code></pre><hr><h3 id="树形层级-RAG"><a href="#树形层级-RAG" class="headerlink" title="树形层级 RAG"></a>树形层级 RAG</h3><blockquote><p><strong>核心创新</strong><br>通过<strong>递归摘要 + 层级索引</strong>，构建具有抽象能力的知识树，支持从宏观到微观的多粒度检索。</p></blockquote><h4 id="核心特点-1"><a href="#核心特点-1" class="headerlink" title="核心特点"></a>核心特点</h4><ul><li><strong>机制</strong>：递归摘要 + 路径规划</li><li><strong>视野</strong>：全局视角，具备多层级抽象</li><li><strong>数据结构</strong>：树形结构，叶节点到根节点逐层抽象</li><li><strong>检索方式</strong>：树搜索 + 路径优化</li></ul><h4 id="优势-1"><a href="#优势-1" class="headerlink" title="优势"></a>优势</h4><ul><li>缓解长文档的信息碎片化问题</li><li>更适合需要综合多处信息的多跳问题</li><li>全局总结能力强</li><li>能利用文档的层次结构</li></ul><h4 id="短板-1"><a href="#短板-1" class="headerlink" title="短板"></a>短板</h4><ul><li>预处理开销大（要调用 LLM 做递归摘要）</li><li>检索链路更长，延迟更高</li><li>多层级索引带来额外存储</li><li>文档更新时需要重建受影响的子树，工程复杂度高</li></ul><p><strong>核心优势场景：</strong></p><pre class="language-text" data-language="text"><code class="language-text">问题："作者在第3章和第7章的观点有什么矛盾？"
+传统 RAG：难以建立跨章节的逻辑关联
+树形 RAG：通过章节级摘要节点，快速定位并对比论点</code></pre><hr><h2 id="核心研究文献"><a href="#核心研究文献" class="headerlink" title="核心研究文献"></a>核心研究文献</h2><h3 id="RAPTOR-递归摘要树"><a href="#RAPTOR-递归摘要树" class="headerlink" title="RAPTOR (递归摘要树)"></a>RAPTOR (递归摘要树)</h3><blockquote><p><strong>Recursive Abstractive Processing for Tree-Organized Retrieval</strong><br>通过<strong>递归聚类</strong>并生成高层级摘要节点，构建一棵”知识树”，让模型能够从宏观视角回答问题。</p></blockquote><p><strong>论文信息：</strong></p><ul><li><strong>标题</strong>：RAPTOR: Recursive Abstractive Processing for Tree-Organized Retrieval</li><li><strong>作者</strong>：Parth Sarthi 等（Stanford），ICLR 2024</li><li><strong>发布日期</strong>：2024-01-31</li><li><strong>论文地址</strong>：<a target="_blank" rel="noopener" href="https://arxiv.org/abs/2401.18059">https://arxiv.org/abs/2401.18059</a></li><li><strong>核心贡献</strong>：自底向上递归地”嵌入—聚类—摘要”，构建多层摘要树，检索时可以同时命中细节块和高层摘要</li></ul><h4 id="RAPTOR-工作流程"><a href="#RAPTOR-工作流程" class="headerlink" title="RAPTOR 工作流程"></a>RAPTOR 工作流程</h4><ol><li><strong>文档切分</strong>：将长文档切分为约 100 token 的短块（叶节点），论文用 SBERT（multi-qa-mpnet-base-cos-v1）做向量化</li><li><strong>递归聚类</strong>：先用 UMAP 降维，再用 GMM（高斯混合模型）软聚类，簇的数量用 BIC 选择；一个节点可以属于多个簇</li><li><strong>摘要生成</strong>：用 LLM（论文中是 gpt-3.5-turbo）为每个簇生成摘要，作为上一层节点</li><li><strong>层级构建</strong>：重复步骤 2-3，直到无法再聚类</li><li><strong>检索</strong>：论文比较了两种方式——逐层向下的树遍历（tree traversal），以及把所有层的节点摊平后一起做相似度检索（collapsed tree）；后者效果更好</li></ol><h4 id="关键技术点"><a href="#关键技术点" class="headerlink" title="关键技术点"></a>关键技术点</h4><p>下面是示意代码，省略了 <code>create_leaf_nodes</code>、<code>assign_to_clusters</code> 等辅助方法：</p><pre class="language-python" data-language="python"><code class="language-python"><span class="token comment"># RAPTOR 核心：软聚类 + 递归摘要（示意）</span>
+<span class="token keyword">class</span> <span class="token class-name">RAPTORTree</span><span class="token punctuation">:</span>
+    <span class="token keyword">def</span> <span class="token function">__init__</span><span class="token punctuation">(</span>self<span class="token punctuation">,</span> documents<span class="token punctuation">:</span> List<span class="token punctuation">[</span><span class="token builtin">str</span><span class="token punctuation">]</span><span class="token punctuation">,</span> llm<span class="token punctuation">,</span> embedding_model<span class="token punctuation">)</span><span class="token punctuation">:</span>
+        self<span class="token punctuation">.</span>llm <span class="token operator">=</span> llm
+        self<span class="token punctuation">.</span>embedding_model <span class="token operator">=</span> embedding_model
+        self<span class="token punctuation">.</span>layers <span class="token operator">=</span> <span class="token punctuation">[</span><span class="token punctuation">]</span>  <span class="token comment"># 存储每一层的节点</span>
+
+    <span class="token keyword">def</span> <span class="token function">build_tree</span><span class="token punctuation">(</span>self<span class="token punctuation">,</span> documents<span class="token punctuation">)</span><span class="token punctuation">:</span>
+        <span class="token comment"># 第一层：原始文档块</span>
+        leaf_nodes <span class="token operator">=</span> self<span class="token punctuation">.</span>create_leaf_nodes<span class="token punctuation">(</span>documents<span class="token punctuation">)</span>
+        self<span class="token punctuation">.</span>layers<span class="token punctuation">.</span>append<span class="token punctuation">(</span>leaf_nodes<span class="token punctuation">)</span>
+
+        current_layer <span class="token operator">=</span> leaf_nodes
+        <span class="token keyword">while</span> <span class="token builtin">len</span><span class="token punctuation">(</span>current_layer<span class="token punctuation">)</span> <span class="token operator">&gt;</span> <span class="token number">1</span><span class="token punctuation">:</span>
+            <span class="token comment"># 软聚类：允许节点属于多个簇</span>
+            clusters <span class="token operator">=</span> self<span class="token punctuation">.</span>soft_cluster<span class="token punctuation">(</span>current_layer<span class="token punctuation">)</span>
+
+            <span class="token comment"># 为每个簇生成摘要</span>
+            summaries <span class="token operator">=</span> <span class="token punctuation">[</span><span class="token punctuation">]</span>
+            <span class="token keyword">for</span> cluster <span class="token keyword">in</span> clusters<span class="token punctuation">:</span>
+                summary <span class="token operator">=</span> self<span class="token punctuation">.</span>llm<span class="token punctuation">.</span>summarize<span class="token punctuation">(</span>cluster<span class="token punctuation">)</span>
+                summaries<span class="token punctuation">.</span>append<span class="token punctuation">(</span>summary<span class="token punctuation">)</span>
+
+            self<span class="token punctuation">.</span>layers<span class="token punctuation">.</span>append<span class="token punctuation">(</span>summaries<span class="token punctuation">)</span>
+            current_layer <span class="token operator">=</span> summaries
+
+    <span class="token keyword">def</span> <span class="token function">soft_cluster</span><span class="token punctuation">(</span>self<span class="token punctuation">,</span> nodes<span class="token punctuation">,</span> n_clusters<span class="token operator">=</span><span class="token boolean">None</span><span class="token punctuation">)</span><span class="token punctuation">:</span>
+        <span class="token triple-quoted-string string">"""使用 GMM 进行软聚类，允许重叠"""</span>
+        <span class="token keyword">from</span> sklearn<span class="token punctuation">.</span>mixture <span class="token keyword">import</span> GaussianMixture
+
+        embeddings <span class="token operator">=</span> <span class="token punctuation">[</span>self<span class="token punctuation">.</span>embedding_model<span class="token punctuation">(</span>n<span class="token punctuation">.</span>text<span class="token punctuation">)</span> <span class="token keyword">for</span> n <span class="token keyword">in</span> nodes<span class="token punctuation">]</span>
+        gmm <span class="token operator">=</span> GaussianMixture<span class="token punctuation">(</span>n_components<span class="token operator">=</span>n_clusters <span class="token keyword">or</span> <span class="token builtin">max</span><span class="token punctuation">(</span><span class="token number">1</span><span class="token punctuation">,</span> <span class="token builtin">len</span><span class="token punctuation">(</span>nodes<span class="token punctuation">)</span> <span class="token operator">//</span> <span class="token number">10</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
+        gmm<span class="token punctuation">.</span>fit<span class="token punctuation">(</span>embeddings<span class="token punctuation">)</span>
+
+        <span class="token comment"># 根据概率分配节点到多个簇</span>
+        probs <span class="token operator">=</span> gmm<span class="token punctuation">.</span>predict_proba<span class="token punctuation">(</span>embeddings<span class="token punctuation">)</span>
+        <span class="token keyword">return</span> self<span class="token punctuation">.</span>assign_to_clusters<span class="token punctuation">(</span>nodes<span class="token punctuation">,</span> probs<span class="token punctuation">)</span></code></pre><hr><h3 id="MCTS-RAG-蒙特卡洛树搜索"><a href="#MCTS-RAG-蒙特卡洛树搜索" class="headerlink" title="MCTS-RAG (蒙特卡洛树搜索)"></a>MCTS-RAG (蒙特卡洛树搜索)</h3><blockquote><p><strong>Enhancing Retrieval-Augmented Generation with Monte Carlo Tree Search</strong><br>把”什么时候检索、检索什么、怎么推理”看成一个<strong>搜索决策过程</strong>，用 MCTS 在推理步骤构成的树上寻找最可靠的答案路径。</p></blockquote><p><strong>论文信息：</strong></p><ul><li><strong>标题</strong>：MCTS-RAG: Enhancing Retrieval-Augmented Generation with Monte Carlo Tree Search</li><li><strong>作者</strong>：Yunhai Hu、Yilun Zhao、Chen Zhao、Arman Cohan</li><li><strong>发布日期</strong>：2025-03-26</li><li><strong>论文地址</strong>：<a target="_blank" rel="noopener" href="https://arxiv.org/abs/2503.20757">https://arxiv.org/abs/2503.20757</a></li><li><strong>核心贡献</strong>：把检索动作嵌进 MCTS 推理搜索，让 7B/8B 级小模型通过增加推理时计算，在知识密集型任务上接近 GPT-4o</li></ul><p>注意它和 RAPTOR 的”树”不是一回事：RAPTOR 的树是<strong>文档索引</strong>，MCTS-RAG 的树是<strong>推理过程</strong>，每个节点是一步推理或检索动作。论文定义了六种动作：直接回答、快速推理、拆解问题、检索后推理、检索后拆解、汇总回答。</p><h4 id="MCTS-RAG-工作流程"><a href="#MCTS-RAG-工作流程" class="headerlink" title="MCTS-RAG 工作流程"></a>MCTS-RAG 工作流程</h4><ol><li><strong>选择 (Selection)</strong>：从根节点开始，按 UCT 分数选择最有潜力的子节点</li><li><strong>扩展 (Expansion)</strong>：在叶节点上尝试上述动作，其中检索类动作会生成查询、取回外部知识</li><li><strong>模拟 (Simulation)</strong>：沿当前路径推演到给出答案，评估其可靠性</li><li><strong>回传 (Backpropagation)</strong>：更新路径上所有节点的价值</li></ol><p>最终答案由多条推理路径投票决定：路径上节点奖励的乘积作为权重。论文设置为 4 次 rollout、最大深度 5，同一节点的不同动作并行展开以降低延迟。</p><h4 id="关键技术点-1"><a href="#关键技术点-1" class="headerlink" title="关键技术点"></a>关键技术点</h4><p>下面是 MCTS 骨架的示意代码（<code>expand</code>、<code>simulate</code> 等方法省略），实际实现中节点内容是推理步骤而非文档：</p><pre class="language-python" data-language="python"><code class="language-python"><span class="token keyword">import</span> math
+
+<span class="token comment"># MCTS 骨架：搜索树 + UCB 策略（示意）</span>
+<span class="token keyword">class</span> <span class="token class-name">MCTSNode</span><span class="token punctuation">:</span>
+    <span class="token keyword">def</span> <span class="token function">__init__</span><span class="token punctuation">(</span>self<span class="token punctuation">,</span> content<span class="token punctuation">,</span> parent<span class="token operator">=</span><span class="token boolean">None</span><span class="token punctuation">)</span><span class="token punctuation">:</span>
+        self<span class="token punctuation">.</span>content <span class="token operator">=</span> content
+        self<span class="token punctuation">.</span>parent <span class="token operator">=</span> parent
+        self<span class="token punctuation">.</span>children <span class="token operator">=</span> <span class="token punctuation">[</span><span class="token punctuation">]</span>
+        self<span class="token punctuation">.</span>visits <span class="token operator">=</span> <span class="token number">0</span>
+        self<span class="token punctuation">.</span>value <span class="token operator">=</span> <span class="token number">0.0</span>
+
+    <span class="token keyword">def</span> <span class="token function">ucb_score</span><span class="token punctuation">(</span>self<span class="token punctuation">,</span> exploration_weight<span class="token operator">=</span><span class="token number">1.414</span><span class="token punctuation">)</span><span class="token punctuation">:</span>
+        <span class="token triple-quoted-string string">"""UCB1 公式：平衡探索与利用"""</span>
+        <span class="token keyword">if</span> self<span class="token punctuation">.</span>visits <span class="token operator">==</span> <span class="token number">0</span><span class="token punctuation">:</span>
+            <span class="token keyword">return</span> <span class="token builtin">float</span><span class="token punctuation">(</span><span class="token string">'inf'</span><span class="token punctuation">)</span>
+
+        exploitation <span class="token operator">=</span> self<span class="token punctuation">.</span>value <span class="token operator">/</span> self<span class="token punctuation">.</span>visits
+        exploration <span class="token operator">=</span> exploration_weight <span class="token operator">*</span> math<span class="token punctuation">.</span>sqrt<span class="token punctuation">(</span>
+            math<span class="token punctuation">.</span>log<span class="token punctuation">(</span>self<span class="token punctuation">.</span>parent<span class="token punctuation">.</span>visits<span class="token punctuation">)</span> <span class="token operator">/</span> self<span class="token punctuation">.</span>visits
+        <span class="token punctuation">)</span>
+        <span class="token keyword">return</span> exploitation <span class="token operator">+</span> exploration
+
+<span class="token keyword">class</span> <span class="token class-name">MCTSRetriever</span><span class="token punctuation">:</span>
+    <span class="token keyword">def</span> <span class="token function">__init__</span><span class="token punctuation">(</span>self<span class="token punctuation">,</span> llm<span class="token punctuation">,</span> max_iterations<span class="token operator">=</span><span class="token number">100</span><span class="token punctuation">)</span><span class="token punctuation">:</span>
+        self<span class="token punctuation">.</span>llm <span class="token operator">=</span> llm
+        self<span class="token punctuation">.</span>max_iterations <span class="token operator">=</span> max_iterations
+
+    <span class="token keyword">def</span> <span class="token function">search</span><span class="token punctuation">(</span>self<span class="token punctuation">,</span> query<span class="token punctuation">,</span> retriever<span class="token punctuation">)</span><span class="token punctuation">:</span>
+        root <span class="token operator">=</span> MCTSNode<span class="token punctuation">(</span>content<span class="token operator">=</span><span class="token boolean">None</span><span class="token punctuation">)</span>
+
+        <span class="token keyword">for</span> _ <span class="token keyword">in</span> <span class="token builtin">range</span><span class="token punctuation">(</span>self<span class="token punctuation">.</span>max_iterations<span class="token punctuation">)</span><span class="token punctuation">:</span>
+            <span class="token comment"># 1. Selection: 选择最佳路径</span>
+            node <span class="token operator">=</span> self<span class="token punctuation">.</span>select<span class="token punctuation">(</span>root<span class="token punctuation">)</span>
+
+            <span class="token comment"># 2. Expansion: 扩展候选节点</span>
+            <span class="token keyword">if</span> <span class="token keyword">not</span> node<span class="token punctuation">.</span>is_terminal<span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">:</span>
+                node <span class="token operator">=</span> self<span class="token punctuation">.</span>expand<span class="token punctuation">(</span>node<span class="token punctuation">,</span> query<span class="token punctuation">,</span> retriever<span class="token punctuation">)</span>
+
+            <span class="token comment"># 3. Simulation: 评估路径质量</span>
+            reward <span class="token operator">=</span> self<span class="token punctuation">.</span>simulate<span class="token punctuation">(</span>node<span class="token punctuation">,</span> query<span class="token punctuation">)</span>
+
+            <span class="token comment"># 4. Backpropagation: 更新路径价值</span>
+            self<span class="token punctuation">.</span>backpropagate<span class="token punctuation">(</span>node<span class="token punctuation">,</span> reward<span class="token punctuation">)</span>
+
+        <span class="token comment"># 返回最佳路径</span>
+        <span class="token keyword">return</span> self<span class="token punctuation">.</span>best_path<span class="token punctuation">(</span>root<span class="token punctuation">)</span>
+
+    <span class="token keyword">def</span> <span class="token function">select</span><span class="token punctuation">(</span>self<span class="token punctuation">,</span> node<span class="token punctuation">)</span><span class="token punctuation">:</span>
+        <span class="token triple-quoted-string string">"""选择 UCB 分数最高的子节点"""</span>
+        <span class="token keyword">while</span> node<span class="token punctuation">.</span>children<span class="token punctuation">:</span>
+            node <span class="token operator">=</span> <span class="token builtin">max</span><span class="token punctuation">(</span>node<span class="token punctuation">.</span>children<span class="token punctuation">,</span> key<span class="token operator">=</span><span class="token keyword">lambda</span> n<span class="token punctuation">:</span> n<span class="token punctuation">.</span>ucb_score<span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
+        <span class="token keyword">return</span> node</code></pre><hr><h3 id="父子块策略-Parent-Child-Retriever"><a href="#父子块策略-Parent-Child-Retriever" class="headerlink" title="父子块策略 (Parent-Child Retriever)"></a>父子块策略 (Parent-Child Retriever)</h3><blockquote><p><strong>Parent-Child Document Chunking Strategy</strong><br>一种<strong>轻量级的层级检索方案</strong>，通过”小块检索、大块召回”的策略，在保持检索精度的同时提供更丰富的上下文。</p></blockquote><p><strong>核心理念：</strong></p><ul><li><strong>Child Chunks（子块）</strong>：用于向量检索的小粒度块（精确匹配）</li><li><strong>Parent Chunks（父块）</strong>：用于 LLM 生成的大粒度块（完整上下文）</li></ul><p><img width="1024" height="1024" style="--img-ar:1.0000" loading="lazy" decoding="async" src="/images/posts/tree-rag-vs-traditional-rag_8903eb3bf893.webp" alt="父子块索引示意图：根文档切分为父块，父块再切分为用于检索的子块"></p><h4 id="工作原理"><a href="#工作原理" class="headerlink" title="工作原理"></a>工作原理</h4><p><strong>两层存储结构：</strong></p><ol><li><strong>检索层（Child）</strong>：存储小块（例如 128-256 tokens）及其向量</li><li><strong>召回层（Parent）</strong>：存储大块（例如 1024-2048 tokens）的原始文本</li></ol><p><strong>检索流程：</strong></p><pre class="language-text" data-language="text"><code class="language-text">用户查询 → 在 Child 层检索 → 定位到匹配的小块 → 返回其对应的 Parent 块</code></pre><h4 id="核心优势"><a href="#核心优势" class="headerlink" title="核心优势"></a>核心优势</h4><blockquote><p><strong>相比传统 RAG 的改进</strong></p><p><strong>传统 RAG 的困境：</strong></p><ul><li>小块：检索准确，但上下文不足（容易断章取义）</li><li>大块：上下文丰富，但检索噪声大（相似度下降）</li></ul><p><strong>Parent-Child 的解决方案：</strong></p><ul><li>检索用小块 → 保证精确度</li><li>生成用大块 → 保证上下文完整性</li></ul></blockquote><h4 id="代码实现"><a href="#代码实现" class="headerlink" title="代码实现"></a>代码实现</h4><pre class="language-python" data-language="python"><code class="language-python"><span class="token keyword">from</span> typing <span class="token keyword">import</span> List
+
+<span class="token comment"># 父子块策略核心实现（按空格分词近似 token，仅作演示）</span>
+<span class="token keyword">class</span> <span class="token class-name">ParentChildRetriever</span><span class="token punctuation">:</span>
+    <span class="token keyword">def</span> <span class="token function">__init__</span><span class="token punctuation">(</span>self<span class="token punctuation">,</span> documents<span class="token punctuation">:</span> List<span class="token punctuation">[</span><span class="token builtin">str</span><span class="token punctuation">]</span><span class="token punctuation">,</span> embedding_model<span class="token punctuation">)</span><span class="token punctuation">:</span>
+        self<span class="token punctuation">.</span>embedding_model <span class="token operator">=</span> embedding_model
+
+        <span class="token comment"># 存储结构</span>
+        self<span class="token punctuation">.</span>child_chunks <span class="token operator">=</span> <span class="token punctuation">[</span><span class="token punctuation">]</span>      <span class="token comment"># 小块（用于检索）</span>
+        self<span class="token punctuation">.</span>parent_chunks <span class="token operator">=</span> <span class="token punctuation">[</span><span class="token punctuation">]</span>     <span class="token comment"># 大块（用于召回）</span>
+        self<span class="token punctuation">.</span>child_embeddings <span class="token operator">=</span> <span class="token punctuation">[</span><span class="token punctuation">]</span>  <span class="token comment"># 小块的向量</span>
+        self<span class="token punctuation">.</span>child_to_parent <span class="token operator">=</span> <span class="token punctuation">{</span><span class="token punctuation">}</span>   <span class="token comment"># 映射关系：child_id -&gt; parent_id</span>
+
+        self<span class="token punctuation">.</span>build_index<span class="token punctuation">(</span>documents<span class="token punctuation">)</span>
+
+    <span class="token keyword">def</span> <span class="token function">build_index</span><span class="token punctuation">(</span>self<span class="token punctuation">,</span> documents<span class="token punctuation">:</span> List<span class="token punctuation">[</span><span class="token builtin">str</span><span class="token punctuation">]</span><span class="token punctuation">)</span><span class="token punctuation">:</span>
+        <span class="token triple-quoted-string string">"""构建父子索引"""</span>
+        parent_id <span class="token operator">=</span> <span class="token number">0</span>
+        child_id <span class="token operator">=</span> <span class="token number">0</span>
+
+        <span class="token keyword">for</span> doc <span class="token keyword">in</span> documents<span class="token punctuation">:</span>
+            <span class="token comment"># 1. 切分为父块（大块）</span>
+            parent_chunks <span class="token operator">=</span> self<span class="token punctuation">.</span>split_document<span class="token punctuation">(</span>
+                doc<span class="token punctuation">,</span>
+                chunk_size<span class="token operator">=</span><span class="token number">1024</span><span class="token punctuation">,</span>   <span class="token comment"># 父块：1024 tokens</span>
+                overlap<span class="token operator">=</span><span class="token number">100</span>
+            <span class="token punctuation">)</span>
+
+            <span class="token keyword">for</span> parent_chunk <span class="token keyword">in</span> parent_chunks<span class="token punctuation">:</span>
+                <span class="token comment"># 存储父块</span>
+                self<span class="token punctuation">.</span>parent_chunks<span class="token punctuation">.</span>append<span class="token punctuation">(</span>parent_chunk<span class="token punctuation">)</span>
+
+                <span class="token comment"># 2. 将父块进一步切分为子块（小块）</span>
+                child_chunks <span class="token operator">=</span> self<span class="token punctuation">.</span>split_document<span class="token punctuation">(</span>
+                    parent_chunk<span class="token punctuation">,</span>
+                    chunk_size<span class="token operator">=</span><span class="token number">256</span><span class="token punctuation">,</span>   <span class="token comment"># 子块：256 tokens</span>
+                    overlap<span class="token operator">=</span><span class="token number">50</span>
+                <span class="token punctuation">)</span>
+
+                <span class="token keyword">for</span> child_chunk <span class="token keyword">in</span> child_chunks<span class="token punctuation">:</span>
+                    <span class="token comment"># 存储子块</span>
+                    self<span class="token punctuation">.</span>child_chunks<span class="token punctuation">.</span>append<span class="token punctuation">(</span>child_chunk<span class="token punctuation">)</span>
+
+                    <span class="token comment"># 建立映射关系</span>
+                    self<span class="token punctuation">.</span>child_to_parent<span class="token punctuation">[</span>child_id<span class="token punctuation">]</span> <span class="token operator">=</span> parent_id
+
+                    <span class="token comment"># 计算子块向量（仅对小块编码）</span>
+                    embedding <span class="token operator">=</span> self<span class="token punctuation">.</span>embedding_model<span class="token punctuation">.</span>encode<span class="token punctuation">(</span><span class="token punctuation">[</span>child_chunk<span class="token punctuation">]</span><span class="token punctuation">)</span><span class="token punctuation">[</span><span class="token number">0</span><span class="token punctuation">]</span>
+                    self<span class="token punctuation">.</span>child_embeddings<span class="token punctuation">.</span>append<span class="token punctuation">(</span>embedding<span class="token punctuation">)</span>
+
+                    child_id <span class="token operator">+=</span> <span class="token number">1</span>
+
+                parent_id <span class="token operator">+=</span> <span class="token number">1</span>
+
+    <span class="token keyword">def</span> <span class="token function">retrieve</span><span class="token punctuation">(</span>self<span class="token punctuation">,</span> query<span class="token punctuation">:</span> <span class="token builtin">str</span><span class="token punctuation">,</span> top_k<span class="token punctuation">:</span> <span class="token builtin">int</span> <span class="token operator">=</span> <span class="token number">5</span><span class="token punctuation">)</span><span class="token punctuation">:</span>
+        <span class="token triple-quoted-string string">"""检索：在子块中搜索，返回父块"""</span>
+        <span class="token comment"># 1. 对查询编码</span>
+        query_embedding <span class="token operator">=</span> self<span class="token punctuation">.</span>embedding_model<span class="token punctuation">.</span>encode<span class="token punctuation">(</span><span class="token punctuation">[</span>query<span class="token punctuation">]</span><span class="token punctuation">)</span><span class="token punctuation">[</span><span class="token number">0</span><span class="token punctuation">]</span>
+
+        <span class="token comment"># 2. 在子块中检索（精确匹配）</span>
+        <span class="token keyword">from</span> sklearn<span class="token punctuation">.</span>metrics<span class="token punctuation">.</span>pairwise <span class="token keyword">import</span> cosine_similarity
+        similarities <span class="token operator">=</span> cosine_similarity<span class="token punctuation">(</span>
+            <span class="token punctuation">[</span>query_embedding<span class="token punctuation">]</span><span class="token punctuation">,</span>
+            self<span class="token punctuation">.</span>child_embeddings
+        <span class="token punctuation">)</span><span class="token punctuation">[</span><span class="token number">0</span><span class="token punctuation">]</span>
+
+        <span class="token comment"># 3. 获取 Top-K 子块</span>
+        top_child_indices <span class="token operator">=</span> similarities<span class="token punctuation">.</span>argsort<span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">[</span><span class="token operator">-</span>top_k<span class="token punctuation">:</span><span class="token punctuation">]</span><span class="token punctuation">[</span><span class="token punctuation">:</span><span class="token punctuation">:</span><span class="token operator">-</span><span class="token number">1</span><span class="token punctuation">]</span>
+
+        <span class="token comment"># 4. 映射到父块（去重，保持相似度顺序）</span>
+        parent_ids <span class="token operator">=</span> <span class="token punctuation">[</span><span class="token punctuation">]</span>
+        <span class="token keyword">for</span> child_id <span class="token keyword">in</span> top_child_indices<span class="token punctuation">:</span>
+            parent_id <span class="token operator">=</span> self<span class="token punctuation">.</span>child_to_parent<span class="token punctuation">[</span>child_id<span class="token punctuation">]</span>
+            <span class="token keyword">if</span> parent_id <span class="token keyword">not</span> <span class="token keyword">in</span> parent_ids<span class="token punctuation">:</span>
+                parent_ids<span class="token punctuation">.</span>append<span class="token punctuation">(</span>parent_id<span class="token punctuation">)</span>
+
+        <span class="token comment"># 5. 返回父块（完整上下文）</span>
+        <span class="token keyword">return</span> <span class="token punctuation">[</span>
+            <span class="token punctuation">{</span>
+                <span class="token string">'text'</span><span class="token punctuation">:</span> self<span class="token punctuation">.</span>parent_chunks<span class="token punctuation">[</span>pid<span class="token punctuation">]</span><span class="token punctuation">,</span>
+                <span class="token string">'parent_id'</span><span class="token punctuation">:</span> pid<span class="token punctuation">,</span>
+                <span class="token string">'source'</span><span class="token punctuation">:</span> <span class="token string">'parent_chunk'</span>
+            <span class="token punctuation">}</span>
+            <span class="token keyword">for</span> pid <span class="token keyword">in</span> parent_ids
+        <span class="token punctuation">]</span>
+
+    <span class="token keyword">def</span> <span class="token function">split_document</span><span class="token punctuation">(</span>self<span class="token punctuation">,</span> doc<span class="token punctuation">:</span> <span class="token builtin">str</span><span class="token punctuation">,</span> chunk_size<span class="token punctuation">:</span> <span class="token builtin">int</span><span class="token punctuation">,</span> overlap<span class="token punctuation">:</span> <span class="token builtin">int</span><span class="token punctuation">)</span><span class="token punctuation">:</span>
+        <span class="token triple-quoted-string string">"""文档切分（带重叠）"""</span>
+        words <span class="token operator">=</span> doc<span class="token punctuation">.</span>split<span class="token punctuation">(</span><span class="token punctuation">)</span>
+        chunks <span class="token operator">=</span> <span class="token punctuation">[</span><span class="token punctuation">]</span>
+
+        <span class="token keyword">for</span> i <span class="token keyword">in</span> <span class="token builtin">range</span><span class="token punctuation">(</span><span class="token number">0</span><span class="token punctuation">,</span> <span class="token builtin">len</span><span class="token punctuation">(</span>words<span class="token punctuation">)</span><span class="token punctuation">,</span> chunk_size <span class="token operator">-</span> overlap<span class="token punctuation">)</span><span class="token punctuation">:</span>
+            chunk <span class="token operator">=</span> <span class="token string">' '</span><span class="token punctuation">.</span>join<span class="token punctuation">(</span>words<span class="token punctuation">[</span>i<span class="token punctuation">:</span>i <span class="token operator">+</span> chunk_size<span class="token punctuation">]</span><span class="token punctuation">)</span>
+            <span class="token keyword">if</span> chunk<span class="token punctuation">:</span>
+                chunks<span class="token punctuation">.</span>append<span class="token punctuation">(</span>chunk<span class="token punctuation">)</span>
+
+        <span class="token keyword">return</span> chunks</code></pre><h4 id="实际应用场景"><a href="#实际应用场景" class="headerlink" title="实际应用场景"></a>实际应用场景</h4><blockquote><p><strong>法律文档检索</strong></p><p><strong>场景</strong>：检索合同条款</p><p><strong>问题</strong>：”违约金的计算方式是什么？”</p><p><strong>传统 RAG（单一块大小）：</strong></p><ul><li>小块（256 tokens）：检索到”违约金按日计算”，但缺少具体公式</li><li>大块（1024 tokens）：包含完整公式，但可能没检索到（被其他相似内容干扰）</li></ul><p><strong>Parent-Child 策略：</strong></p><ul><li>子块检索：”违约金按日计算”（精确命中）</li><li>父块召回：整个条款段落，包含完整计算公式、生效条件、上限说明</li><li><strong>结果</strong>：既准确又完整</li></ul></blockquote><h4 id="配置建议"><a href="#配置建议" class="headerlink" title="配置建议"></a>配置建议</h4><blockquote><p><strong>参数调优</strong></p><p>块大小没有通用最优值，下面是常见的起点，需要在自己的评测集上调：</p><table><thead><tr><th align="left">文档类型</th><th align="left">子块大小</th><th align="left">父块大小</th></tr></thead><tbody><tr><td align="left">技术文档</td><td align="left">128-256 tokens</td><td align="left">1024-1536 tokens</td></tr><tr><td align="left">法律合同</td><td align="left">256-384 tokens</td><td align="left">1536-2048 tokens</td></tr><tr><td align="left">新闻文章</td><td align="left">128-192 tokens</td><td align="left">512-1024 tokens</td></tr></tbody></table><p><strong>经验法则：</strong></p><ul><li>子块：包含 1-2 个完整句子</li><li>父块：包含 1-2 个完整段落</li><li>重叠：确保关键信息不被切断</li></ul></blockquote><h4 id="与其他方法的对比"><a href="#与其他方法的对比" class="headerlink" title="与其他方法的对比"></a>与其他方法的对比</h4><p><strong>父子块 vs 传统 RAG：</strong></p><pre class="language-python" data-language="python"><code class="language-python"><span class="token comment"># 传统 RAG：一种块大小</span>
+chunks <span class="token operator">=</span> split<span class="token punctuation">(</span>doc<span class="token punctuation">,</span> size<span class="token operator">=</span><span class="token number">512</span><span class="token punctuation">)</span>  <span class="token comment"># 中等大小，检索精度和上下文都要妥协</span>
+
+<span class="token comment"># 父子块：两种块大小</span>
+child_chunks <span class="token operator">=</span> split<span class="token punctuation">(</span>doc<span class="token punctuation">,</span> size<span class="token operator">=</span><span class="token number">256</span><span class="token punctuation">)</span>   <span class="token comment"># 检索用：小而准</span>
+parent_chunks <span class="token operator">=</span> split<span class="token punctuation">(</span>doc<span class="token punctuation">,</span> size<span class="token operator">=</span><span class="token number">1024</span><span class="token punctuation">)</span> <span class="token comment"># 生成用：大而全</span></code></pre><p><strong>父子块 vs 树形 RAG：</strong></p><ul><li><strong>复杂度</strong>：父子块更简单，无需递归摘要</li><li><strong>成本</strong>：父子块更低，不需要 LLM 生成摘要</li><li><strong>延迟</strong>：父子块更快，无树遍历开销</li><li><strong>适用性</strong>：父子块是树形 RAG 的轻量替代，但没有跨段落的摘要节点，回答不了全局总结类问题</li></ul><h4 id="高级变体"><a href="#高级变体" class="headerlink" title="高级变体"></a>高级变体</h4><p><strong>多层级父子结构：</strong></p><pre class="language-python" data-language="python"><code class="language-python"><span class="token keyword">class</span> <span class="token class-name">MultiLevelParentChild</span><span class="token punctuation">:</span>
+    <span class="token triple-quoted-string string">"""三层结构：孙 → 子 → 父"""</span>
+    <span class="token keyword">def</span> <span class="token function">__init__</span><span class="token punctuation">(</span>self<span class="token punctuation">)</span><span class="token punctuation">:</span>
+        self<span class="token punctuation">.</span>grandchild_chunks <span class="token operator">=</span> <span class="token punctuation">[</span><span class="token punctuation">]</span>  <span class="token comment"># 64 tokens (检索层)</span>
+        self<span class="token punctuation">.</span>child_chunks <span class="token operator">=</span> <span class="token punctuation">[</span><span class="token punctuation">]</span>       <span class="token comment"># 256 tokens (中间层)</span>
+        self<span class="token punctuation">.</span>parent_chunks <span class="token operator">=</span> <span class="token punctuation">[</span><span class="token punctuation">]</span>      <span class="token comment"># 1024 tokens (召回层)</span>
+
+        <span class="token comment"># 映射关系</span>
+        self<span class="token punctuation">.</span>gc_to_child <span class="token operator">=</span> <span class="token punctuation">{</span><span class="token punctuation">}</span>   <span class="token comment"># grandchild → child</span>
+        self<span class="token punctuation">.</span>child_to_parent <span class="token operator">=</span> <span class="token punctuation">{</span><span class="token punctuation">}</span> <span class="token comment"># child → parent</span>
+
+    <span class="token keyword">def</span> <span class="token function">retrieve</span><span class="token punctuation">(</span>self<span class="token punctuation">,</span> query<span class="token punctuation">:</span> <span class="token builtin">str</span><span class="token punctuation">,</span> return_level<span class="token operator">=</span><span class="token string">'parent'</span><span class="token punctuation">)</span><span class="token punctuation">:</span>
+        <span class="token triple-quoted-string string">"""可选择返回不同层级的块"""</span>
+        <span class="token comment"># 1. 在孙块中检索</span>
+        top_gc_ids <span class="token operator">=</span> self<span class="token punctuation">.</span>search_grandchild<span class="token punctuation">(</span>query<span class="token punctuation">)</span>
+
+        <span class="token comment"># 2. 根据需求返回不同层级</span>
+        <span class="token keyword">if</span> return_level <span class="token operator">==</span> <span class="token string">'grandchild'</span><span class="token punctuation">:</span>
+            <span class="token keyword">return</span> <span class="token punctuation">[</span>self<span class="token punctuation">.</span>grandchild_chunks<span class="token punctuation">[</span>i<span class="token punctuation">]</span> <span class="token keyword">for</span> i <span class="token keyword">in</span> top_gc_ids<span class="token punctuation">]</span>
+        <span class="token keyword">elif</span> return_level <span class="token operator">==</span> <span class="token string">'child'</span><span class="token punctuation">:</span>
+            child_ids <span class="token operator">=</span> <span class="token punctuation">[</span>self<span class="token punctuation">.</span>gc_to_child<span class="token punctuation">[</span>i<span class="token punctuation">]</span> <span class="token keyword">for</span> i <span class="token keyword">in</span> top_gc_ids<span class="token punctuation">]</span>
+            <span class="token keyword">return</span> <span class="token punctuation">[</span>self<span class="token punctuation">.</span>child_chunks<span class="token punctuation">[</span>i<span class="token punctuation">]</span> <span class="token keyword">for</span> i <span class="token keyword">in</span> child_ids<span class="token punctuation">]</span>
+        <span class="token keyword">else</span><span class="token punctuation">:</span>  <span class="token comment"># parent</span>
+            parent_ids <span class="token operator">=</span> <span class="token punctuation">[</span>
+                self<span class="token punctuation">.</span>child_to_parent<span class="token punctuation">[</span>self<span class="token punctuation">.</span>gc_to_child<span class="token punctuation">[</span>i<span class="token punctuation">]</span><span class="token punctuation">]</span>
+                <span class="token keyword">for</span> i <span class="token keyword">in</span> top_gc_ids
+            <span class="token punctuation">]</span>
+            <span class="token keyword">return</span> <span class="token punctuation">[</span>self<span class="token punctuation">.</span>parent_chunks<span class="token punctuation">[</span>i<span class="token punctuation">]</span> <span class="token keyword">for</span> i <span class="token keyword">in</span> parent_ids<span class="token punctuation">]</span></code></pre><h4 id="工程实践要点"><a href="#工程实践要点" class="headerlink" title="工程实践要点"></a>工程实践要点</h4><blockquote><p><strong>常见陷阱</strong></p><p><strong>1. 映射关系丢失</strong></p><pre class="language-python" data-language="python"><code class="language-python"><span class="token comment"># 错误：没有保存映射关系</span>
+child_chunks <span class="token operator">=</span> split_small<span class="token punctuation">(</span>doc<span class="token punctuation">)</span>
+parent_chunks <span class="token operator">=</span> split_large<span class="token punctuation">(</span>doc<span class="token punctuation">)</span>
+<span class="token comment"># 问题：无法知道哪个 child 属于哪个 parent</span>
+
+<span class="token comment"># 正确：先切父块，再切子块</span>
+<span class="token keyword">for</span> parent <span class="token keyword">in</span> split_large<span class="token punctuation">(</span>doc<span class="token punctuation">)</span><span class="token punctuation">:</span>
+    <span class="token keyword">for</span> child <span class="token keyword">in</span> split_small<span class="token punctuation">(</span>parent<span class="token punctuation">)</span><span class="token punctuation">:</span>
+        child_to_parent<span class="token punctuation">[</span>child_id<span class="token punctuation">]</span> <span class="token operator">=</span> parent_id</code></pre><p><strong>2. 重复召回</strong></p><pre class="language-python" data-language="python"><code class="language-python"><span class="token comment"># 多个子块可能属于同一父块，需要去重</span>
+parent_ids <span class="token operator">=</span> <span class="token builtin">set</span><span class="token punctuation">(</span><span class="token punctuation">[</span>child_to_parent<span class="token punctuation">[</span>cid<span class="token punctuation">]</span> <span class="token keyword">for</span> cid <span class="token keyword">in</span> top_children<span class="token punctuation">]</span><span class="token punctuation">)</span></code></pre><p><strong>3. 存储冗余</strong></p><pre class="language-python" data-language="python"><code class="language-python"><span class="token comment"># 优化：只存储父块和映射关系，子块可以动态生成</span>
+<span class="token keyword">class</span> <span class="token class-name">EfficientParentChild</span><span class="token punctuation">:</span>
+    <span class="token keyword">def</span> <span class="token function">__init__</span><span class="token punctuation">(</span>self<span class="token punctuation">)</span><span class="token punctuation">:</span>
+        self<span class="token punctuation">.</span>parent_chunks <span class="token operator">=</span> <span class="token punctuation">[</span><span class="token punctuation">]</span>  <span class="token comment"># 只存储父块</span>
+        self<span class="token punctuation">.</span>child_ranges <span class="token operator">=</span> <span class="token punctuation">[</span><span class="token punctuation">]</span>   <span class="token comment"># 子块在父块中的位置 [(start, end), ...]</span></code></pre></blockquote><h4 id="LangChain-实现"><a href="#LangChain-实现" class="headerlink" title="LangChain 实现"></a>LangChain 实现</h4><p>LangChain 自带 <code>ParentDocumentRetriever</code>。LangChain 1.0（2025-10）之后它被移到了 <code>langchain-classic</code> 包，下面按新的包结构写（需要 <code>pip install langchain-classic langchain-chroma langchain-openai langchain-text-splitters</code>）：</p><pre class="language-python" data-language="python"><code class="language-python"><span class="token keyword">from</span> langchain_classic<span class="token punctuation">.</span>retrievers <span class="token keyword">import</span> ParentDocumentRetriever
+<span class="token keyword">from</span> langchain_core<span class="token punctuation">.</span>stores <span class="token keyword">import</span> InMemoryStore
+<span class="token keyword">from</span> langchain_text_splitters <span class="token keyword">import</span> RecursiveCharacterTextSplitter
+<span class="token keyword">from</span> langchain_chroma <span class="token keyword">import</span> Chroma
+<span class="token keyword">from</span> langchain_openai <span class="token keyword">import</span> OpenAIEmbeddings
+
+embeddings <span class="token operator">=</span> OpenAIEmbeddings<span class="token punctuation">(</span>model<span class="token operator">=</span><span class="token string">"text-embedding-3-small"</span><span class="token punctuation">)</span>
+
+<span class="token comment"># 注意：RecursiveCharacterTextSplitter 的 chunk_size 默认按字符数计</span>
+parent_splitter <span class="token operator">=</span> RecursiveCharacterTextSplitter<span class="token punctuation">(</span>
+    chunk_size<span class="token operator">=</span><span class="token number">2000</span><span class="token punctuation">,</span>
+    chunk_overlap<span class="token operator">=</span><span class="token number">200</span>
+<span class="token punctuation">)</span>
+
+child_splitter <span class="token operator">=</span> RecursiveCharacterTextSplitter<span class="token punctuation">(</span>
+    chunk_size<span class="token operator">=</span><span class="token number">400</span><span class="token punctuation">,</span>
+    chunk_overlap<span class="token operator">=</span><span class="token number">50</span>
+<span class="token punctuation">)</span>
+
+<span class="token comment"># 父块存储（键值对）</span>
+store <span class="token operator">=</span> InMemoryStore<span class="token punctuation">(</span><span class="token punctuation">)</span>
+
+<span class="token comment"># 子块向量库</span>
+vectorstore <span class="token operator">=</span> Chroma<span class="token punctuation">(</span>
+    collection_name<span class="token operator">=</span><span class="token string">"child_chunks"</span><span class="token punctuation">,</span>
+    embedding_function<span class="token operator">=</span>embeddings
+<span class="token punctuation">)</span>
+
+<span class="token comment"># 组装检索器</span>
+retriever <span class="token operator">=</span> ParentDocumentRetriever<span class="token punctuation">(</span>
+    vectorstore<span class="token operator">=</span>vectorstore<span class="token punctuation">,</span>
+    docstore<span class="token operator">=</span>store<span class="token punctuation">,</span>
+    child_splitter<span class="token operator">=</span>child_splitter<span class="token punctuation">,</span>
+    parent_splitter<span class="token operator">=</span>parent_splitter<span class="token punctuation">,</span>
+<span class="token punctuation">)</span>
+
+<span class="token comment"># 添加文档（documents 为 langchain_core.documents.Document 列表）</span>
+retriever<span class="token punctuation">.</span>add_documents<span class="token punctuation">(</span>documents<span class="token punctuation">)</span>
+
+<span class="token comment"># 检索：返回的是父块</span>
+results <span class="token operator">=</span> retriever<span class="token punctuation">.</span>invoke<span class="token punctuation">(</span><span class="token string">"查询内容"</span><span class="token punctuation">)</span></code></pre><hr><h2 id="关键能力对比"><a href="#关键能力对比" class="headerlink" title="关键能力对比"></a>关键能力对比</h2><h3 id="定性对比表"><a href="#定性对比表" class="headerlink" title="定性对比表"></a>定性对比表</h3><table><thead><tr><th align="left">维度</th><th align="left">传统 RAG</th><th align="left">RAPTOR（树形索引）</th><th align="left">MCTS-RAG（推理搜索）</th></tr></thead><tbody><tr><td align="left"><strong>擅长的问题</strong></td><td align="left">简单事实查找</td><td align="left">长文档总结、跨章节综合</td><td align="left">需要多步推理和多次检索的问题</td></tr><tr><td align="left"><strong>长文本处理</strong></td><td align="left">只看局部块</td><td align="left">摘要节点提供全局视角</td><td align="left">取决于底层检索</td></tr><tr><td align="left"><strong>多跳推理</strong></td><td align="left">弱</td><td align="left">较强（摘要节点聚合了多处信息）</td><td align="left">强（显式拆解问题、多轮检索）</td></tr><tr><td align="left"><strong>离线成本</strong></td><td align="left">只做向量化</td><td align="left">需要 LLM 递归摘要</td><td align="left">只做向量化</td></tr><tr><td align="left"><strong>在线成本</strong></td><td align="left">一次检索 + 一次生成</td><td align="left">一次检索 + 一次生成</td><td align="left">多轮 LLM 调用，延迟和 token 都明显增加</td></tr><tr><td align="left"><strong>工程复杂度</strong></td><td align="left">低</td><td align="left">中（树构建与增量更新）</td><td align="left">高（搜索与打分）</td></tr></tbody></table><p>两者也不冲突：RAPTOR 改进的是”索引长什么样”，MCTS-RAG 改进的是”怎么用检索来推理”，理论上可以把 RAPTOR 树作为 MCTS-RAG 的检索后端。</p><h3 id="场景示例"><a href="#场景示例" class="headerlink" title="场景示例"></a>场景示例</h3><blockquote><p><strong>一个假设的例子</strong></p><p><strong>问题</strong>：”这份300页的技术报告中，关于成本优化的建议分布在哪几章？主要观点是什么？”</p><p><strong>传统 RAG</strong>：</p><ul><li>检索到若干包含”成本优化”的段落</li><li>无法确定分布位置（第几章）</li><li>难以提炼主要观点（缺乏全局视角）</li></ul><p><strong>RAPTOR</strong>：</p><ul><li>从章节级摘要定位相关章节：第3、7、12章</li><li>提取各章核心观点并总结</li><li>给出结构化答案：<ul><li>第3章：基础设施成本优化（云资源右配）</li><li>第7章：人力成本优化（自动化流程）</li><li>第12章：长期成本优化（架构重构）</li></ul></li></ul><p><strong>MCTS-RAG</strong>：</p><ul><li>先把问题拆成”哪些章节谈成本优化””各章观点是什么”等子问题</li><li>对每个子问题分别检索、推理，多条推理路径投票得出答案</li><li>准确率可能更高，但调用次数和延迟也成倍增加</li></ul></blockquote><hr><h2 id="核心代码实现对比"><a href="#核心代码实现对比" class="headerlink" title="核心代码实现对比"></a>核心代码实现对比</h2><h3 id="传统-RAG-实现"><a href="#传统-RAG-实现" class="headerlink" title="传统 RAG 实现"></a>传统 RAG 实现</h3><p>以下两段是便于对照的示意实现，<code>embedding_model.encode</code> 假定接口与 sentence-transformers 一致，<code>llm.summarize</code> 需要自行实现。</p><pre class="language-python" data-language="python"><code class="language-python"><span class="token keyword">from</span> typing <span class="token keyword">import</span> List
+
+<span class="token comment"># 传统 RAG：扁平化检索</span>
+<span class="token keyword">class</span> <span class="token class-name">FlatRAG</span><span class="token punctuation">:</span>
+    <span class="token keyword">def</span> <span class="token function">__init__</span><span class="token punctuation">(</span>self<span class="token punctuation">,</span> documents<span class="token punctuation">:</span> List<span class="token punctuation">[</span><span class="token builtin">str</span><span class="token punctuation">]</span><span class="token punctuation">,</span> embedding_model<span class="token punctuation">)</span><span class="token punctuation">:</span>
+        self<span class="token punctuation">.</span>embedding_model <span class="token operator">=</span> embedding_model
+        self<span class="token punctuation">.</span>chunks <span class="token operator">=</span> <span class="token punctuation">[</span><span class="token punctuation">]</span>
+        self<span class="token punctuation">.</span>embeddings <span class="token operator">=</span> <span class="token punctuation">[</span><span class="token punctuation">]</span>
+
+        <span class="token comment"># 1. 文档切分</span>
+        <span class="token keyword">for</span> doc <span class="token keyword">in</span> documents<span class="token punctuation">:</span>
+            chunks <span class="token operator">=</span> self<span class="token punctuation">.</span>split_document<span class="token punctuation">(</span>doc<span class="token punctuation">,</span> chunk_size<span class="token operator">=</span><span class="token number">512</span><span class="token punctuation">)</span>
+            self<span class="token punctuation">.</span>chunks<span class="token punctuation">.</span>extend<span class="token punctuation">(</span>chunks<span class="token punctuation">)</span>
+
+        <span class="token comment"># 2. 向量化</span>
+        self<span class="token punctuation">.</span>embeddings <span class="token operator">=</span> self<span class="token punctuation">.</span>embedding_model<span class="token punctuation">.</span>encode<span class="token punctuation">(</span>self<span class="token punctuation">.</span>chunks<span class="token punctuation">)</span>
+
+    <span class="token keyword">def</span> <span class="token function">retrieve</span><span class="token punctuation">(</span>self<span class="token punctuation">,</span> query<span class="token punctuation">:</span> <span class="token builtin">str</span><span class="token punctuation">,</span> top_k<span class="token punctuation">:</span> <span class="token builtin">int</span> <span class="token operator">=</span> <span class="token number">5</span><span class="token punctuation">)</span><span class="token punctuation">:</span>
+        <span class="token comment"># 3. 向量检索</span>
+        query_embedding <span class="token operator">=</span> self<span class="token punctuation">.</span>embedding_model<span class="token punctuation">.</span>encode<span class="token punctuation">(</span><span class="token punctuation">[</span>query<span class="token punctuation">]</span><span class="token punctuation">)</span><span class="token punctuation">[</span><span class="token number">0</span><span class="token punctuation">]</span>
+
+        <span class="token comment"># 4. 计算相似度</span>
+        <span class="token keyword">from</span> sklearn<span class="token punctuation">.</span>metrics<span class="token punctuation">.</span>pairwise <span class="token keyword">import</span> cosine_similarity
+        similarities <span class="token operator">=</span> cosine_similarity<span class="token punctuation">(</span>
+            <span class="token punctuation">[</span>query_embedding<span class="token punctuation">]</span><span class="token punctuation">,</span>
+            self<span class="token punctuation">.</span>embeddings
+        <span class="token punctuation">)</span><span class="token punctuation">[</span><span class="token number">0</span><span class="token punctuation">]</span>
+
+        <span class="token comment"># 5. Top-K 排序</span>
+        top_indices <span class="token operator">=</span> similarities<span class="token punctuation">.</span>argsort<span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">[</span><span class="token operator">-</span>top_k<span class="token punctuation">:</span><span class="token punctuation">]</span><span class="token punctuation">[</span><span class="token punctuation">:</span><span class="token punctuation">:</span><span class="token operator">-</span><span class="token number">1</span><span class="token punctuation">]</span>
+        <span class="token keyword">return</span> <span class="token punctuation">[</span>self<span class="token punctuation">.</span>chunks<span class="token punctuation">[</span>i<span class="token punctuation">]</span> <span class="token keyword">for</span> i <span class="token keyword">in</span> top_indices<span class="token punctuation">]</span>
+
+    <span class="token keyword">def</span> <span class="token function">split_document</span><span class="token punctuation">(</span>self<span class="token punctuation">,</span> doc<span class="token punctuation">:</span> <span class="token builtin">str</span><span class="token punctuation">,</span> chunk_size<span class="token punctuation">:</span> <span class="token builtin">int</span><span class="token punctuation">)</span><span class="token punctuation">:</span>
+        <span class="token triple-quoted-string string">"""简单的固定窗口切分"""</span>
+        words <span class="token operator">=</span> doc<span class="token punctuation">.</span>split<span class="token punctuation">(</span><span class="token punctuation">)</span>
+        <span class="token keyword">return</span> <span class="token punctuation">[</span>
+            <span class="token string">' '</span><span class="token punctuation">.</span>join<span class="token punctuation">(</span>words<span class="token punctuation">[</span>i<span class="token punctuation">:</span>i<span class="token operator">+</span>chunk_size<span class="token punctuation">]</span><span class="token punctuation">)</span>
+            <span class="token keyword">for</span> i <span class="token keyword">in</span> <span class="token builtin">range</span><span class="token punctuation">(</span><span class="token number">0</span><span class="token punctuation">,</span> <span class="token builtin">len</span><span class="token punctuation">(</span>words<span class="token punctuation">)</span><span class="token punctuation">,</span> chunk_size<span class="token punctuation">)</span>
+        <span class="token punctuation">]</span></code></pre><h3 id="树形-RAG-实现-RAPTOR-风格"><a href="#树形-RAG-实现-RAPTOR-风格" class="headerlink" title="树形 RAG 实现 (RAPTOR 风格)"></a>树形 RAG 实现 (RAPTOR 风格)</h3><pre class="language-python" data-language="python"><code class="language-python"><span class="token keyword">from</span> typing <span class="token keyword">import</span> List
+
+<span class="token comment"># 树形 RAG：层级化检索（collapsed tree 风格）</span>
+<span class="token keyword">class</span> <span class="token class-name">TreeRAG</span><span class="token punctuation">:</span>
+    <span class="token keyword">def</span> <span class="token function">__init__</span><span class="token punctuation">(</span>self<span class="token punctuation">,</span> documents<span class="token punctuation">:</span> List<span class="token punctuation">[</span><span class="token builtin">str</span><span class="token punctuation">]</span><span class="token punctuation">,</span> llm<span class="token punctuation">,</span> embedding_model<span class="token punctuation">)</span><span class="token punctuation">:</span>
+        self<span class="token punctuation">.</span>llm <span class="token operator">=</span> llm
+        self<span class="token punctuation">.</span>embedding_model <span class="token operator">=</span> embedding_model
+        self<span class="token punctuation">.</span>tree_layers <span class="token operator">=</span> <span class="token punctuation">[</span><span class="token punctuation">]</span>
+
+        <span class="token comment"># 构建层级树</span>
+        self<span class="token punctuation">.</span>build_hierarchy<span class="token punctuation">(</span>documents<span class="token punctuation">)</span>
+
+    <span class="token keyword">def</span> <span class="token function">build_hierarchy</span><span class="token punctuation">(</span>self<span class="token punctuation">,</span> documents<span class="token punctuation">:</span> List<span class="token punctuation">[</span><span class="token builtin">str</span><span class="token punctuation">]</span><span class="token punctuation">)</span><span class="token punctuation">:</span>
+        <span class="token triple-quoted-string string">"""递归构建摘要层级"""</span>
+        <span class="token comment"># 1. 叶节点层：原始 chunks</span>
+        leaf_chunks <span class="token operator">=</span> <span class="token punctuation">[</span><span class="token punctuation">]</span>
+        <span class="token keyword">for</span> doc <span class="token keyword">in</span> documents<span class="token punctuation">:</span>
+            chunks <span class="token operator">=</span> self<span class="token punctuation">.</span>split_document<span class="token punctuation">(</span>doc<span class="token punctuation">,</span> chunk_size<span class="token operator">=</span><span class="token number">512</span><span class="token punctuation">)</span>
+            leaf_chunks<span class="token punctuation">.</span>extend<span class="token punctuation">(</span>chunks<span class="token punctuation">)</span>
+
+        self<span class="token punctuation">.</span>tree_layers<span class="token punctuation">.</span>append<span class="token punctuation">(</span><span class="token punctuation">{</span>
+            <span class="token string">'level'</span><span class="token punctuation">:</span> <span class="token number">0</span><span class="token punctuation">,</span>
+            <span class="token string">'nodes'</span><span class="token punctuation">:</span> leaf_chunks<span class="token punctuation">,</span>
+            <span class="token string">'embeddings'</span><span class="token punctuation">:</span> self<span class="token punctuation">.</span>embedding_model<span class="token punctuation">.</span>encode<span class="token punctuation">(</span>leaf_chunks<span class="token punctuation">)</span>
+        <span class="token punctuation">}</span><span class="token punctuation">)</span>
+
+        <span class="token comment"># 2. 递归构建上层摘要</span>
+        current_nodes <span class="token operator">=</span> leaf_chunks
+        level <span class="token operator">=</span> <span class="token number">1</span>
+
+        <span class="token keyword">while</span> <span class="token builtin">len</span><span class="token punctuation">(</span>current_nodes<span class="token punctuation">)</span> <span class="token operator">&gt;</span> <span class="token number">1</span><span class="token punctuation">:</span>
+            <span class="token comment"># 聚类</span>
+            clusters <span class="token operator">=</span> self<span class="token punctuation">.</span>cluster_nodes<span class="token punctuation">(</span>current_nodes<span class="token punctuation">,</span> n_clusters<span class="token operator">=</span><span class="token builtin">max</span><span class="token punctuation">(</span><span class="token number">1</span><span class="token punctuation">,</span> <span class="token builtin">len</span><span class="token punctuation">(</span>current_nodes<span class="token punctuation">)</span> <span class="token operator">//</span> <span class="token number">5</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
+
+            <span class="token comment"># 生成摘要</span>
+            summaries <span class="token operator">=</span> <span class="token punctuation">[</span><span class="token punctuation">]</span>
+            <span class="token keyword">for</span> cluster <span class="token keyword">in</span> clusters<span class="token punctuation">:</span>
+                summary <span class="token operator">=</span> self<span class="token punctuation">.</span>llm<span class="token punctuation">.</span>summarize<span class="token punctuation">(</span>cluster<span class="token punctuation">)</span>
+                summaries<span class="token punctuation">.</span>append<span class="token punctuation">(</span>summary<span class="token punctuation">)</span>
+
+            <span class="token comment"># 存储当前层</span>
+            self<span class="token punctuation">.</span>tree_layers<span class="token punctuation">.</span>append<span class="token punctuation">(</span><span class="token punctuation">{</span>
+                <span class="token string">'level'</span><span class="token punctuation">:</span> level<span class="token punctuation">,</span>
+                <span class="token string">'nodes'</span><span class="token punctuation">:</span> summaries<span class="token punctuation">,</span>
+                <span class="token string">'embeddings'</span><span class="token punctuation">:</span> self<span class="token punctuation">.</span>embedding_model<span class="token punctuation">.</span>encode<span class="token punctuation">(</span>summaries<span class="token punctuation">)</span>
+            <span class="token punctuation">}</span><span class="token punctuation">)</span>
+
+            current_nodes <span class="token operator">=</span> summaries
+            level <span class="token operator">+=</span> <span class="token number">1</span>
+
+    <span class="token keyword">def</span> <span class="token function">retrieve</span><span class="token punctuation">(</span>self<span class="token punctuation">,</span> query<span class="token punctuation">:</span> <span class="token builtin">str</span><span class="token punctuation">,</span> top_k_per_layer<span class="token punctuation">:</span> <span class="token builtin">int</span> <span class="token operator">=</span> <span class="token number">3</span><span class="token punctuation">)</span><span class="token punctuation">:</span>
+        <span class="token triple-quoted-string string">"""跨层级混合检索"""</span>
+        query_embedding <span class="token operator">=</span> self<span class="token punctuation">.</span>embedding_model<span class="token punctuation">.</span>encode<span class="token punctuation">(</span><span class="token punctuation">[</span>query<span class="token punctuation">]</span><span class="token punctuation">)</span><span class="token punctuation">[</span><span class="token number">0</span><span class="token punctuation">]</span>
+
+        <span class="token keyword">from</span> sklearn<span class="token punctuation">.</span>metrics<span class="token punctuation">.</span>pairwise <span class="token keyword">import</span> cosine_similarity
+        all_candidates <span class="token operator">=</span> <span class="token punctuation">[</span><span class="token punctuation">]</span>
+
+        <span class="token comment"># 在每一层都检索</span>
+        <span class="token keyword">for</span> layer <span class="token keyword">in</span> self<span class="token punctuation">.</span>tree_layers<span class="token punctuation">:</span>
+            similarities <span class="token operator">=</span> cosine_similarity<span class="token punctuation">(</span>
+                <span class="token punctuation">[</span>query_embedding<span class="token punctuation">]</span><span class="token punctuation">,</span>
+                layer<span class="token punctuation">[</span><span class="token string">'embeddings'</span><span class="token punctuation">]</span>
+            <span class="token punctuation">)</span><span class="token punctuation">[</span><span class="token number">0</span><span class="token punctuation">]</span>
+
+            top_indices <span class="token operator">=</span> similarities<span class="token punctuation">.</span>argsort<span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">[</span><span class="token operator">-</span>top_k_per_layer<span class="token punctuation">:</span><span class="token punctuation">]</span><span class="token punctuation">[</span><span class="token punctuation">:</span><span class="token punctuation">:</span><span class="token operator">-</span><span class="token number">1</span><span class="token punctuation">]</span>
+
+            <span class="token keyword">for</span> idx <span class="token keyword">in</span> top_indices<span class="token punctuation">:</span>
+                all_candidates<span class="token punctuation">.</span>append<span class="token punctuation">(</span><span class="token punctuation">{</span>
+                    <span class="token string">'text'</span><span class="token punctuation">:</span> layer<span class="token punctuation">[</span><span class="token string">'nodes'</span><span class="token punctuation">]</span><span class="token punctuation">[</span>idx<span class="token punctuation">]</span><span class="token punctuation">,</span>
+                    <span class="token string">'level'</span><span class="token punctuation">:</span> layer<span class="token punctuation">[</span><span class="token string">'level'</span><span class="token punctuation">]</span><span class="token punctuation">,</span>
+                    <span class="token string">'score'</span><span class="token punctuation">:</span> similarities<span class="token punctuation">[</span>idx<span class="token punctuation">]</span>
+                <span class="token punctuation">}</span><span class="token punctuation">)</span>
+
+        <span class="token comment"># 按分数排序，返回混合结果</span>
+        all_candidates<span class="token punctuation">.</span>sort<span class="token punctuation">(</span>key<span class="token operator">=</span><span class="token keyword">lambda</span> x<span class="token punctuation">:</span> x<span class="token punctuation">[</span><span class="token string">'score'</span><span class="token punctuation">]</span><span class="token punctuation">,</span> reverse<span class="token operator">=</span><span class="token boolean">True</span><span class="token punctuation">)</span>
+        <span class="token keyword">return</span> all_candidates<span class="token punctuation">[</span><span class="token punctuation">:</span>top_k_per_layer <span class="token operator">*</span> <span class="token number">2</span><span class="token punctuation">]</span>
+
+    <span class="token keyword">def</span> <span class="token function">cluster_nodes</span><span class="token punctuation">(</span>self<span class="token punctuation">,</span> nodes<span class="token punctuation">:</span> List<span class="token punctuation">[</span><span class="token builtin">str</span><span class="token punctuation">]</span><span class="token punctuation">,</span> n_clusters<span class="token punctuation">:</span> <span class="token builtin">int</span><span class="token punctuation">)</span><span class="token punctuation">:</span>
+        <span class="token triple-quoted-string string">"""用 GMM 聚类（这里取最可能的簇，即硬分配；RAPTOR 原文是按概率阈值软分配）"""</span>
+        <span class="token keyword">from</span> sklearn<span class="token punctuation">.</span>mixture <span class="token keyword">import</span> GaussianMixture
+
+        embeddings <span class="token operator">=</span> self<span class="token punctuation">.</span>embedding_model<span class="token punctuation">.</span>encode<span class="token punctuation">(</span>nodes<span class="token punctuation">)</span>
+        gmm <span class="token operator">=</span> GaussianMixture<span class="token punctuation">(</span>n_components<span class="token operator">=</span>n_clusters<span class="token punctuation">,</span> random_state<span class="token operator">=</span><span class="token number">42</span><span class="token punctuation">)</span>
+        labels <span class="token operator">=</span> gmm<span class="token punctuation">.</span>fit_predict<span class="token punctuation">(</span>embeddings<span class="token punctuation">)</span>
+
+        <span class="token comment"># 按簇分组</span>
+        clusters <span class="token operator">=</span> <span class="token punctuation">[</span><span class="token punctuation">[</span><span class="token punctuation">]</span> <span class="token keyword">for</span> _ <span class="token keyword">in</span> <span class="token builtin">range</span><span class="token punctuation">(</span>n_clusters<span class="token punctuation">)</span><span class="token punctuation">]</span>
+        <span class="token keyword">for</span> i<span class="token punctuation">,</span> label <span class="token keyword">in</span> <span class="token builtin">enumerate</span><span class="token punctuation">(</span>labels<span class="token punctuation">)</span><span class="token punctuation">:</span>
+            clusters<span class="token punctuation">[</span>label<span class="token punctuation">]</span><span class="token punctuation">.</span>append<span class="token punctuation">(</span>nodes<span class="token punctuation">[</span>i<span class="token punctuation">]</span><span class="token punctuation">)</span>
+
+        <span class="token keyword">return</span> <span class="token punctuation">[</span>c <span class="token keyword">for</span> c <span class="token keyword">in</span> clusters <span class="token keyword">if</span> c<span class="token punctuation">]</span>  <span class="token comment"># 过滤空簇</span></code></pre><hr><h2 id="实践建议"><a href="#实践建议" class="headerlink" title="实践建议"></a>实践建议</h2><h3 id="何时使用传统-RAG"><a href="#何时使用传统-RAG" class="headerlink" title="何时使用传统 RAG"></a>何时使用传统 RAG</h3><blockquote><p><strong>适用场景</strong></p><ul><li>文档较短，或者问题的答案通常集中在一两段里</li><li>查询类型：简单事实查找</li><li>对延迟敏感</li><li>预算有限，无法承担 LLM 预处理成本</li></ul></blockquote><h3 id="何时使用树形-RAG"><a href="#何时使用树形-RAG" class="headerlink" title="何时使用树形 RAG"></a>何时使用树形 RAG</h3><blockquote><p><strong>适用场景</strong></p><ul><li>长文档（书籍、长报告、合同汇编）</li><li>查询类型：总结、对比、多跳推理</li><li>对准确性要求高于延迟</li><li>文档相对稳定，不需要频繁重建索引</li></ul></blockquote><h3 id="混合策略"><a href="#混合策略" class="headerlink" title="混合策略"></a>混合策略</h3><blockquote><p><strong>最佳实践</strong></p><p><strong>双路检索架构</strong>：</p><ol><li><strong>快速路径</strong>：传统 RAG 处理简单查询</li><li><strong>深度路径</strong>：树形 RAG 处理总结、对比类复杂查询</li><li><strong>路由</strong>：用规则、小分类器或 LLM 判断查询复杂度</li></ol><p>两条路径各占多少流量取决于业务，建议先打日志统计真实查询分布再决定。</p></blockquote><pre class="language-python" data-language="python"><code class="language-python"><span class="token keyword">class</span> <span class="token class-name">HybridRAG</span><span class="token punctuation">:</span>
+    <span class="token keyword">def</span> <span class="token function">__init__</span><span class="token punctuation">(</span>self<span class="token punctuation">,</span> documents<span class="token punctuation">,</span> llm<span class="token punctuation">,</span> embedding_model<span class="token punctuation">,</span> query_classifier<span class="token punctuation">)</span><span class="token punctuation">:</span>
+        self<span class="token punctuation">.</span>flat_rag <span class="token operator">=</span> FlatRAG<span class="token punctuation">(</span>documents<span class="token punctuation">,</span> embedding_model<span class="token punctuation">)</span>
+        self<span class="token punctuation">.</span>tree_rag <span class="token operator">=</span> TreeRAG<span class="token punctuation">(</span>documents<span class="token punctuation">,</span> llm<span class="token punctuation">,</span> embedding_model<span class="token punctuation">)</span>
+        self<span class="token punctuation">.</span>query_classifier <span class="token operator">=</span> query_classifier
+
+    <span class="token keyword">def</span> <span class="token function">retrieve</span><span class="token punctuation">(</span>self<span class="token punctuation">,</span> query<span class="token punctuation">:</span> <span class="token builtin">str</span><span class="token punctuation">)</span><span class="token punctuation">:</span>
+        <span class="token comment"># 判断查询复杂度</span>
+        <span class="token keyword">if</span> self<span class="token punctuation">.</span>query_classifier<span class="token punctuation">.</span>is_simple<span class="token punctuation">(</span>query<span class="token punctuation">)</span><span class="token punctuation">:</span>
+            <span class="token keyword">return</span> self<span class="token punctuation">.</span>flat_rag<span class="token punctuation">.</span>retrieve<span class="token punctuation">(</span>query<span class="token punctuation">)</span>
+        <span class="token keyword">else</span><span class="token punctuation">:</span>
+            <span class="token keyword">return</span> self<span class="token punctuation">.</span>tree_rag<span class="token punctuation">.</span>retrieve<span class="token punctuation">(</span>query<span class="token punctuation">)</span></code></pre><hr><h2 id="论文报告的实验结果"><a href="#论文报告的实验结果" class="headerlink" title="论文报告的实验结果"></a>论文报告的实验结果</h2><p>下面的数字都直接摘自两篇论文，实验设置不同，<strong>不能横向比较</strong>，只能看各自相对基线的提升。</p><h3 id="RAPTOR"><a href="#RAPTOR" class="headerlink" title="RAPTOR"></a>RAPTOR</h3><p>RAPTOR 在 NarrativeQA（长篇小说/剧本问答）、QASPER（论文全文问答）和 QuALITY（长文档多选题）三个数据集上评测：</p><table><thead><tr><th align="left">设置</th><th align="left">指标</th><th align="left">RAPTOR</th><th align="left">对照</th></tr></thead><tbody><tr><td align="left">QuALITY 测试集，GPT-4</td><td align="left">准确率</td><td align="left"><strong>82.6%</strong></td><td align="left">此前最佳 CoLISA 62.3%</td></tr><tr><td align="left">QuALITY 困难子集，GPT-4</td><td align="left">准确率</td><td align="left"><strong>76.2%</strong></td><td align="left">CoLISA 54.7%</td></tr><tr><td align="left">QASPER，GPT-4</td><td align="left">F1</td><td align="left"><strong>55.7%</strong></td><td align="left">此前最佳 CoLT5 XL 53.9%</td></tr><tr><td align="left">QASPER，GPT-3</td><td align="left">F1</td><td align="left"><strong>53.1%</strong></td><td align="left">DPR 51.3%，BM25 46.6%</td></tr><tr><td align="left">QuALITY，GPT-3</td><td align="left">准确率</td><td align="left"><strong>62.4%</strong></td><td align="left">DPR 60.4%，BM25 57.3%</td></tr></tbody></table><p>和同一读者模型下的 DPR、BM25 对比，提升是几个百分点；和此前的最好结果相比，GPT-4 + RAPTOR 在 QuALITY 上高出约 20 个百分点，其中有相当一部分来自 GPT-4 本身。</p><h3 id="MCTS-RAG"><a href="#MCTS-RAG" class="headerlink" title="MCTS-RAG"></a>MCTS-RAG</h3><p>MCTS-RAG 在 ComplexWebQA（多跳知识问答）、GPQA（研究生级科学题）、FoolMeTwice（事实核查）上评测，读者模型是小模型：</p><table><thead><tr><th align="left">模型</th><th align="left">方法</th><th align="left">ComplexWebQA</th><th align="left">GPQA</th><th align="left">FoolMeTwice</th></tr></thead><tbody><tr><td align="left">Llama 3.1-8B</td><td align="left">Standard RAG</td><td align="left">35.6%</td><td align="left">31.7%</td><td align="left">51.5%</td></tr><tr><td align="left">Llama 3.1-8B</td><td align="left">MCTS-RAG</td><td align="left"><strong>67.3%</strong></td><td align="left"><strong>71.3%</strong></td><td align="left"><strong>73.8%</strong></td></tr><tr><td align="left">Qwen2.5-7B</td><td align="left">Standard RAG</td><td align="left">44.2%</td><td align="left">40.6%</td><td align="left">58.4%</td></tr><tr><td align="left">Qwen2.5-7B</td><td align="left">MCTS-RAG</td><td align="left"><strong>61.4%</strong></td><td align="left"><strong>64.6%</strong></td><td align="left"><strong>68.3%</strong></td></tr></tbody></table><p>代价是推理时计算：在 Qwen2.5-7B + GPQA 上，MCTS-RAG 的延迟约为 Standard RAG 的 2.8 倍，每个问题消耗约 1.2 万 token；rollout 从 4 增加到 16 时，token 增至约 2.9 万，延迟升到约 4.5 倍。</p><blockquote><p><strong>数据来源</strong></p><ul><li>RAPTOR：Sarthi et al., 2024, <a target="_blank" rel="noopener" href="https://arxiv.org/abs/2401.18059">arXiv:2401.18059</a></li><li>MCTS-RAG：Hu et al., 2025, <a target="_blank" rel="noopener" href="https://arxiv.org/abs/2503.20757">arXiv:2503.20757</a></li><li>数据集：<a target="_blank" rel="noopener" href="https://huggingface.co/datasets/deepmind/narrativeqa">NarrativeQA</a>、<a target="_blank" rel="noopener" href="https://github.com/nyu-mll/quality">QuALITY</a></li></ul></blockquote><hr><h2 id="工程实践要点-1"><a href="#工程实践要点-1" class="headerlink" title="工程实践要点"></a>工程实践要点</h2><h3 id="树构建优化"><a href="#树构建优化" class="headerlink" title="树构建优化"></a>树构建优化</h3><blockquote><p><strong>注意事项</strong></p><p><strong>聚类数量选择</strong>：</p><ul><li>RAPTOR 原文用 BIC 自动选择簇数，比固定比例更稳</li><li>如果用固定比例，可以从每 5-10 个节点聚为 1 簇起步</li><li>单个簇的总长度不要超过摘要模型的上下文，过大的簇需要再拆分</li></ul></blockquote><p><strong>代码示例</strong>：</p><pre class="language-python" data-language="python"><code class="language-python"><span class="token keyword">def</span> <span class="token function">adaptive_clustering</span><span class="token punctuation">(</span>nodes<span class="token punctuation">,</span> max_cluster_size<span class="token operator">=</span><span class="token number">10</span><span class="token punctuation">)</span><span class="token punctuation">:</span>
+    <span class="token triple-quoted-string string">"""自适应聚类数量"""</span>
+    n_nodes <span class="token operator">=</span> <span class="token builtin">len</span><span class="token punctuation">(</span>nodes<span class="token punctuation">)</span>
+    n_clusters <span class="token operator">=</span> <span class="token builtin">max</span><span class="token punctuation">(</span><span class="token number">1</span><span class="token punctuation">,</span> n_nodes <span class="token operator">//</span> max_cluster_size<span class="token punctuation">)</span>
+    <span class="token keyword">return</span> n_clusters</code></pre><h3 id="摘要生成策略"><a href="#摘要生成策略" class="headerlink" title="摘要生成策略"></a>摘要生成策略</h3><blockquote><p><strong>提示词优化</strong></p><pre class="language-text" data-language="text"><code class="language-text">你是一位专业的文档摘要专家。请阅读以下相关段落，
+并生成一个简洁、准确的摘要（不超过150字）：
+
+{cluster_content}
+
+要求：
+1. 保留关键信息和逻辑关系
+2. 使用抽象化的语言
+3. 适合作为上层索引节点</code></pre></blockquote><h3 id="存储优化"><a href="#存储优化" class="headerlink" title="存储优化"></a>存储优化</h3><pre class="language-python" data-language="python"><code class="language-python"><span class="token comment"># 使用稀疏矩阵存储层级关系</span>
+<span class="token keyword">from</span> scipy<span class="token punctuation">.</span>sparse <span class="token keyword">import</span> lil_matrix
+
+<span class="token keyword">class</span> <span class="token class-name">EfficientTreeRAG</span><span class="token punctuation">:</span>
+    <span class="token keyword">def</span> <span class="token function">__init__</span><span class="token punctuation">(</span>self<span class="token punctuation">)</span><span class="token punctuation">:</span>
+        self<span class="token punctuation">.</span>adjacency_matrix <span class="token operator">=</span> lil_matrix<span class="token punctuation">(</span><span class="token punctuation">(</span><span class="token number">10000</span><span class="token punctuation">,</span> <span class="token number">10000</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
+        self<span class="token punctuation">.</span>node_embeddings <span class="token operator">=</span> <span class="token punctuation">{</span><span class="token punctuation">}</span>
+
+    <span class="token keyword">def</span> <span class="token function">add_edge</span><span class="token punctuation">(</span>self<span class="token punctuation">,</span> parent_id<span class="token punctuation">,</span> child_id<span class="token punctuation">)</span><span class="token punctuation">:</span>
+        self<span class="token punctuation">.</span>adjacency_matrix<span class="token punctuation">[</span>parent_id<span class="token punctuation">,</span> child_id<span class="token punctuation">]</span> <span class="token operator">=</span> <span class="token number">1</span></code></pre></div><hr><div class="hexo-ad" aria-label="赞助内容"><div class="hexo-ad-script"><style>.hexo-article-ad-slot{display:block;width:100%;max-width:320px;height:100px;margin:0 auto}@media (min-width:500px){.hexo-article-ad-slot{max-width:468px;height:60px}}@media (min-width:800px){.hexo-article-ad-slot{max-width:728px;height:90px}}</style><ins class="adsbygoogle hexo-article-ad-slot" style="display:block" data-ad-client="ca-pub-8990123471955885" data-ad-slot="4326698678"></ins><script>(adsbygoogle=window.adsbygoogle||[]).push({})</script></div></div><style>.hexo-ad{margin:1.2rem auto;text-align:center}.hexo-ad-img{max-width:100%;height:auto;border-radius:8px;box-shadow:0 2px 8px rgba(0,0,0,.08)}.hexo-ad-script{margin:0 auto}</style><div class="reprint" id="reprint-statement"><div class="reprint__author"><span class="reprint-meta" style="font-weight:700"><i class="fas fa-user">文章作者:</i></span> <span class="reprint-info"><a href="/about" rel="external nofollow noreferrer">costalong</a></span></div><div class="reprint__type"><span class="reprint-meta" style="font-weight:700"><i class="fas fa-link">文章链接:</i></span> <span class="reprint-info"><a href="https://costalong.com/2026/01/24/tree-rag-vs-traditional-rag/">https://costalong.com/2026/01/24/tree-rag-vs-traditional-rag/</a> <button class="reprint-copy-link" type="button" data-copy-url="https://costalong.com/2026/01/24/tree-rag-vs-traditional-rag/" aria-label="复制文章链接" title="复制文章链接"><i class="fas fa-copy" aria-hidden="true"></i> <span>复制链接</span></button><span class="reprint-copy-status" role="status" aria-live="polite"></span></span></div><div class="reprint__notice"><span class="reprint-meta" style="font-weight:700"><i class="fas fa-copyright">版权声明:</i></span> <span class="reprint-info">本博客所有文章除特別声明外，均采用 <a href="https://creativecommons.org/licenses/by/4.0/deed.zh" rel="external nofollow noreferrer" target="_blank">CC BY 4.0</a> 许可协议。转载请注明来源 <a href="/about" target="_blank">costalong</a> !</span></div></div><script async defer>document.addEventListener("copy", function (e) {
+        if (window.__articlePermalinkCopy) return;
+        let toastHTML = '<span>复制成功，请遵循本文的转载规则</span><button class="btn-flat toast-action" onclick="navToReprintStatement()" style="font-size: smaller">查看</a>';
+        M.toast({html: toastHTML})
+      });
+
+      document.addEventListener("click", async function (e) {
+        const button = e.target.closest(".reprint-copy-link");
+        if (!button) return;
+
+        const row = button.closest(".reprint__type .reprint-info");
+        const permalink = button.dataset.copyUrl;
+        if (!row || !permalink) return;
+
+        const status = row.querySelector(".reprint-copy-status");
+        const fallbackCopy = function (text) {
+          const textarea = document.createElement("textarea");
+          textarea.value = text;
+          textarea.setAttribute("readonly", "");
+          textarea.style.position = "fixed";
+          textarea.style.opacity = "0";
+          document.body.appendChild(textarea);
+          textarea.select();
+          window.__articlePermalinkCopy = true;
+          let copied = false;
+          try {
+            copied = document.execCommand("copy");
+          } finally {
+            window.__articlePermalinkCopy = false;
+            textarea.remove();
+          }
+          if (!copied) throw new Error("Clipboard copy failed");
+        };
+
+        try {
+          if (navigator.clipboard && navigator.clipboard.writeText) {
+            try {
+              await navigator.clipboard.writeText(permalink);
+            } catch (error) {
+              fallbackCopy(permalink);
+            }
+          } else {
+            fallbackCopy(permalink);
+          }
+          status.textContent = "已复制";
+          button.classList.add("is-copied");
+        } catch (error) {
+          status.textContent = "复制失败，请长按链接复制";
+        }
+
+        window.setTimeout(function () {
+          status.textContent = "";
+          button.classList.remove("is-copied");
+        }, 2200);
+      });
+
+      function navToReprintStatement() {
+        $("html, body").animate({scrollTop: $("#reprint-statement").offset().top - 80}, 800);
+      }</script><div class="tag_share" style="display:block"><div class="post-meta__tag-list" style="display:inline-block"><div class="article-tag"><a href="/tags/RAG/"><span class="chip bg-color">RAG</span></a> <a href="/tags/AI%E6%9E%B6%E6%9E%84/"><span class="chip bg-color ai">AI架构</span></a> <a href="/tags/%E6%A3%80%E7%B4%A2%E5%A2%9E%E5%BC%BA/"><span class="chip bg-color">检索增强</span></a> <a href="/tags/RAPTOR/"><span class="chip bg-color">RAPTOR</span></a> <a href="/tags/MCTS/"><span class="chip bg-color">MCTS</span></a></div></div><div class="post_share" style="zoom:80%;width:fit-content;display:inline-block;float:right;margin:-.15rem 0"><link rel="stylesheet" href="/libs/share/css/share.min.css"><div id="article-share"><div class="social-share" data-sites="twitter,facebook,google,qq,qzone,wechat,weibo,douban,linkedin" data-wechat-qrcode-helper="<p>微信扫一扫即可分享！</p>"></div><script src="/libs/share/js/social-share.min.js"></script></div></div></div><div id="reward"><a href="#rewardModal" class="reward-link modal-trigger btn-floating btn-medium waves-effect waves-light red">赏</a><div id="rewardModal" class="modal"><div class="modal-content"><a class="close modal-close"><i class="fas fa-times"></i></a><h4 class="reward-title">你的赏识是我前进的动力</h4><div class="reward-content"><div class="reward-tabs"><ul class="tabs row"><li class="tab col s6 alipay-tab waves-effect waves-light"><a href="#alipay">支付宝</a></li><li class="tab col s6 wechat-tab waves-effect waves-light"><a href="#wechat">微 信</a></li></ul><div id="alipay"><img src="/images/reward/alipay.jpg" class="reward-img" loading="lazy" alt="支付宝打赏二维码"></div><div id="wechat"><img src="/images/reward/wechat.jpg" class="reward-img" loading="lazy" alt="微信打赏二维码"></div></div></div></div></div></div><script>$(function(){$(".tabs").tabs()})</script></div></div><section class="post-related" aria-labelledby="post-related-title"><h2 id="post-related-title">继续阅读</h2><div class="post-related-grid"><a class="post-related-card" href="/2026/04/27/karpathy-llm-wiki-architecture/"><span class="post-related-date">2026-04-27</span> <strong>Karpathy 的 LLM Wiki：三层架构搭建持久化的个人 AI 大脑</strong> <span class="post-related-summary">对照 Karpathy 的 LLM Wiki gist 原文，拆解 Raw Sources / Wiki / Schema 三层和 Ingest / Query / Lint 三个…</span></a> <a class="post-related-card" href="/2026/06/06/claude-minsearch-mcp-protobuf-rag/"><span class="post-related-date">2026-06-06</span> <strong>Claude 想看最新 protobuf 文档？用 minsearch + MCP 搭一个 100 行的迷你 RAG</strong> <span class="post-related-summary">用 minsearch 的 TF-IDF 索引加一个 stdio MCP server，约 100 行 Python 把 protobuf 官方文档接进 Claude Code；代…</span></a> <a class="post-related-card" href="/2026/04/16/mempalace-local-memory-tutorial/"><span class="post-related-date">2026-04-16</span> <strong>MemPalace 从零上手：给 Claude Code 装本地 AI 记忆（零 API）</strong> <span class="post-related-summary">用 MemPalace 3.10 给 Claude Code 加一层本地记忆：从 init、mine、search 到 MCP 接入和 Stop / PreCompact 自动保存…</span></a></div></section><style>.valine-card{margin:1.5rem auto}.valine-card .card-content{padding:20px 20px 5px 20px}#vcomments textarea{box-sizing:border-box;background:url(/medias/comment_bg.png) 100% 100% no-repeat}#vcomments p{margin:2px 2px 10px;font-size:1.05rem;line-height:1.78rem}#vcomments blockquote p{text-indent:.2rem}#vcomments a{padding:0 2px;color:#4cbf30;font-weight:500;text-decoration:none}#vcomments img{max-width:100%;height:auto;cursor:pointer}#vcomments ol li{list-style-type:decimal}#vcomments ol,ul{display:block;padding-left:2em;word-spacing:.05rem}#vcomments ul li,ol li{display:list-item;line-height:1.8rem;font-size:1rem}#vcomments ul li{list-style-type:disc}#vcomments ul ul li{list-style-type:circle}#vcomments table,td,th{padding:12px 13px;border:1px solid #dfe2e5}#vcomments table,td,th{border:0}table tr:nth-child(2n),thead{background-color:#fafafa}#vcomments table th{background-color:#f2f2f2;min-width:80px}#vcomments table td{min-width:80px}#vcomments h1{font-size:1.85rem;font-weight:700;line-height:2.2rem}#vcomments h2{font-size:1.65rem;font-weight:700;line-height:1.9rem}#vcomments h3{font-size:1.45rem;font-weight:700;line-height:1.7rem}#vcomments h4{font-size:1.25rem;font-weight:700;line-height:1.5rem}#vcomments h5{font-size:1.1rem;font-weight:700;line-height:1.4rem}#vcomments h6{font-size:1rem;line-height:1.3rem}#vcomments p{font-size:1rem;line-height:1.5rem}#vcomments hr{margin:12px 0;border:0;border-top:1px solid #ccc}#vcomments blockquote{margin:15px 0;border-left:5px solid #42b983;padding:1rem .8rem .3rem .8rem;color:#666;background-color:rgba(66,185,131,.1)}#vcomments pre{font-family:monospace,monospace;padding:1.2em;margin:.5em 0;background:#272822;overflow:auto;border-radius:.3em;tab-size:4}#vcomments code{font-family:monospace,monospace;padding:1px 3px;font-size:.92rem;color:#e96900;background-color:#f8f8f8;border-radius:2px}#vcomments pre code{font-family:monospace,monospace;padding:0;color:#e8eaf6;background-color:#272822}#vcomments pre[class*=language-]{padding:1.2em;margin:.5em 0}#vcomments code[class*=language-],pre[class*=language-]{color:#e8eaf6}#vcomments [type=checkbox]:not(:checked),[type=checkbox]:checked{position:inherit;margin-left:-1.3rem;margin-right:.4rem;margin-top:-1px;vertical-align:middle;left:unset;visibility:visible}#vcomments b,strong{font-weight:700}#vcomments dfn{font-style:italic}#vcomments small{font-size:85%}#vcomments cite{font-style:normal}#vcomments mark{background-color:#fcf8e3;padding:.2em}#vcomments table,td,th{padding:12px 13px;border:1px solid #dfe2e5}table tr:nth-child(2n),thead{background-color:#fafafa}#vcomments table th{background-color:#f2f2f2;min-width:80px}#vcomments table td{min-width:80px}#vcomments [type=checkbox]:not(:checked),[type=checkbox]:checked{position:inherit;margin-left:-1.3rem;margin-right:.4rem;margin-top:-1px;vertical-align:middle;left:unset;visibility:visible}</style><div class="card valine-card" data-aos="fade-up"><div class="comment_headling" style="font-size:20px;font-weight:700;padding:20px 20px 8px 20px"><i class="fas fa-comments fa-fw" aria-hidden="true"></i> <span>评论</span></div><div id="vcomments" class="card-content" style="display:grid"></div></div><script>!function(){var e=document.getElementById("vcomments"),t=["/libs/valine/av-min.js","/libs/valine/Valine.min.js"];function i(e){if(e!==t.length){var n=document.createElement("script");n.src=t[e],n.onload=function(){i(e+1)},document.body.appendChild(n)}else new Valine({el:"#vcomments",appId:"wCf5tlcDtIMPMtrnfln6u3fL-MdYXbMMI",appKey:"pvzhB4VvZzNeC5gtXTaIv0oo",serverURLs:"https://wcf5tlcd.api.lncldglobal.com",notify:!1,verify:!1,visitor:!0,recordIP:!1,avatar:"mm",pageSize:"10",lang:"zh-cn",placeholder:"有什么想说的，在这里留言…"})}if(!("IntersectionObserver"in window))return i(0);var n=new IntersectionObserver(function(e){e[0].isIntersecting&&(n.disconnect(),i(0))},{rootMargin:"600px 0px"});n.observe(e)}()</script><article id="prenext-posts" class="prev-next articles"><div class="row article-row"><div class="article col s12 m6" data-aos="fade-up"><div class="article-badge left-badge text-color"><i class="fas fa-chevron-left"></i> &nbsp;上一篇</div><div class="card"><a href="/2026/01/27/go-goroutine-gmp/"><div class="card-image card-image-V"><div class="box-content"><p class="title">阅读全文</p><span class="post" style="width:180px">Go 协程实现原理：GMP 模型与调度器深度解析</span></div><img src="/images/posts/go-goroutine-gmp_c4325301caf2-card.webp" width="400" height="300" loading="lazy" class="responsive-img" alt="Go 协程实现原理：GMP 模型与调度器深度解析"> <span class="card-title title-V">Go 协程实现原理：GMP 模型与调度器深度解析</span></div></a><div class="card-content article-content"><div class="summary block-with-text">从 G、M、P 三个结构讲起，梳理 Go 调度器的本地/全局队列、work stealing、系统调用 handoff、基于信号的抢占和连续栈的增长收缩，附可运行的示例与 runtime 监控代码。</div><div class="publish-info"><span class="publish-date"><i class="far fa-clock fa-fw icon-date"></i> 2026-01-27</span><span class="publish-author"><i class="fas fa-bookmark fa-fw icon-category"></i> <a href="/categories/golang/" class="post-category">golang</a></span></div></div><div class="card-action article-tags"><a href="/tags/Go/"><span class="chip bg-color go">Go</span></a> <a href="/tags/%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B/"><span class="chip bg-color">并发编程</span></a> <a href="/tags/%E8%B0%83%E5%BA%A6%E5%99%A8/"><span class="chip bg-color">调度器</span></a> <a href="/tags/GMP%E6%A8%A1%E5%9E%8B/"><span class="chip bg-color ai">GMP模型</span></a> <a href="/tags/%E6%80%A7%E8%83%BD%E4%BC%98%E5%8C%96/"><span class="chip bg-color">性能优化</span></a></div></div></div><div class="article col s12 m6" data-aos="fade-up"><div class="article-badge right-badge text-color">下一篇&nbsp;<i class="fas fa-chevron-right"></i></div><div class="card"><a href="/2026/01/03/claude-code-cc-switch-antigravity-tools-zu-he-shi-yong-zhi-nan/"><div class="card-image card-image-V"><div class="box-content"><p class="title">阅读全文</p><span class="post" style="width:180px">Claude Code + CC-Switch + Antigravity Tools 组合使用指南</span></div><img src="/images/covers/ai-agents-card.webp" width="400" height="300" loading="lazy" class="responsive-img" alt="Claude Code + CC-Switch + Antigravity Tools 组合使用指南"> <span class="card-title title-V">Claude Code + CC-Switch + Antigravity Tools 组合使用指南</span></div></a><div class="card-content article-content"><div class="summary block-with-text">结合了 Claude Code (强大的 AI 编程助手)、CC-Switch (假设为上下文/配置快速切换工具) 和 Antigravity Tools GitHub 仓库 前提条件： 安装后验证： GitHub 仓库 macOS 安装：…</div><div class="publish-info"><span class="publish-date"><i class="far fa-clock fa-fw icon-date"></i> 2026-01-03</span><span class="publish-author"><i class="fas fa-user fa-fw"></i> costalong</span></div></div><div class="card-action article-tags"><a href="/tags/ai/"><span class="chip bg-color ai">ai</span></a></div></div></div></div></article></div><script src="/libs/codeBlock/codeBlockFuction.js"></script><script src="/libs/codeBlock/codeLang.js"></script><script src="/libs/codeBlock/codeCopy.js"></script><script src="/libs/codeBlock/codeShrink.js"></script><script>!function(){function t(n){var t=n.closest?n.closest(".img-item"):null;if(t){var e=t.nextElementSibling;e&&e.classList.contains("caption")&&(e.style.display="none"),t.style.display="none"}else n.style.display="none"}$(function(){setTimeout(function(){document.querySelectorAll("#articleContent img").forEach(function(n){n.addEventListener("error",function(){t(this)},{once:!0}),n.complete&&0===n.naturalWidth&&t(n)})},0)})}()</script><script>$(function(){$("#read_mode").on("click",function(){var a=$("#artDetail .card").first();a.toggleClass("card-block-fullscreen"),$("html").toggleClass("card-block-fullscreen-html-scroll"),$(this).attr("aria-pressed",String(a.hasClass("card-block-fullscreen")));var s=$(this).find("i");s.hasClass("fa-expand-arrows-alt")?s.removeClass("fa-expand-arrows-alt").addClass("fa-compress-arrows-alt"):s.removeClass("fa-compress-arrows-alt").addClass("fa-expand-arrows-alt")}).on("keydown",function(a){"Enter"!==a.key&&" "!==a.key||(a.preventDefault(),$(this).trigger("click"))})})</script></div><div id="toc-aside" class="expanded col l3 hide-on-med-and-down"><div class="toc-widget card"><div class="toc-title"><i class="far fa-list-alt"></i>&nbsp;&nbsp;目录</div><div id="toc-content"></div></div></div></div><div id="floating-toc-btn"><button type="button" class="btn-floating btn-large bg-color" aria-label="打开文章目录" aria-controls="toc-aside mobile-toc-drawer" aria-expanded="false"><i class="fas fa-list-ul" aria-hidden="true"></i></button></div><div id="mobile-toc-overlay" class="mobile-toc-overlay" aria-hidden="true"></div><div id="mobile-toc-drawer" class="mobile-toc-drawer" role="dialog" aria-modal="true" aria-label="文章目录" aria-hidden="true" inert><div class="mobile-toc-header"><span class="mobile-toc-title"><i class="far fa-list-alt"></i> &nbsp;&nbsp;目录</span> <button type="button" id="mobile-toc-close" class="mobile-toc-close" aria-label="关闭文章目录"><i class="fas fa-times" aria-hidden="true"></i></button></div><div class="mobile-toc-body" id="mobile-toc-body"></div></div><script src="/libs/tocbot/tocbot.min.js"></script><script>$(function () {
+        tocbot.init({
+            tocSelector: '#toc-content',
+            contentSelector: '#articleContent',
+            headingsOffset: -($(window).height() * 0.4 - 45),
+            collapseDepth: Number('3'),
+            headingSelector: 'h2, h3, h4'
+        });
+
+        // Set scroll toc fixed.
+        let tocHeight = parseInt($(window).height() * 0.4 - 64);
+        let $tocWidget = $('.toc-widget');
+        $(window).scroll(function () {
+            let scroll = $(window).scrollTop();
+            /* add post toc fixed. */
+            if (scroll > tocHeight) {
+                $tocWidget.addClass('toc-fixed');
+            } else {
+                $tocWidget.removeClass('toc-fixed');
+            }
+        });
+
+        
+        /* 修复文章卡片 div 的宽度. */
+        let fixPostCardWidth = function (srcId, targetId) {
+            let srcDiv = $('#' + srcId);
+            if (srcDiv.length === 0) {
+                return;
+            }
+
+            let w = srcDiv.width();
+            if (w >= 450) {
+                w = w + 21;
+            } else if (w >= 350 && w < 450) {
+                w = w + 18;
+            } else if (w >= 300 && w < 350) {
+                w = w + 16;
+            } else {
+                w = w + 14;
+            }
+            $('#' + targetId).width(w);
+        };
+
+        // 切换TOC目录展开收缩的相关操作.
+        const expandedClass = 'expanded';
+        let $tocAside = $('#toc-aside');
+        let $mainContent = $('#main-content');
+
+        /* 目录只有一两条时，侧栏几乎是空的，右侧留下一大片空白。
+           这种情况直接不要侧栏，让正文占满整行（正文自身仍有 measure 行宽上限，
+           由 .no-toc 负责居中）。 */
+        if ($('#toc-content .toc-link').length < 3) {
+            $tocAside.removeClass(expandedClass).hide();
+            $mainContent.removeClass('l9').addClass('no-toc');
+            $('#floating-toc-btn').hide();
+        }
+
+        // 移动端 TOC 抽屉逻辑
+        let $overlay = $('#mobile-toc-overlay');
+        let $drawer = $('#mobile-toc-drawer');
+        let $drawerBody = $('#mobile-toc-body');
+        let $tocTrigger = $('#floating-toc-btn .btn-floating');
+        let drawerOpen = false;
+
+        function openMobileDrawer() {
+            // 克隆桌面端 TOC 内容到抽屉
+            $drawerBody.html($('#toc-content').html());
+            $overlay.addClass('active');
+            $drawer.addClass('active').attr('aria-hidden', 'false').removeAttr('inert');
+            $tocTrigger.attr({'aria-expanded': 'true', 'aria-label': '关闭文章目录'});
+            $('body').css('overflow', 'hidden');
+            drawerOpen = true;
+            $('#mobile-toc-close').trigger('focus');
+
+            // 点击抽屉内链接后自动关闭
+            $drawerBody.find('.toc-link').on('click', function() {
+                closeMobileDrawer(false);
+            });
+        }
+
+        function closeMobileDrawer(restoreFocus) {
+            $overlay.removeClass('active');
+            $drawer.removeClass('active').attr('aria-hidden', 'true');
+            // Let a clicked TOC anchor complete its native hash navigation before making it inert.
+            if (restoreFocus === false) {
+                window.setTimeout(function () { $drawer.attr('inert', ''); }, 0);
+            } else {
+                $drawer.attr('inert', '');
+            }
+            $tocTrigger.attr({'aria-expanded': 'false', 'aria-label': '打开文章目录'});
+            $('body').css('overflow', '');
+            drawerOpen = false;
+            if (restoreFocus !== false) $tocTrigger.trigger('focus');
+        }
+
+        $overlay.on('click', function () { closeMobileDrawer(); });
+        $('#mobile-toc-close').on('click', function () { closeMobileDrawer(); });
+        $(document).on('keydown', function (event) {
+            if (drawerOpen && event.key === 'Escape') closeMobileDrawer();
+        });
+
+        $(window).on('resize', function () {
+            if ($(window).width() > 1199 && drawerOpen) closeMobileDrawer(false);
+            if ($(window).width() > 1199) {
+                const expanded = $tocAside.hasClass(expandedClass);
+                $tocTrigger.attr({'aria-expanded': String(expanded), 'aria-label': expanded ? '收起文章目录' : '展开文章目录'});
+            } else if (!drawerOpen) {
+                $tocTrigger.attr({'aria-expanded': 'false', 'aria-label': '打开文章目录'});
+            }
+        });
+
+        if ($(window).width() > 1199 && $tocAside.hasClass(expandedClass)) {
+            $tocTrigger.attr({'aria-expanded': 'true', 'aria-label': '收起文章目录'});
+        }
+
+        $tocTrigger.on('click', function () {
+            // 1199px 及以下打开抽屉：993–1199 侧栏太窄，CSS 已把它隐藏
+            if ($(window).width() <= 1199) {
+                if (drawerOpen) {
+                    closeMobileDrawer();
+                } else {
+                    openMobileDrawer();
+                }
+                return;
+            }
+
+            // 桌面端保持原有折叠逻辑
+            if ($tocAside.hasClass(expandedClass)) {
+                $tocAside.removeClass(expandedClass).hide();
+                $tocTrigger.attr({'aria-expanded': 'false', 'aria-label': '展开文章目录'});
+                // 只去掉 l9 会让 col s12 m12 在大屏退回整行宽度，正文行宽从 788px
+                // 涨到 1092px（中文行太长且不居中，右侧空一大片）。补一个类来封顶并居中。
+                $mainContent.removeClass('l9').addClass('toc-collapsed');
+            } else {
+                $tocAside.addClass(expandedClass).show();
+                $tocTrigger.attr({'aria-expanded': 'true', 'aria-label': '收起文章目录'});
+                $mainContent.addClass('l9').removeClass('toc-collapsed');
+            }
+            fixPostCardWidth('artDetail', 'prenext-posts');
+        });
+        
+    });</script></main><div class="progress-bar"></div><footer class="dp-footer page-footer"><div class="dp-wrap dp-foot-grid"><div class="l">&copy; <span id="year">2023-2026</span> <b>翼舞成梦</b> · costalong.com — 用 <a href="https://hexo.io/" target="_blank" rel="noopener">Hexo</a> 构建，内容均为原创工程笔记。</div><div class="dp-foot-links"><a href="/advertise/">广告合作</a> <a href="/privacy/">隐私政策</a> <a href="/atom.xml">RSS</a> <a href="/archives">归档</a> <a href="/about">关于</a> <a href="https://github.com/costa92" target="_blank" rel="noopener">GitHub</a> <a href="/sitemap.xml">sitemap</a></div></div><div class="dp-wrap" style="margin-top:16px;display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;font-size:12.5px;color:var(--text-mut)"><div class="footer-social"><a href="https://github.com/costa92" class="tooltipped" aria-label="访问我的GitHub" target="_blank" rel="noopener" data-tooltip="访问我的GitHub" data-position="top" data-delay="50"><i class="fab fa-github"></i></a><a href="mailto:costa9293@gmail.com" class="tooltipped" aria-label="邮件联系我" target="_blank" rel="noopener" data-tooltip="邮件联系我" data-position="top" data-delay="50"><i class="fas fa-envelope-open"></i></a><a href="tencent://AddContact/?fromId=50&fromSubId=1&subcmd=all&uin=944310536" class="tooltipped" aria-label="QQ联系我" target="_blank" rel="noopener" data-tooltip="QQ联系我: 944310536" data-position="top" data-delay="50"><i class="fab fa-qq"></i></a><a href="/atom.xml" class="tooltipped" aria-label="RSS 订阅" target="_blank" rel="noopener" data-tooltip="RSS 订阅" data-position="top" data-delay="50"><i class="fas fa-rss"></i></a></div><div class="footer-stats" style="font-family:var(--font-mono)"><span id="busuanzi_container_site_pv"><i class="far fa-eye"></i> &nbsp;<span id="busuanzi_value_site_pv"></span></span> <span id="busuanzi_container_site_uv">&nbsp;&middot;&nbsp;<i class="fas fa-users"></i>&nbsp;<span id="busuanzi_value_site_uv"></span></span> &nbsp;&middot;&nbsp;<a href="https://beian.miit.gov.cn/#/Integrated/index" target="_blank" rel="noopener">湘ICP备15006875号</a></div></div></footer><div id="searchModal" class="modal" role="dialog" aria-modal="true" aria-labelledby="searchTitle"><div class="modal-content"><div class="search-header"><label for="searchInput" id="searchTitle" class="title"><i class="fas fa-search" aria-hidden="true"></i> &nbsp;&nbsp;搜索</label> <input type="search" id="searchInput" name="s" placeholder="请输入搜索的关键字" class="search-input" aria-controls="searchResult"></div><div id="searchStatus" class="search-status" role="status" aria-live="polite"></div><div id="searchResult"></div></div></div><script>$(function(){"use strict";var n=document.getElementById("searchInput"),l=document.getElementById("searchResult"),t=document.getElementById("searchStatus"),a=null,c=!1;function o(e){t.textContent=e}function e(){l.replaceChildren();var e=n.value.trim().toLocaleLowerCase();if(e)if(a){var r=e.split(/[\s\-]+/).filter(Boolean),t=a.filter(function(t){return r.every(function(e){return t.searchText.includes(e)})}).slice(0,20);if(t.length){o("找到 "+t.length+" 条相关内容"+(20===t.length?"（最多显示 20 条）":""));var i=document.createElement("ul");i.className="search-result-list",t.forEach(function(e){var t=document.createElement("li"),n=document.createElement("a");if(n.className="search-result-title",n.href=e.url,n.textContent=e.title,t.appendChild(n),e.content){var l=e.content.toLocaleLowerCase().indexOf(r[0]),a=Math.max(0,l-35),c=document.createElement("p");c.className="search-result",c.textContent=(a?"…":"")+e.content.slice(a,a+130)+(a+130<e.content.length?"…":""),t.appendChild(c)}i.appendChild(t)}),l.appendChild(i)}else o("没有找到相关内容，请换个关键词试试。")}else o(c?"正在加载搜索索引…":"搜索索引暂时不可用，请稍后重试。");else o("")}function r(){a||c||(c=!0,e(),$.ajax({url:"/search.xml",dataType:"xml"}).done(function(e){a=$("entry",e).map(function(){var e,t=$("title",this).text().trim(),n=(e=$("content",this).text(),String(e||"").replace(/<[^>]*>/g," ").replace(/\s+/g," ").trim()),l=$("url",this).text().trim();return t&&l?{title:t,content:n,url:"/"===l.charAt(0)?l:"/"+l,searchText:(t+" "+n).toLocaleLowerCase()}:null}).get()}).fail(function(){a=null}).always(function(){c=!1,e()}))}n.addEventListener("input",function(){r(),e()}),n.addEventListener("focus",r),$('a[href="#searchModal"], .search-btn').on("click",r)})</script><div class="stars-con"><div id="stars"></div><div id="stars2"></div><div id="stars3"></div></div><script>function switchNightMode(){$('<div class="Cuteen_DarkSky"><div class="Cuteen_DarkPlanet"></div></div>').appendTo($("body")),setTimeout(function(){$("body").hasClass("DarkMode")?($("body").removeClass("DarkMode"),localStorage.setItem("isDark","0"),$("#sum-moon-icon").removeClass("fa-sun").addClass("fa-moon")):($("body").addClass("DarkMode"),localStorage.setItem("isDark","1"),$("#sum-moon-icon").addClass("fa-sun").removeClass("fa-moon")),setTimeout(function(){$(".Cuteen_DarkSky").fadeOut(1e3,function(){$(this).remove()})},2e3)})}</script><div id="backTop" class="top-scroll"><button type="button" class="btn-floating btn-large waves-effect waves-light" aria-label="回到顶部"><i class="fas fa-arrow-up" aria-hidden="true"></i></button></div><script src="/libs/materialize/materialize.min.js" defer></script><script src="/libs/masonry/masonry.pkgd.min.js" defer></script><script src="/libs/aos/aos.js"></script><script src="/libs/lightGallery/js/lightgallery-all.min.js" defer></script><script src="/libs/scrollprogress/scrollProgress.min.js"></script><script src="/js/matery.js?v=3f7ec091" defer></script><script src="/js/responsive-tables.js?v=6ebf2b5e"></script><script src="/js/infinite-scroll.js?v=b6f5ebe2" defer></script><script>!function(){var t=document.createElement("script");t.src="https://zz.bdstatic.com/linksubmit/push.js";var e=document.getElementsByTagName("script")[0];e.parentNode.insertBefore(t,e)}()</script><script src="/js/fireworks.js" async></script><script>!function(){if(!new URLSearchParams(location.search).has("style-audit-preview")){var e=document.createElement("script");e.src="https://events.vercount.one/js",document.head.appendChild(e)}}()</script><script color="110,80,255" pointcolor="80,140,255" opacity="0.28" zindex="-1" count="80" src="/libs/background/canvas-nest.js"></script><script src="/libs/instantpage/instantpage.js" type="module"></script><script>window.Base64=window.Base64||{encode:function(e){return btoa(unescape(encodeURIComponent(e)))}}</script><script>$(function () {
+        const hasAttr = (e,a) => a.some(_=> e.attr(_)!==undefined);
+        $('a').each(function() {
+          const $this = $(this);
+          if(hasAttr($this,["data-fancybox","ignore-external-link"])) return;
+          const href = $this.attr('href');
+          if (href && href.match('^((http|https|thunder|qqdl|ed2k|Flashget|qbrowser|ftp|rtsp|mms)://)')) {
+            const strs = href.split('/');
+            if (strs.length >= 3) {
+                const host = strs[2];
+                if (host !== 'https://costalong.com' || window.location.host) {
+                    $this.attr('href', '/go.html?u='+Base64.encode(href)+'').attr('rel', 'external nofollow noopener noreferrer');
+                    if (true) {
+                        $this.attr('target', '_blank');
+                    }
+                }
+            }
+          }
+        });
+        });</script></body></html>

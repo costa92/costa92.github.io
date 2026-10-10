@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 360 495" role="img" aria-labelledby="diagram-title diagram-desc">
+<title id="diagram-title">污点与容忍</title><desc id="diagram-desc">在独立多节点实验环境中比较带污点节点对普通 Pod 与具备容忍 Pod 的调度结果。</desc>
+<defs><pattern id="grid" width="32" height="32" patternUnits="userSpaceOnUse"><path d="M32 0 L0 0 0 32" fill="none" stroke="#1e293b" stroke-width=".6"/></pattern>
+<marker id="arrow" markerWidth="9" markerHeight="7" refX="8" refY="3.5" orient="auto"><path d="M0 0 L9 3.5 L0 7Z" fill="#94a3b8"/></marker></defs>
+<rect width="360" height="495" rx="16" fill="#0f172a"/><rect width="360" height="495" rx="16" fill="url(#grid)"/>
+<text x="24" y="29" fill="#f8fafc" font-family="'PingFang SC','Noto Sans SC',sans-serif" font-size="17" font-weight="700">污点与容忍</text>
+<text x="24" y="51" fill="#94a3b8" font-family="'PingFang SC','Noto Sans SC',sans-serif" font-size="11.5">容忍只允许候选，不保证落点</text>
+<rect x="24" y="80" width="312" height="62" rx="10" fill="#152338" stroke="#22d3ee" stroke-width="1.4"/>
+<text x="180.0" y="107.0" text-anchor="middle" font-family="'PingFang SC','Noto Sans SC',sans-serif" font-size="14" fill="#f8fafc" font-weight="700">节点 taint</text>
+<text x="180.0" y="123.0" text-anchor="middle" font-family="'PingFang SC','Noto Sans SC',sans-serif" font-size="12" fill="#cbd5e1">先看 effect 与 Pod toleration</text>
+<path d="M180 142 V184 H98 V220" fill="none" stroke="#fb7185" stroke-width="1.8" marker-end="url(#arrow)"/>
+<path d="M180 184 H262 V220" fill="none" stroke="#34d399" stroke-width="1.8" marker-end="url(#arrow)"/>
+<rect x="24" y="220" width="148" height="94" rx="10" fill="#152338" stroke="#fb7185" stroke-width="1.4"/>
+<text x="98.0" y="255.0" text-anchor="middle" font-family="'PingFang SC','Noto Sans SC',sans-serif" font-size="14" fill="#f8fafc" font-weight="700">不容忍</text>
+<text x="98.0" y="271.0" text-anchor="middle" font-family="'PingFang SC','Noto Sans SC',sans-serif" font-size="12" fill="#cbd5e1">NoSchedule 阻止；</text>
+<text x="98.0" y="287.0" text-anchor="middle" font-family="'PingFang SC','Noto Sans SC',sans-serif" font-size="12" fill="#cbd5e1">NoExecute 可驱逐</text>
+<rect x="188" y="220" width="148" height="94" rx="10" fill="#152338" stroke="#34d399" stroke-width="1.4"/>
+<text x="262.0" y="263.0" text-anchor="middle" font-family="'PingFang SC','Noto Sans SC',sans-serif" font-size="14" fill="#f8fafc" font-weight="700">容忍</text>
+<text x="262.0" y="279.0" text-anchor="middle" font-family="'PingFang SC','Noto Sans SC',sans-serif" font-size="12" fill="#cbd5e1">仍需满足其它约束</text>
+<rect x="24" y="370" width="312" height="70" rx="10" fill="#152338" stroke="#fbbf24" stroke-width="1.4"/>
+<text x="180.0" y="401.0" text-anchor="middle" font-family="'PingFang SC','Noto Sans SC',sans-serif" font-size="14" fill="#f8fafc" font-weight="700">PreferNoSchedule 是软约束</text>
+<text x="180.0" y="417.0" text-anchor="middle" font-family="'PingFang SC','Noto Sans SC',sans-serif" font-size="12" fill="#cbd5e1">倾向避开，不绝对阻止调度</text>
+<line x1="24" y1="460" x2="336" y2="460" stroke="#334155"/>
+<text x="24" y="480" fill="#94a3b8" font-family="'PingFang SC','Noto Sans SC',sans-serif" font-size="10">costalong.com · Kubernetes 笔记</text></svg>

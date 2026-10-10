@@ -1,0 +1,339 @@
+<!DOCTYPE HTML><html lang="zh-CN"><head><meta charset="utf-8"><meta name="keywords" content="nfs实现k8s持久化, costalong, 翼舞成梦, 后端开发, Go语言, Kubernetes, K8s, Linux, AI, 学习笔记"><meta name="description" content="从零搭建 NFS 服务端，再在 Kubernetes 里通过 PV / PVC 把它挂成持久化存储。含各节点的客户端安装、exports 权限配置，以及验证挂载是否生效的完整步骤。"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="renderer" content="webkit|ie-stand|ie-comp"><meta name="mobile-web-app-capable" content="yes"><meta name="format-detection" content="telephone=no"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><meta name="referrer" content="strict-origin-when-cross-origin"><meta name="google-adsense-account" content="ca-pub-8990123471955885"><script>!function(){if(!new URLSearchParams(location.search).has("style-audit-preview")){var n=!1;document.addEventListener("DOMContentLoaded",function(){if(!("IntersectionObserver"in window))return t();var n=new IntersectionObserver(function(e){e.some(function(e){return e.isIntersecting})&&(n.disconnect(),t())},{rootMargin:"200px 0px"});document.querySelectorAll("ins.adsbygoogle").forEach(function(e){n.observe(e)})}),window.addEventListener("load",function(){(window.requestIdleCallback||function(e){setTimeout(e,2e3)})(t,{timeout:4e3})})}function t(){if(!n){n=!0;var e=document.createElement("script");e.async=!0,e.src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8990123471955885",e.crossOrigin="anonymous",document.head.appendChild(e)}}}()</script><title>nfs实现k8s持久化 | 翼舞成梦</title><meta property="og:site_name" content="翼舞成梦"><meta property="og:locale" content="zh_CN"><meta property="og:type" content="article"><meta property="og:title" content="nfs实现k8s持久化"><meta property="og:description" content="从零搭建 NFS 服务端，再在 Kubernetes 里通过 PV / PVC 把它挂成持久化存储。含各节点的客户端安装、exports 权限配置，以及验证挂载是否生效的完整步骤。"><meta property="og:url" content="https://costalong.com/2023/09/13/k8s/k8s-install-nfs/"><meta property="og:image" content="https://costalong.com/images/k8s/nfs/cover.jpeg"><meta name="twitter:card" content="summary_large_image"><script type="application/ld+json">{"@context":"https://schema.org","@type":"BlogPosting","headline":"nfs实现k8s持久化","description":"从零搭建 NFS 服务端，再在 Kubernetes 里通过 PV / PVC 把它挂成持久化存储。含各节点的客户端安装、exports 权限配置，以及验证挂载是否生效的完整步骤。","image":"https://costalong.com/images/k8s/nfs/cover.jpeg","url":"https://costalong.com/2023/09/13/k8s/k8s-install-nfs/","datePublished":"2023-09-13T10:37:51.000Z","dateModified":"2023-09-13T10:37:51.000Z","author":{"@type":"Person","name":"costalong"},"publisher":{"@type":"Person","name":"costalong"}}</script><link rel="canonical" href="https://costalong.com/2023/09/13/k8s/k8s-install-nfs/"><link rel="alternate" type="application/atom+xml" title="翼舞成梦" href="https://costalong.com/atom.xml"><link rel="alternate" type="application/json" title="翼舞成梦" href="https://costalong.com/feed.json"><link rel="icon" type="image/png" href="/favicon.png"><link rel="stylesheet" href="/css/fonts.css?v=864fc7ac"><link rel="preload" href="/libs/awesome/webfonts/fa-solid-900.woff2" as="font" type="font/woff2" crossorigin><link rel="stylesheet" href="/libs/awesome/css/all.min.css"><link rel="stylesheet" href="/libs/materialize/materialize.min.css"><link rel="stylesheet" href="/libs/aos/aos.css"><link rel="stylesheet" href="/libs/animate/animate.min.css" media="print" onload='this.media="all"'><link rel="stylesheet" href="/libs/lightGallery/css/lightgallery.min.css" media="print" onload='this.media="all"'><link rel="stylesheet" href="/css/matery.css"><link rel="stylesheet" href="/css/my.css"><link rel="stylesheet" href="/css/dark.css" media="none" onload='"all"!=media&&(media="all")'><link rel="stylesheet" href="/css/infinite-scroll.css"><link rel="stylesheet" href="/css/sidebar.css"><link rel="stylesheet" href="/css/navbar.css"><link rel="stylesheet" href="/libs/tocbot/tocbot.css"><link rel="stylesheet" href="/css/post.css"><link rel="stylesheet" href="/css/reward.css" media="print" onload='this.media="all"'><link rel="stylesheet" href="/css/obsidian.css?v=fee1bba1"><link rel="stylesheet" href="/css/darkpremium.css?v=c801dadc"><link rel="stylesheet" href="/css/post-darkpremium.css?v=c09ea248"><script>!function(o){var t=[];o.$=o.jQuery=function(n){if("function"!=typeof n)throw new Error("jQuery 尚未加载：请写在 $(function () {...}) 里");t.push(n)},document.addEventListener("DOMContentLoaded",function(){o.jQuery.fn&&t.forEach(function(n){o.jQuery(n)})})}(window)</script><script src="/libs/jquery/jquery-3.6.0.min.js" defer></script><script>new MutationObserver(function(t){t.forEach(function(t){"attributes"===t.type&&"aria-hidden"===t.attributeName&&"true"===document.body.getAttribute("aria-hidden")&&document.body.removeAttribute("aria-hidden")})}).observe(document.documentElement,{attributes:!0,subtree:!0,attributeFilter:["aria-hidden"]}),window.addEventListener("DOMContentLoaded",function(){"true"===document.body.getAttribute("aria-hidden")&&document.body.removeAttribute("aria-hidden")})</script><meta name="generator" content="Hexo 8.1.2"><style>.github-emoji{position:relative;display:inline-block;width:1.2em;min-height:1.2em;overflow:hidden;vertical-align:top;color:transparent}.github-emoji>span{position:relative;z-index:10}.github-emoji .fancybox,.github-emoji img{margin:0!important;padding:0!important;border:none!important;outline:0!important;text-decoration:none!important;user-select:none!important;cursor:auto!important}.github-emoji img{height:1.2em!important;width:1.2em!important;position:absolute!important;left:50%!important;top:50%!important;transform:translate(-50%,-50%)!important;user-select:none!important;cursor:auto!important}.github-emoji-fallback{color:inherit}.github-emoji-fallback img{opacity:0!important}</style></head><body><a class="skip-link" href="#content-start">跳到正文</a><header class="dp-nav"><div class="dp-wrap"><div class="dp-nav-inner"><a class="dp-brand" href="/"><span class="mark"><img src="/medias/logo.webp" alt="" width="22" height="22"></span><span><span class="name">翼舞成梦</span><br><span class="dom">costalong.com</span></span></a><div class="dp-nav-links" role="navigation" aria-label="主导航"><a href="/">首页</a> <a href="/archives/">归档</a> <a href="/moments">Moments</a> <a href="/about/">关于</a> <a href="/explore/">探索</a> <a href="/galleries/">相册</a> <a href="/notes/">笔记</a> <a href="/contact/">留言板</a> <a href="/friends/">友情链接</a></div><div class="dp-nav-actions"><a href="#searchModal" class="icon-btn modal-trigger" title="搜索" aria-label="搜索"><i class="fas fa-search" aria-hidden="true"></i></a><a class="dp-nav-cta" href="/atom.xml"><i class="fas fa-rss" style="margin-right:6px" aria-hidden="true"></i> 订阅更新</a> <button type="button" data-target="mobile-nav" class="icon-btn dp-burger sidenav-trigger button-collapse" aria-label="打开菜单" aria-expanded="false" aria-controls="mobile-nav"><i class="fas fa-bars" aria-hidden="true"></i></button></div></div></div><div id="mobile-nav" class="side-nav sidenav"><div class="mobile-head bg-color"><img src="/medias/logo.webp" class="logo-img circle responsive-img" alt="网站头像"><div class="logo-name">翼舞成梦</div><div class="logo-desc">翼舞成梦的个人博客，专注于后端开发、K8s 容器化技术、Linux 运维以及人工智能学习笔记分享。</div></div><ul class="menu-list mobile-menu-list"><li class="m-nav-item"><a href="/" class="waves-effect waves-light"><i class="fa-fw fas fa-home"></i> 首页</a></li><li class="m-nav-item"><a href="/archives/" class="waves-effect waves-light"><i class="fa-fw fas fa-archive"></i> 归档</a></li><li class="m-nav-item"><a href="/moments" class="waves-effect waves-light"><i class="fa-fw fas fa-bolt"></i> Moments</a></li><li class="m-nav-item"><button type="button" class="m-nav-toggle" aria-expanded="false" aria-controls="mobile-submenu-3"><i class="fa-fw fas fa-compass" aria-hidden="true"></i> Discover<span class="m-icon" aria-hidden="true"><i class="fas fa-chevron-right"></i></span></button><ul id="mobile-submenu-3"><li><a href="/categories" class="m-sub-link"><i class="fa m-sub-icon fas fa-bookmark"></i> <span>分类</span></a></li><li><a href="/tags" class="m-sub-link"><i class="fa m-sub-icon fas fa-tags"></i> <span>标签</span></a></li></ul></li><li class="m-nav-item"><a href="/about/" class="waves-effect waves-light"><i class="fa-fw fas fa-user-circle"></i> 关于</a></li><li class="m-nav-item"><a href="/explore/" class="waves-effect waves-light"><i class="fa-fw fas fa-compass"></i> 探索</a></li><li class="m-nav-item"><a href="/galleries/" class="waves-effect waves-light"><i class="fa-fw fas fa-image"></i> 相册</a></li><li class="m-nav-item"><a href="/notes/" class="waves-effect waves-light"><i class="fa-fw fas fa-book-reader"></i> 笔记</a></li><li class="m-nav-item"><a href="/contact/" class="waves-effect waves-light"><i class="fa-fw fas fa-comments"></i> 留言板</a></li><li class="m-nav-item"><a href="/friends/" class="waves-effect waves-light"><i class="fa-fw fas fa-address-book"></i> 友情链接</a></li></ul></div></header><div id="content-start" tabindex="-1"></div><div class="dp-bg-field"><div class="glow v"></div><div class="glow c"></div><div class="glow i"></div></div><div class="dp"><header class="dp-page-hero dp-wrap post-dp-hero"><span class="eyebrow"><span class="dot"></span><i class="fas fa-dharmachakra"></i> &nbsp;k8s</span><h1 id="post-title" class="post-title"><span class="grad">nfs实现k8s持久化</span></h1><div class="meta"><span><i class="far fa-calendar-minus"></i> &nbsp;2023-09-13</span><span><i class="fas fa-bookmark"></i> &nbsp;<a href="/categories/k8s/"><b>k8s</b></a></span> <span class="hero-tags"><a href="/tags/k8s/"><span class="chip k8s">k8s</span></a> <a href="/tags/nfs/"><span class="chip k8s">nfs</span></a> <a href="/tags/storage/"><span class="chip k8s">storage</span></a></span></div></header></div><main class="post-container content"><div class="row"><div id="main-content" class="col s12 m12 l9"><div id="artDetail"><div class="card"><div class="card-content article-info"><div class="row tag-cate"><div class="col s7"><div class="article-tag"><a href="/tags/k8s/"><span class="chip bg-color k8s">k8s</span></a> <a href="/tags/nfs/"><span class="chip bg-color k8s">nfs</span></a> <a href="/tags/storage/"><span class="chip bg-color k8s">storage</span></a></div></div><div class="col s5 right-align"><div class="post-cate"><i class="fas fa-bookmark fa-fw icon-category"></i> <a href="/categories/k8s/" class="post-category">k8s</a></div></div></div><div class="post-info"><div class="info-break-policy post-meta-words"><i class="far fa-file-word fa-fw"></i> <span class="post-meta-label">文章字数:&nbsp;&nbsp;</span> 1.8k</div><div id="busuanzi_container_page_pv" class="info-break-policy post-meta-views"><i class="far fa-eye fa-fw"></i> <span class="post-meta-label">阅读次数:&nbsp;&nbsp;</span><span id="busuanzi_value_page_pv"></span></div><div id="read_mode" class="info-break-policy post-meta-read-mode" style="display:inline" role="button" tabindex="0" aria-label="切换阅读模式" aria-pressed="false"><i class="fas fa-expand-arrows-alt" title="【进入/离开】 阅读模式" aria-hidden="true"></i> &nbsp;&nbsp; <span title="【进入/离开】阅读模式" aria-hidden="true">阅读模式</span></div></div></div><hr class="clearfix"><link rel="stylesheet" href="/libs/prism/prism.min.css"><div class="card-content article-card-content"><div id="articleContent"><h3 id="1-部署nfs服务端"><a href="#1-部署nfs服务端" class="headerlink" title="1. 部署nfs服务端"></a>1. 部署nfs服务端</h3><p>在任意一台服务器上安装</p><p>（1）安装nfs服务:</p><pre class="language-bash" data-language="bash"><code class="language-bash">yum <span class="token function">install</span> <span class="token parameter variable">-y</span> nfs-utils rpcbind
+<span class="token function">vim</span> /etc/exports
+/nfsdata *<span class="token punctuation">(</span>rw,no_root_squash,no_all_squash,sync<span class="token punctuation">)</span></code></pre><p>（2）保存配置文件后，执行如下操作：<br>在服务端创建对应的目录和赋予权限：</p><pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token function">mkdir</span> /nfsdata
+<span class="token function">chmod</span> <span class="token number">777</span> /nfsdata</code></pre><p>（3） 启动rpcbind和nfs服务：</p><pre class="language-bash" data-language="bash"><code class="language-bash">systemctl start rpcbind <span class="token operator">&amp;&amp;</span> systemctl <span class="token builtin class-name">enable</span> rpcbind
+systemctl start nfs <span class="token operator">&amp;&amp;</span> systemctl <span class="token builtin class-name">enable</span> nfs</code></pre><p>（4）每个node安装nfs工具</p><pre class="language-bash" data-language="bash"><code class="language-bash">yum <span class="token function">install</span> <span class="token parameter variable">-y</span> nfs-utils </code></pre><p>（5） 每个node查询NFS服务器</p><pre class="language-bash" data-language="bash"><code class="language-bash">showmount <span class="token parameter variable">-e</span> nfs-ip
+showmount <span class="token parameter variable">-e</span> <span class="token number">192.168</span>.11.101</code></pre><h4 id="NFS-PersistentVolume"><a href="#NFS-PersistentVolume" class="headerlink" title="NFS PersistentVolume"></a>NFS PersistentVolume</h4><p>（1）下面创建一个 PV mypv1，配置文件 nfs-pv1.yml 如下：</p><pre class="language-yaml" data-language="yaml"><code class="language-yaml"><span class="token key atrule">apiVersion</span><span class="token punctuation">:</span> v1
+<span class="token key atrule">kind</span><span class="token punctuation">:</span> PersistentVolume
+<span class="token key atrule">metadata</span><span class="token punctuation">:</span>
+  <span class="token key atrule">name</span><span class="token punctuation">:</span> mypv1
+<span class="token key atrule">spec</span><span class="token punctuation">:</span>
+  <span class="token key atrule">capacity</span><span class="token punctuation">:</span>
+    <span class="token key atrule">storage</span><span class="token punctuation">:</span> 1Gi
+  <span class="token key atrule">accessModes</span><span class="token punctuation">:</span>
+    <span class="token punctuation">-</span> ReadWriteOnce
+  <span class="token key atrule">persistentVolumeReclaimPolicy</span><span class="token punctuation">:</span> Recycle
+  <span class="token key atrule">storageClassName</span><span class="token punctuation">:</span> nfs
+  <span class="token key atrule">nfs</span><span class="token punctuation">:</span>
+    <span class="token key atrule">path</span><span class="token punctuation">:</span> /data/NFS/k8s/pv1
+    <span class="token key atrule">server</span><span class="token punctuation">:</span> 192.168.11.101</code></pre><p>① capacity 指定 PV 的容量为 1G。</p><p>② accessModes 指定访问模式为 ReadWriteOnce，支持的访问模式有：</p><p>ReadWriteOnce – PV 能以 read-write 模式 mount 到单个节点。</p><p>ReadOnlyMany – PV 能以 read-only 模式 mount 到多个节点。</p><p>ReadWriteMany – PV 能以 read-write 模式 mount 到多个节点。</p><p>③ persistentVolumeReclaimPolicy 指定当 PV 的回收策略为 Recycle，支持的策略有：</p><p>Retain – 需要管理员手工回收。</p><p>Recycle – 清除 PV 中的数据，效果相当于执行 rm -rf /thevolume/*。</p><p>Delete – 删除 Storage Provider 上的对应存储资源，例如 AWS EBS、GCE PD、Azure Disk、OpenStack Cinder Volume 等。</p><p>④ storageClassName 指定 PV 的 class 为 nfs。相当于为 PV 设置了一个分类，PVC 可以指定 class 申请相应 class 的 PV。</p><p>⑤ 指定 PV 在 NFS 服务器上对应的目录。</p><p>注意要做storage-provider段要提前建好文件夹</p><p>注意要做storage-provider段要提前建好文件夹</p><pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token punctuation">[</span>dev@rediscom k8s<span class="token punctuation">]</span>$ <span class="token function">ls</span>
+pv1</code></pre><p>（2）创建 mypv1：</p><pre class="language-bash" data-language="bash"><code class="language-bash">kubectl apply <span class="token parameter variable">-f</span> nfs-pv1.yaml</code></pre><p>（3）查看 mypv1：</p><pre class="language-bash" data-language="bash"><code class="language-bash">kubectl get <span class="token function">pv</span></code></pre><p><img width="1426" height="104" style="--img-ar:13.7115" fetchpriority="high" decoding="async" src="/images/k8s/nfs/16373020145856.jpg" alt="pv"></p><p>STATUS 为 Available，表示 mypv1 就绪，可以被 PVC 申请。</p><h4 id="创建-PVC"><a href="#创建-PVC" class="headerlink" title="创建 PVC"></a>创建 PVC</h4><p>(1）接下来创建 PVC mypvc1，配置文件 nfs-pvc1.yml 如下：</p><pre class="language-yaml" data-language="yaml"><code class="language-yaml"><span class="token key atrule">kind</span><span class="token punctuation">:</span> PersistentVolumeClaim
+<span class="token key atrule">apiVersion</span><span class="token punctuation">:</span> v1
+<span class="token key atrule">metadata</span><span class="token punctuation">:</span>
+  <span class="token key atrule">name</span><span class="token punctuation">:</span> mypvc1
+<span class="token key atrule">spec</span><span class="token punctuation">:</span>
+  <span class="token key atrule">accessModes</span><span class="token punctuation">:</span>
+    <span class="token punctuation">-</span> ReadWriteOnce
+  <span class="token key atrule">resources</span><span class="token punctuation">:</span>
+    <span class="token key atrule">requests</span><span class="token punctuation">:</span>
+      <span class="token key atrule">storage</span><span class="token punctuation">:</span> 1Gi
+  <span class="token key atrule">storageClassName</span><span class="token punctuation">:</span> nfs</code></pre><p>PVC 就很简单了，只需要指定 PV 的容量，访问模式和 class。</p><p>（2）创建 mypvc1：</p><pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token punctuation">[</span>root@k8s-master pvc<span class="token punctuation">]</span><span class="token comment"># kubectl apply -f nfs-pvc1.yml</span>
+persistentvolumeclaim/mypvc1 created
+<span class="token punctuation">[</span>root@k8s-master pvc<span class="token punctuation">]</span><span class="token comment"># kubectl get pvc</span>
+NAME     STATUS   VOLUME   CAPACITY   ACCESS MODES   STORAGECLASS   AGE
+mypvc1   Bound    mypv1    1Gi        RWO            nfs            11s</code></pre><p>从 kubectl get pvc 和 kubectl get pv 的输出可以看到 mypvc1 已经 Bound 到 mypv1，申请成功。</p><h3 id="2-Pod使用pvc"><a href="#2-Pod使用pvc" class="headerlink" title="2 Pod使用pvc"></a>2 Pod使用pvc</h3><p>（1）接下来就可以在 Pod 中使用存储了，Pod 配置文件 pod1.yml 如下：</p><pre class="language-yaml" data-language="yaml"><code class="language-yaml"><span class="token key atrule">apiVersion</span><span class="token punctuation">:</span> v1
+<span class="token key atrule">kind</span><span class="token punctuation">:</span> Pod
+<span class="token key atrule">metadata</span><span class="token punctuation">:</span>
+  <span class="token key atrule">name</span><span class="token punctuation">:</span> mypod1
+<span class="token key atrule">spec</span><span class="token punctuation">:</span>
+  <span class="token key atrule">containers</span><span class="token punctuation">:</span>
+    <span class="token punctuation">-</span> <span class="token key atrule">name</span><span class="token punctuation">:</span> mypod1
+      <span class="token key atrule">image</span><span class="token punctuation">:</span> busybox
+      <span class="token key atrule">args</span><span class="token punctuation">:</span>
+      <span class="token punctuation">-</span> /bin/sh
+      <span class="token punctuation">-</span> <span class="token punctuation">-</span>c
+      <span class="token punctuation">-</span> sleep 30000
+      <span class="token key atrule">volumeMounts</span><span class="token punctuation">:</span>
+      <span class="token punctuation">-</span> <span class="token key atrule">mountPath</span><span class="token punctuation">:</span> <span class="token string">"mydata"</span>
+        <span class="token key atrule">name</span><span class="token punctuation">:</span> mydata
+  <span class="token key atrule">volumes</span><span class="token punctuation">:</span>
+    <span class="token punctuation">-</span> <span class="token key atrule">name</span><span class="token punctuation">:</span> mydata
+      <span class="token key atrule">persistentVolumeClaim</span><span class="token punctuation">:</span>
+        <span class="token key atrule">claimName</span><span class="token punctuation">:</span> mypvc1</code></pre><p>与使用普通 Volume 的格式类似，在 volumes 中过 persistentVolumeClaim 指定使用 mypvc1 申请的 Volume。</p><p>（2）创建 mypod1：</p><pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token punctuation">[</span>root@k8s-master pod<span class="token punctuation">]</span><span class="token comment"># kubectl apply -f pod1.yaml</span>
+pod/mypod1 created
+<span class="token punctuation">[</span>root@k8s-master pod<span class="token punctuation">]</span><span class="token comment"># kubectl get pod -o wide</span>
+NAME                     READY   STATUS              RESTARTS   AGE     IP              NODE        NOMINATED NODE   READINESS GATES
+mypod1                   <span class="token number">0</span>/1     ContainerCreating   <span class="token number">0</span>          20s     <span class="token operator">&lt;</span>none<span class="token operator">&gt;</span>          k8s-node4   <span class="token operator">&lt;</span>none<span class="token operator">&gt;</span>           <span class="token operator">&lt;</span>none<span class="token operator">&gt;</span>
+nginx-58dcb77688-h8c5x   <span class="token number">1</span>/1     Running             <span class="token number">0</span>          3d23h   <span class="token number">172.31</span>.156.68   k8s-node1   <span class="token operator">&lt;</span>none<span class="token operator">&gt;</span>           <span class="token operator">&lt;</span>none<span class="token operator">&gt;</span></code></pre><p>（3）验证 PV 是否可用：</p><pre class="language-bash" data-language="bash"><code class="language-bash">kubectl <span class="token builtin class-name">exec</span> mypod1 <span class="token function">touch</span> /mydata/hello</code></pre><p>查看生成文件</p><pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token punctuation">[</span>root@rediscom ~<span class="token punctuation">]</span><span class="token comment"># cd /data/NFS/k8s/pv1/</span>
+<span class="token punctuation">[</span>root@rediscom pv1<span class="token punctuation">]</span><span class="token comment"># ls</span>
+hello</code></pre><p>可见，在 Pod 中创建的文件 /mydata/hello 确实已经保存到了 NFS 服务器目录 /nfsdata/pv1 中。</p><p>如果不再需要使用 PV，可用删除 PVC 回收 PV。</p><h3 id="3-回收-PV"><a href="#3-回收-PV" class="headerlink" title="3. 回收 PV"></a>3. 回收 PV</h3><p>通过pvc回收pv<br>（1）当 PV 不再需要时，可通过删除 PVC 回收。</p><pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token punctuation">[</span>root@k8s-master pvc<span class="token punctuation">]</span><span class="token comment"># kubectl get pvc</span>
+NAME     STATUS   VOLUME   CAPACITY   ACCESS MODES   STORAGECLASS   AGE
+mypvc1   Bound    mypv1    1Gi        RWO            nfs            22m
+<span class="token comment"># 删除pvc</span>
+<span class="token punctuation">[</span>root@k8s-master pvc<span class="token punctuation">]</span><span class="token comment"># kubectl delete pvc mypvc1</span>
+persistentvolumeclaim <span class="token string">"mypvc1"</span> deleted</code></pre><p>当 PVC mypvc1 被删除后，发现 Kubernetes 启动了一个新 Pod，这个 Pod 的作用就是清除 PV mypv1 的数据。这个时候再看 NFS 服务器目录 /data/NFS/k8s/pv1/ 中已经没有数据了</p><p><img width="780" height="258" style="--img-ar:3.0233" loading="lazy" decoding="async" src="/images/k8s/nfs/16373060619523.jpg" alt="data1"></p><p><strong>注意:</strong> 删除 mypvc1 时之前要停止与它相关的 pod ，不然 mypvc1一直处于 Terminating 状态</p><p>（2）当数据清除完毕，mypv1 的状态重新变为 Available，此时则可以被新的 PVC 申请。</p><pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token punctuation">[</span>root@k8s-master pvc<span class="token punctuation">]</span><span class="token comment"># kubectl get pv</span>
+NAME    CAPACITY   ACCESS MODES   RECLAIM POLICY   STATUS      CLAIM   STORAGECLASS   REASON   AGE
+mypv1   1Gi        RWO            Recycle          Available           nfs                     67m</code></pre><p>（3）因为 PV 的回收策略设置为 Recycle，所以数据会被清除，但这可能不是我们想要的结果。如果我们希望保留数据，可以将策略设置为 Retain。</p><pre class="language-yaml" data-language="yaml"><code class="language-yaml"><span class="token key atrule">apiVersion</span><span class="token punctuation">:</span> v1
+<span class="token key atrule">kind</span><span class="token punctuation">:</span> PersistentVolume
+<span class="token key atrule">metadata</span><span class="token punctuation">:</span>
+  <span class="token key atrule">name</span><span class="token punctuation">:</span> mypv1
+<span class="token key atrule">spec</span><span class="token punctuation">:</span>
+  <span class="token key atrule">capacity</span><span class="token punctuation">:</span>
+    <span class="token key atrule">storage</span><span class="token punctuation">:</span> 1Gi
+  <span class="token key atrule">accessModes</span><span class="token punctuation">:</span>
+    <span class="token punctuation">-</span> ReadWriteOnce
+  <span class="token key atrule">persistentVolumeReclaimPolicy</span><span class="token punctuation">:</span> Retain
+  <span class="token key atrule">storageClassName</span><span class="token punctuation">:</span> nfs
+  <span class="token key atrule">nfs</span><span class="token punctuation">:</span>
+    <span class="token key atrule">path</span><span class="token punctuation">:</span> /data/NFS/k8s/pv1
+    <span class="token key atrule">server</span><span class="token punctuation">:</span> 192.168.11.101</code></pre><p>（4）通过 kubectl apply 更新 PV：</p><pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token punctuation">[</span>root@k8s-master pv<span class="token punctuation">]</span><span class="token comment"># kubectl apply -f nfs-pv1.yaml</span>
+persistentvolume/mypv1 configured
+<span class="token punctuation">[</span>root@k8s-master pv<span class="token punctuation">]</span><span class="token comment"># kubectl get pv</span>
+NAME    CAPACITY   ACCESS MODES   RECLAIM POLICY   STATUS      CLAIM   STORAGECLASS   REASON   AGE
+mypv1   1Gi        RWO            Retain           Available           nfs                     81m
+<span class="token punctuation">[</span>root@k8s-master pv<span class="token punctuation">]</span><span class="token comment">#</span></code></pre><p>（5）回收策略已经变为 Retain，通过下面步骤验证其效果：</p><pre class="language-yaml" data-language="yaml"><code class="language-yaml"><span class="token punctuation">[</span>root@k8s<span class="token punctuation">-</span>master pvc<span class="token punctuation">]</span><span class="token comment"># kubectl exec mypod1 touch /mydata/hello</span>
+kubectl exec <span class="token punctuation">[</span>POD<span class="token punctuation">]</span> <span class="token punctuation">[</span>COMMAND<span class="token punctuation">]</span> is DEPRECATED and will be removed in a future version. Use kubectl exec <span class="token punctuation">[</span>POD<span class="token punctuation">]</span> <span class="token punctuation">-</span><span class="token punctuation">-</span> <span class="token punctuation">[</span>COMMAND<span class="token punctuation">]</span> instead.
+<span class="token key atrule">error</span><span class="token punctuation">:</span> <span class="token key atrule">unable to upgrade connection</span><span class="token punctuation">:</span> container not found ("mypod1")
+<span class="token punctuation">[</span>root@k8s<span class="token punctuation">-</span>master pvc<span class="token punctuation">]</span><span class="token comment"># kubectl get pod</span>
+NAME                     READY   STATUS    RESTARTS   AGE
+mypod1                   1/1     Running   0          27s
+nginx<span class="token punctuation">-</span>58dcb77688<span class="token punctuation">-</span>h8c5x   1/1     Running   0          4d
+<span class="token punctuation">[</span>root@k8s<span class="token punctuation">-</span>master pvc<span class="token punctuation">]</span><span class="token comment"># kubectl exec mypod1 touch /mydata/hello</span>
+kubectl exec <span class="token punctuation">[</span>POD<span class="token punctuation">]</span> <span class="token punctuation">[</span>COMMAND<span class="token punctuation">]</span> is DEPRECATED and will be removed in a future version. Use kubectl exec <span class="token punctuation">[</span>POD<span class="token punctuation">]</span> <span class="token punctuation">-</span><span class="token punctuation">-</span> <span class="token punctuation">[</span>COMMAND<span class="token punctuation">]</span> instead.
+<span class="token punctuation">[</span>root@k8s<span class="token punctuation">-</span>master pvc<span class="token punctuation">]</span><span class="token comment"># kubectl delete -f ../pod/pod1.yaml</span>
+pod "mypod1" deleted
+<span class="token punctuation">[</span>root@k8s<span class="token punctuation">-</span>master pvc<span class="token punctuation">]</span><span class="token comment"># kubectl get pvc</span>
+NAME     STATUS   VOLUME   CAPACITY   ACCESS MODES   STORAGECLASS   AGE
+mypvc1   Bound    mypv1    1Gi        RWO            nfs            3m48s
+<span class="token punctuation">[</span>root@k8s<span class="token punctuation">-</span>master pvc<span class="token punctuation">]</span><span class="token comment"># kubectl delete pvc mypvc1</span>
+persistentvolumeclaim "mypvc1" deleted
+<span class="token punctuation">[</span>root@k8s<span class="token punctuation">-</span>master pvc<span class="token punctuation">]</span><span class="token comment"># kubectl get pvc</span>
+No resources found in default namespace.
+<span class="token punctuation">[</span>root@k8s<span class="token punctuation">-</span>master pvc<span class="token punctuation">]</span><span class="token comment">#</span></code></pre><p>（6）我们再看 NFS 服务器目录 /nfsdata/pv1 中数据还保留。</p><pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token punctuation">[</span>root@rediscom pv1<span class="token punctuation">]</span><span class="token comment"># ls</span>
+hello
+<span class="token punctuation">[</span>root@rediscom pv1<span class="token punctuation">]</span><span class="token comment">#</span></code></pre><p>（7）虽然 mypv1 中的数据得到了保留，但其 PV 状态会一直处于 Released，不能被其他 PVC 申请。</p><pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token punctuation">[</span>root@k8s-master pvc<span class="token punctuation">]</span><span class="token comment"># kubectl get pv</span>
+NAME    CAPACITY   ACCESS MODES   RECLAIM POLICY   STATUS     CLAIM            STORAGECLASS   REASON   AGE
+mypv1   1Gi        RWO            Retain           Released   default/mypvc1   nfs                     89m</code></pre><p>8）为了重新使用存储资源，可以删除并重新创建 mypv1。删除操作只是删除了 PV 对象，存储空间中的数据并不会被删除。</p><p>新建的 mypv1 状态为 Available，已经可以被 PVC 申请。</p><pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token punctuation">[</span>root@k8s-master pvc<span class="token punctuation">]</span><span class="token comment"># kubectl delete pv mypv1</span>
+<span class="token punctuation">[</span>root@k8s-master pvc<span class="token punctuation">]</span><span class="token comment"># ubectl apply -f nfs-pv1.yaml</span>
+<span class="token punctuation">[</span>root@k8s-master pvc<span class="token punctuation">]</span><span class="token comment"># kubectl get pv</span>
+NAME    CAPACITY   ACCESS MODES   RECLAIM POLICY   STATUS      CLAIM   STORAGECLASS   REASON   AGE
+mypv1   1Gi        RWO            Retain           Available           nfs                     2s
+<span class="token punctuation">[</span>root@k8s-master pvc<span class="token punctuation">]</span><span class="token comment">#</span></code></pre><p>PV 还支持 Delete 的回收策略，会删除 PV 在 Storage Provider 上对应存储空间。NFS 的 PV 不支持 Delete，支持 Delete 的 Provider 有 AWS EBS、GCE PD、Azure Disk、OpenStack Cinder Volume 等</p><h3 id="4-PV的动态供给"><a href="#4-PV的动态供给" class="headerlink" title="4.  PV的动态供给"></a>4. PV的动态供给</h3><p>pv的供给方式</p><p>前面的例子中，我们提前创建了 PV，然后通过 PVC 申请 PV 并在 Pod 中使用，这种方式叫做静态供给（Static Provision）。</p><p>与之对应的是动态供给（Dynamical Provision），即如果没有满足 PVC 条件的 PV，会动态创建 PV。相比静态供给，动态供给有明显的优势：不需要提前创建 PV，减少了管理员的工作量，效率高。</p><p>动态供给是通过 StorageClass 实现的，StorageClass 定义了如何创建 PV</p><p>pv动态供给举例<br>StorageClass standard：</p><p><img width="465" height="230" style="--img-ar:2.0217" loading="lazy" decoding="async" src="/images/k8s/nfs/16373075330215.jpg" alt="standard"></p><p>StorageClass slow：</p><p><img width="467" height="255" style="--img-ar:1.8314" loading="lazy" decoding="async" src="/images/k8s/nfs/16373075453270.jpg" alt="slow"></p><p>这两个 StorageClass 都会动态创建 AWS EBS，不同在于 standard 创建的是 gp2 类型的 EBS，而 slow 创建的是 io1 类型的 EBS。不同类型的 EBS 支持的参数可参考 AWS 官方文档。</p><p>StorageClass 支持 Delete 和 Retain 两种 reclaimPolicy，默认是 Delete。</p><p>与之前一样，PVC 在申请 PV 时，只需要指定 StorageClass 和容量以及访问模式，比如：</p><pre class="language-yaml" data-language="yaml"><code class="language-yaml"> <span class="token key atrule">kind</span><span class="token punctuation">:</span> PersistentVolumeClaim
+<span class="token key atrule">apiVersion</span><span class="token punctuation">:</span> v1
+<span class="token key atrule">metadata</span><span class="token punctuation">:</span>
+  <span class="token key atrule">name</span><span class="token punctuation">:</span> mypvc1
+<span class="token key atrule">spec</span><span class="token punctuation">:</span>
+  <span class="token key atrule">accessModes</span><span class="token punctuation">:</span>
+    <span class="token punctuation">-</span> ReadWriteOnce
+  <span class="token key atrule">resources</span><span class="token punctuation">:</span>
+    <span class="token key atrule">requests</span><span class="token punctuation">:</span>
+      <span class="token key atrule">storage</span><span class="token punctuation">:</span> 1Gi
+  <span class="token key atrule">storageClassName</span><span class="token punctuation">:</span> standard</code></pre><p>除了 AWS EBS，Kubernetes 支持其他多种动态供给 PV 的 Provisioner，完整列表请参考 <a target="_blank" rel="noopener" href="https://kubernetes.io/docs/concepts/storage/storage-classes/#provisioner">https://kubernetes.io/docs/concepts/storage/storage-classes/#provisioner</a></p></div><hr><div class="hexo-ad" aria-label="赞助内容"><div class="hexo-ad-script"><style>.hexo-article-ad-slot{display:block;width:100%;max-width:320px;height:100px;margin:0 auto}@media (min-width:500px){.hexo-article-ad-slot{max-width:468px;height:60px}}@media (min-width:800px){.hexo-article-ad-slot{max-width:728px;height:90px}}</style><ins class="adsbygoogle hexo-article-ad-slot" style="display:block" data-ad-client="ca-pub-8990123471955885" data-ad-slot="4326698678"></ins><script>(adsbygoogle=window.adsbygoogle||[]).push({})</script></div></div><style>.hexo-ad{margin:1.2rem auto;text-align:center}.hexo-ad-img{max-width:100%;height:auto;border-radius:8px;box-shadow:0 2px 8px rgba(0,0,0,.08)}.hexo-ad-script{margin:0 auto}</style><div class="reprint" id="reprint-statement"><div class="reprint__author"><span class="reprint-meta" style="font-weight:700"><i class="fas fa-user">文章作者:</i></span> <span class="reprint-info"><a href="/about" rel="external nofollow noreferrer">costalong</a></span></div><div class="reprint__type"><span class="reprint-meta" style="font-weight:700"><i class="fas fa-link">文章链接:</i></span> <span class="reprint-info"><a href="https://costalong.com/2023/09/13/k8s/k8s-install-nfs/">https://costalong.com/2023/09/13/k8s/k8s-install-nfs/</a> <button class="reprint-copy-link" type="button" data-copy-url="https://costalong.com/2023/09/13/k8s/k8s-install-nfs/" aria-label="复制文章链接" title="复制文章链接"><i class="fas fa-copy" aria-hidden="true"></i> <span>复制链接</span></button><span class="reprint-copy-status" role="status" aria-live="polite"></span></span></div><div class="reprint__notice"><span class="reprint-meta" style="font-weight:700"><i class="fas fa-copyright">版权声明:</i></span> <span class="reprint-info">本博客所有文章除特別声明外，均采用 <a href="https://creativecommons.org/licenses/by/4.0/deed.zh" rel="external nofollow noreferrer" target="_blank">CC BY 4.0</a> 许可协议。转载请注明来源 <a href="/about" target="_blank">costalong</a> !</span></div></div><script async defer>document.addEventListener("copy", function (e) {
+        if (window.__articlePermalinkCopy) return;
+        let toastHTML = '<span>复制成功，请遵循本文的转载规则</span><button class="btn-flat toast-action" onclick="navToReprintStatement()" style="font-size: smaller">查看</a>';
+        M.toast({html: toastHTML})
+      });
+
+      document.addEventListener("click", async function (e) {
+        const button = e.target.closest(".reprint-copy-link");
+        if (!button) return;
+
+        const row = button.closest(".reprint__type .reprint-info");
+        const permalink = button.dataset.copyUrl;
+        if (!row || !permalink) return;
+
+        const status = row.querySelector(".reprint-copy-status");
+        const fallbackCopy = function (text) {
+          const textarea = document.createElement("textarea");
+          textarea.value = text;
+          textarea.setAttribute("readonly", "");
+          textarea.style.position = "fixed";
+          textarea.style.opacity = "0";
+          document.body.appendChild(textarea);
+          textarea.select();
+          window.__articlePermalinkCopy = true;
+          let copied = false;
+          try {
+            copied = document.execCommand("copy");
+          } finally {
+            window.__articlePermalinkCopy = false;
+            textarea.remove();
+          }
+          if (!copied) throw new Error("Clipboard copy failed");
+        };
+
+        try {
+          if (navigator.clipboard && navigator.clipboard.writeText) {
+            try {
+              await navigator.clipboard.writeText(permalink);
+            } catch (error) {
+              fallbackCopy(permalink);
+            }
+          } else {
+            fallbackCopy(permalink);
+          }
+          status.textContent = "已复制";
+          button.classList.add("is-copied");
+        } catch (error) {
+          status.textContent = "复制失败，请长按链接复制";
+        }
+
+        window.setTimeout(function () {
+          status.textContent = "";
+          button.classList.remove("is-copied");
+        }, 2200);
+      });
+
+      function navToReprintStatement() {
+        $("html, body").animate({scrollTop: $("#reprint-statement").offset().top - 80}, 800);
+      }</script><div class="tag_share" style="display:block"><div class="post-meta__tag-list" style="display:inline-block"><div class="article-tag"><a href="/tags/k8s/"><span class="chip bg-color k8s">k8s</span></a> <a href="/tags/nfs/"><span class="chip bg-color k8s">nfs</span></a> <a href="/tags/storage/"><span class="chip bg-color k8s">storage</span></a></div></div><div class="post_share" style="zoom:80%;width:fit-content;display:inline-block;float:right;margin:-.15rem 0"><link rel="stylesheet" href="/libs/share/css/share.min.css"><div id="article-share"><div class="social-share" data-sites="twitter,facebook,google,qq,qzone,wechat,weibo,douban,linkedin" data-wechat-qrcode-helper="<p>微信扫一扫即可分享！</p>"></div><script src="/libs/share/js/social-share.min.js"></script></div></div></div><div id="reward"><a href="#rewardModal" class="reward-link modal-trigger btn-floating btn-medium waves-effect waves-light red">赏</a><div id="rewardModal" class="modal"><div class="modal-content"><a class="close modal-close"><i class="fas fa-times"></i></a><h4 class="reward-title">你的赏识是我前进的动力</h4><div class="reward-content"><div class="reward-tabs"><ul class="tabs row"><li class="tab col s6 alipay-tab waves-effect waves-light"><a href="#alipay">支付宝</a></li><li class="tab col s6 wechat-tab waves-effect waves-light"><a href="#wechat">微 信</a></li></ul><div id="alipay"><img src="/images/reward/alipay.jpg" class="reward-img" loading="lazy" alt="支付宝打赏二维码"></div><div id="wechat"><img src="/images/reward/wechat.jpg" class="reward-img" loading="lazy" alt="微信打赏二维码"></div></div></div></div></div></div><script>$(function(){$(".tabs").tabs()})</script></div></div><section class="post-related" aria-labelledby="post-related-title"><h2 id="post-related-title">继续阅读</h2><div class="post-related-grid"><a class="post-related-card" href="/2023/09/14/k8s/pod-elegant-stop/"><span class="post-related-date">2023-09-14</span> <strong>pods 优雅终止</strong> <span class="post-related-summary">Pod 销毁时，会停止容器内的进程，通常在停止的过程中我们需要执行一些善后逻辑，比如等待存量请求处理完以避免连接中断，或通知相关依赖进行清理等，从而实现优雅终止目的。本文介绍在 K…</span></a> <a class="post-related-card" href="/2023/09/09/k8s/initcontainers-mo-shi/"><span class="post-related-date">2023-09-09</span> <strong>InitContainers模式</strong> <span class="post-related-summary">init容器是在同一个Pod中的其他容器之前启动和执行的容器。它的目的是为Pod上托管的主应用程序执行初始化逻辑。例如，创建必要的用户帐户、执行数据库迁移、创建数据库模式等等。 在…</span></a> <a class="post-related-card" href="/2023/09/03/k8s/csi-fen-xi-rong-qi-chu-cun-jie-kou/"><span class="post-related-date">2023-09-03</span> <strong>CSI--容器储存接口</strong> <span class="post-related-summary">Kubernetes 可插拔架构的三大接口之一：CSI 为什么存在、它与 CNI/CRI 的分工，以及一个存储插件要实现哪些 gRPC 服务才能被 k8s 识别。</span></a></div></section><style>.valine-card{margin:1.5rem auto}.valine-card .card-content{padding:20px 20px 5px 20px}#vcomments textarea{box-sizing:border-box;background:url(/medias/comment_bg.png) 100% 100% no-repeat}#vcomments p{margin:2px 2px 10px;font-size:1.05rem;line-height:1.78rem}#vcomments blockquote p{text-indent:.2rem}#vcomments a{padding:0 2px;color:#4cbf30;font-weight:500;text-decoration:none}#vcomments img{max-width:100%;height:auto;cursor:pointer}#vcomments ol li{list-style-type:decimal}#vcomments ol,ul{display:block;padding-left:2em;word-spacing:.05rem}#vcomments ul li,ol li{display:list-item;line-height:1.8rem;font-size:1rem}#vcomments ul li{list-style-type:disc}#vcomments ul ul li{list-style-type:circle}#vcomments table,td,th{padding:12px 13px;border:1px solid #dfe2e5}#vcomments table,td,th{border:0}table tr:nth-child(2n),thead{background-color:#fafafa}#vcomments table th{background-color:#f2f2f2;min-width:80px}#vcomments table td{min-width:80px}#vcomments h1{font-size:1.85rem;font-weight:700;line-height:2.2rem}#vcomments h2{font-size:1.65rem;font-weight:700;line-height:1.9rem}#vcomments h3{font-size:1.45rem;font-weight:700;line-height:1.7rem}#vcomments h4{font-size:1.25rem;font-weight:700;line-height:1.5rem}#vcomments h5{font-size:1.1rem;font-weight:700;line-height:1.4rem}#vcomments h6{font-size:1rem;line-height:1.3rem}#vcomments p{font-size:1rem;line-height:1.5rem}#vcomments hr{margin:12px 0;border:0;border-top:1px solid #ccc}#vcomments blockquote{margin:15px 0;border-left:5px solid #42b983;padding:1rem .8rem .3rem .8rem;color:#666;background-color:rgba(66,185,131,.1)}#vcomments pre{font-family:monospace,monospace;padding:1.2em;margin:.5em 0;background:#272822;overflow:auto;border-radius:.3em;tab-size:4}#vcomments code{font-family:monospace,monospace;padding:1px 3px;font-size:.92rem;color:#e96900;background-color:#f8f8f8;border-radius:2px}#vcomments pre code{font-family:monospace,monospace;padding:0;color:#e8eaf6;background-color:#272822}#vcomments pre[class*=language-]{padding:1.2em;margin:.5em 0}#vcomments code[class*=language-],pre[class*=language-]{color:#e8eaf6}#vcomments [type=checkbox]:not(:checked),[type=checkbox]:checked{position:inherit;margin-left:-1.3rem;margin-right:.4rem;margin-top:-1px;vertical-align:middle;left:unset;visibility:visible}#vcomments b,strong{font-weight:700}#vcomments dfn{font-style:italic}#vcomments small{font-size:85%}#vcomments cite{font-style:normal}#vcomments mark{background-color:#fcf8e3;padding:.2em}#vcomments table,td,th{padding:12px 13px;border:1px solid #dfe2e5}table tr:nth-child(2n),thead{background-color:#fafafa}#vcomments table th{background-color:#f2f2f2;min-width:80px}#vcomments table td{min-width:80px}#vcomments [type=checkbox]:not(:checked),[type=checkbox]:checked{position:inherit;margin-left:-1.3rem;margin-right:.4rem;margin-top:-1px;vertical-align:middle;left:unset;visibility:visible}</style><div class="card valine-card" data-aos="fade-up"><div class="comment_headling" style="font-size:20px;font-weight:700;padding:20px 20px 8px 20px"><i class="fas fa-comments fa-fw" aria-hidden="true"></i> <span>评论</span></div><div id="vcomments" class="card-content" style="display:grid"></div></div><script>!function(){var e=document.getElementById("vcomments"),t=["/libs/valine/av-min.js","/libs/valine/Valine.min.js"];function i(e){if(e!==t.length){var n=document.createElement("script");n.src=t[e],n.onload=function(){i(e+1)},document.body.appendChild(n)}else new Valine({el:"#vcomments",appId:"wCf5tlcDtIMPMtrnfln6u3fL-MdYXbMMI",appKey:"pvzhB4VvZzNeC5gtXTaIv0oo",serverURLs:"https://wcf5tlcd.api.lncldglobal.com",notify:!1,verify:!1,visitor:!0,recordIP:!1,avatar:"mm",pageSize:"10",lang:"zh-cn",placeholder:"有什么想说的，在这里留言…"})}if(!("IntersectionObserver"in window))return i(0);var n=new IntersectionObserver(function(e){e[0].isIntersecting&&(n.disconnect(),i(0))},{rootMargin:"600px 0px"});n.observe(e)}()</script><article id="prenext-posts" class="prev-next articles"><div class="row article-row"><div class="article col s12 m6" data-aos="fade-up"><div class="article-badge left-badge text-color"><i class="fas fa-chevron-left"></i> &nbsp;上一篇</div><div class="card"><a href="/2023/09/13/linux/ubuntu-install-nfs-server/"><div class="card-image card-image-V"><div class="box-content"><p class="title">阅读全文</p><span class="post" style="width:180px">ubuntu 安装 nfs</span></div><img src="/images/covers/linux-card.webp" width="400" height="300" loading="lazy" class="responsive-img" alt="ubuntu 安装 nfs"> <span class="card-title title-V">ubuntu 安装 nfs</span></div></a><div class="card-content article-content"><div class="summary block-with-text">在 Ubuntu 上搭建 NFS 服务端：exports 权限参数怎么选、共享目录如何创建、客户端为什么不必单独装包，以及排查挂载失败时最常用的几条命令。</div><div class="publish-info"><span class="publish-date"><i class="far fa-clock fa-fw icon-date"></i> 2023-09-13</span><span class="publish-author"><i class="fas fa-bookmark fa-fw icon-category"></i> <a href="/categories/linux/" class="post-category">linux</a></span></div></div><div class="card-action article-tags"><a href="/tags/nfs/"><span class="chip bg-color k8s">nfs</span></a> <a href="/tags/storage/"><span class="chip bg-color k8s">storage</span></a></div></div></div><div class="article col s12 m6" data-aos="fade-up"><div class="article-badge right-badge text-color">下一篇&nbsp;<i class="fas fa-chevron-right"></i></div><div class="card"><a href="/2023/09/13/traefik/treafik-introduce/"><div class="card-image card-image-V"><div class="box-content"><p class="title">阅读全文</p><span class="post" style="width:180px">traefik 简介</span></div><img src="/images/covers/cloud-native-card.webp" width="400" height="300" loading="lazy" class="responsive-img" alt="traefik 简介"> <span class="card-title title-V">traefik 简介</span></div></a><div class="card-content article-content"><div class="summary block-with-text">Traefik 是什么、解决了什么问题：作为面向微服务的 HTTP 反向代理，它如何自动发现后端服务、与 Kubernetes Ingress 如何配合，以及和 Nginx 的取舍。</div><div class="publish-info"><span class="publish-date"><i class="far fa-clock fa-fw icon-date"></i> 2023-09-13</span><span class="publish-author"><i class="fas fa-bookmark fa-fw icon-category"></i> <a href="/categories/traefik/" class="post-category">traefik</a></span></div></div><div class="card-action article-tags"><a href="/tags/k8s/"><span class="chip bg-color k8s">k8s</span></a> <a href="/tags/traefik/"><span class="chip bg-color traefik">traefik</span></a></div></div></div></div></article></div><script src="/libs/codeBlock/codeBlockFuction.js"></script><script src="/libs/codeBlock/codeLang.js"></script><script src="/libs/codeBlock/codeCopy.js"></script><script src="/libs/codeBlock/codeShrink.js"></script><script>!function(){function t(n){var t=n.closest?n.closest(".img-item"):null;if(t){var e=t.nextElementSibling;e&&e.classList.contains("caption")&&(e.style.display="none"),t.style.display="none"}else n.style.display="none"}$(function(){setTimeout(function(){document.querySelectorAll("#articleContent img").forEach(function(n){n.addEventListener("error",function(){t(this)},{once:!0}),n.complete&&0===n.naturalWidth&&t(n)})},0)})}()</script><script>$(function(){$("#read_mode").on("click",function(){var a=$("#artDetail .card").first();a.toggleClass("card-block-fullscreen"),$("html").toggleClass("card-block-fullscreen-html-scroll"),$(this).attr("aria-pressed",String(a.hasClass("card-block-fullscreen")));var s=$(this).find("i");s.hasClass("fa-expand-arrows-alt")?s.removeClass("fa-expand-arrows-alt").addClass("fa-compress-arrows-alt"):s.removeClass("fa-compress-arrows-alt").addClass("fa-expand-arrows-alt")}).on("keydown",function(a){"Enter"!==a.key&&" "!==a.key||(a.preventDefault(),$(this).trigger("click"))})})</script></div><div id="toc-aside" class="expanded col l3 hide-on-med-and-down"><div class="toc-widget card"><div class="toc-title"><i class="far fa-list-alt"></i>&nbsp;&nbsp;目录</div><div id="toc-content"></div></div></div></div><div id="floating-toc-btn"><button type="button" class="btn-floating btn-large bg-color" aria-label="打开文章目录" aria-controls="toc-aside mobile-toc-drawer" aria-expanded="false"><i class="fas fa-list-ul" aria-hidden="true"></i></button></div><div id="mobile-toc-overlay" class="mobile-toc-overlay" aria-hidden="true"></div><div id="mobile-toc-drawer" class="mobile-toc-drawer" role="dialog" aria-modal="true" aria-label="文章目录" aria-hidden="true" inert><div class="mobile-toc-header"><span class="mobile-toc-title"><i class="far fa-list-alt"></i> &nbsp;&nbsp;目录</span> <button type="button" id="mobile-toc-close" class="mobile-toc-close" aria-label="关闭文章目录"><i class="fas fa-times" aria-hidden="true"></i></button></div><div class="mobile-toc-body" id="mobile-toc-body"></div></div><script src="/libs/tocbot/tocbot.min.js"></script><script>$(function () {
+        tocbot.init({
+            tocSelector: '#toc-content',
+            contentSelector: '#articleContent',
+            headingsOffset: -($(window).height() * 0.4 - 45),
+            collapseDepth: Number('3'),
+            headingSelector: 'h2, h3, h4'
+        });
+
+        // Set scroll toc fixed.
+        let tocHeight = parseInt($(window).height() * 0.4 - 64);
+        let $tocWidget = $('.toc-widget');
+        $(window).scroll(function () {
+            let scroll = $(window).scrollTop();
+            /* add post toc fixed. */
+            if (scroll > tocHeight) {
+                $tocWidget.addClass('toc-fixed');
+            } else {
+                $tocWidget.removeClass('toc-fixed');
+            }
+        });
+
+        
+        /* 修复文章卡片 div 的宽度. */
+        let fixPostCardWidth = function (srcId, targetId) {
+            let srcDiv = $('#' + srcId);
+            if (srcDiv.length === 0) {
+                return;
+            }
+
+            let w = srcDiv.width();
+            if (w >= 450) {
+                w = w + 21;
+            } else if (w >= 350 && w < 450) {
+                w = w + 18;
+            } else if (w >= 300 && w < 350) {
+                w = w + 16;
+            } else {
+                w = w + 14;
+            }
+            $('#' + targetId).width(w);
+        };
+
+        // 切换TOC目录展开收缩的相关操作.
+        const expandedClass = 'expanded';
+        let $tocAside = $('#toc-aside');
+        let $mainContent = $('#main-content');
+
+        /* 目录只有一两条时，侧栏几乎是空的，右侧留下一大片空白。
+           这种情况直接不要侧栏，让正文占满整行（正文自身仍有 measure 行宽上限，
+           由 .no-toc 负责居中）。 */
+        if ($('#toc-content .toc-link').length < 3) {
+            $tocAside.removeClass(expandedClass).hide();
+            $mainContent.removeClass('l9').addClass('no-toc');
+            $('#floating-toc-btn').hide();
+        }
+
+        // 移动端 TOC 抽屉逻辑
+        let $overlay = $('#mobile-toc-overlay');
+        let $drawer = $('#mobile-toc-drawer');
+        let $drawerBody = $('#mobile-toc-body');
+        let $tocTrigger = $('#floating-toc-btn .btn-floating');
+        let drawerOpen = false;
+
+        function openMobileDrawer() {
+            // 克隆桌面端 TOC 内容到抽屉
+            $drawerBody.html($('#toc-content').html());
+            $overlay.addClass('active');
+            $drawer.addClass('active').attr('aria-hidden', 'false').removeAttr('inert');
+            $tocTrigger.attr({'aria-expanded': 'true', 'aria-label': '关闭文章目录'});
+            $('body').css('overflow', 'hidden');
+            drawerOpen = true;
+            $('#mobile-toc-close').trigger('focus');
+
+            // 点击抽屉内链接后自动关闭
+            $drawerBody.find('.toc-link').on('click', function() {
+                closeMobileDrawer(false);
+            });
+        }
+
+        function closeMobileDrawer(restoreFocus) {
+            $overlay.removeClass('active');
+            $drawer.removeClass('active').attr('aria-hidden', 'true');
+            // Let a clicked TOC anchor complete its native hash navigation before making it inert.
+            if (restoreFocus === false) {
+                window.setTimeout(function () { $drawer.attr('inert', ''); }, 0);
+            } else {
+                $drawer.attr('inert', '');
+            }
+            $tocTrigger.attr({'aria-expanded': 'false', 'aria-label': '打开文章目录'});
+            $('body').css('overflow', '');
+            drawerOpen = false;
+            if (restoreFocus !== false) $tocTrigger.trigger('focus');
+        }
+
+        $overlay.on('click', function () { closeMobileDrawer(); });
+        $('#mobile-toc-close').on('click', function () { closeMobileDrawer(); });
+        $(document).on('keydown', function (event) {
+            if (drawerOpen && event.key === 'Escape') closeMobileDrawer();
+        });
+
+        $(window).on('resize', function () {
+            if ($(window).width() > 1199 && drawerOpen) closeMobileDrawer(false);
+            if ($(window).width() > 1199) {
+                const expanded = $tocAside.hasClass(expandedClass);
+                $tocTrigger.attr({'aria-expanded': String(expanded), 'aria-label': expanded ? '收起文章目录' : '展开文章目录'});
+            } else if (!drawerOpen) {
+                $tocTrigger.attr({'aria-expanded': 'false', 'aria-label': '打开文章目录'});
+            }
+        });
+
+        if ($(window).width() > 1199 && $tocAside.hasClass(expandedClass)) {
+            $tocTrigger.attr({'aria-expanded': 'true', 'aria-label': '收起文章目录'});
+        }
+
+        $tocTrigger.on('click', function () {
+            // 1199px 及以下打开抽屉：993–1199 侧栏太窄，CSS 已把它隐藏
+            if ($(window).width() <= 1199) {
+                if (drawerOpen) {
+                    closeMobileDrawer();
+                } else {
+                    openMobileDrawer();
+                }
+                return;
+            }
+
+            // 桌面端保持原有折叠逻辑
+            if ($tocAside.hasClass(expandedClass)) {
+                $tocAside.removeClass(expandedClass).hide();
+                $tocTrigger.attr({'aria-expanded': 'false', 'aria-label': '展开文章目录'});
+                // 只去掉 l9 会让 col s12 m12 在大屏退回整行宽度，正文行宽从 788px
+                // 涨到 1092px（中文行太长且不居中，右侧空一大片）。补一个类来封顶并居中。
+                $mainContent.removeClass('l9').addClass('toc-collapsed');
+            } else {
+                $tocAside.addClass(expandedClass).show();
+                $tocTrigger.attr({'aria-expanded': 'true', 'aria-label': '收起文章目录'});
+                $mainContent.addClass('l9').removeClass('toc-collapsed');
+            }
+            fixPostCardWidth('artDetail', 'prenext-posts');
+        });
+        
+    });</script></main><div class="progress-bar"></div><footer class="dp-footer page-footer"><div class="dp-wrap dp-foot-grid"><div class="l">&copy; <span id="year">2023-2026</span> <b>翼舞成梦</b> · costalong.com — 用 <a href="https://hexo.io/" target="_blank" rel="noopener">Hexo</a> 构建，内容均为原创工程笔记。</div><div class="dp-foot-links"><a href="/advertise/">广告合作</a> <a href="/privacy/">隐私政策</a> <a href="/atom.xml">RSS</a> <a href="/archives">归档</a> <a href="/about">关于</a> <a href="https://github.com/costa92" target="_blank" rel="noopener">GitHub</a> <a href="/sitemap.xml">sitemap</a></div></div><div class="dp-wrap" style="margin-top:16px;display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;font-size:12.5px;color:var(--text-mut)"><div class="footer-social"><a href="https://github.com/costa92" class="tooltipped" aria-label="访问我的GitHub" target="_blank" rel="noopener" data-tooltip="访问我的GitHub" data-position="top" data-delay="50"><i class="fab fa-github"></i></a><a href="mailto:costa9293@gmail.com" class="tooltipped" aria-label="邮件联系我" target="_blank" rel="noopener" data-tooltip="邮件联系我" data-position="top" data-delay="50"><i class="fas fa-envelope-open"></i></a><a href="tencent://AddContact/?fromId=50&fromSubId=1&subcmd=all&uin=944310536" class="tooltipped" aria-label="QQ联系我" target="_blank" rel="noopener" data-tooltip="QQ联系我: 944310536" data-position="top" data-delay="50"><i class="fab fa-qq"></i></a><a href="/atom.xml" class="tooltipped" aria-label="RSS 订阅" target="_blank" rel="noopener" data-tooltip="RSS 订阅" data-position="top" data-delay="50"><i class="fas fa-rss"></i></a></div><div class="footer-stats" style="font-family:var(--font-mono)"><span id="busuanzi_container_site_pv"><i class="far fa-eye"></i> &nbsp;<span id="busuanzi_value_site_pv"></span></span> <span id="busuanzi_container_site_uv">&nbsp;&middot;&nbsp;<i class="fas fa-users"></i>&nbsp;<span id="busuanzi_value_site_uv"></span></span> &nbsp;&middot;&nbsp;<a href="https://beian.miit.gov.cn/#/Integrated/index" target="_blank" rel="noopener">湘ICP备15006875号</a></div></div></footer><div id="searchModal" class="modal" role="dialog" aria-modal="true" aria-labelledby="searchTitle"><div class="modal-content"><div class="search-header"><label for="searchInput" id="searchTitle" class="title"><i class="fas fa-search" aria-hidden="true"></i> &nbsp;&nbsp;搜索</label> <input type="search" id="searchInput" name="s" placeholder="请输入搜索的关键字" class="search-input" aria-controls="searchResult"></div><div id="searchStatus" class="search-status" role="status" aria-live="polite"></div><div id="searchResult"></div></div></div><script>$(function(){"use strict";var n=document.getElementById("searchInput"),l=document.getElementById("searchResult"),t=document.getElementById("searchStatus"),a=null,c=!1;function o(e){t.textContent=e}function e(){l.replaceChildren();var e=n.value.trim().toLocaleLowerCase();if(e)if(a){var r=e.split(/[\s\-]+/).filter(Boolean),t=a.filter(function(t){return r.every(function(e){return t.searchText.includes(e)})}).slice(0,20);if(t.length){o("找到 "+t.length+" 条相关内容"+(20===t.length?"（最多显示 20 条）":""));var i=document.createElement("ul");i.className="search-result-list",t.forEach(function(e){var t=document.createElement("li"),n=document.createElement("a");if(n.className="search-result-title",n.href=e.url,n.textContent=e.title,t.appendChild(n),e.content){var l=e.content.toLocaleLowerCase().indexOf(r[0]),a=Math.max(0,l-35),c=document.createElement("p");c.className="search-result",c.textContent=(a?"…":"")+e.content.slice(a,a+130)+(a+130<e.content.length?"…":""),t.appendChild(c)}i.appendChild(t)}),l.appendChild(i)}else o("没有找到相关内容，请换个关键词试试。")}else o(c?"正在加载搜索索引…":"搜索索引暂时不可用，请稍后重试。");else o("")}function r(){a||c||(c=!0,e(),$.ajax({url:"/search.xml",dataType:"xml"}).done(function(e){a=$("entry",e).map(function(){var e,t=$("title",this).text().trim(),n=(e=$("content",this).text(),String(e||"").replace(/<[^>]*>/g," ").replace(/\s+/g," ").trim()),l=$("url",this).text().trim();return t&&l?{title:t,content:n,url:"/"===l.charAt(0)?l:"/"+l,searchText:(t+" "+n).toLocaleLowerCase()}:null}).get()}).fail(function(){a=null}).always(function(){c=!1,e()}))}n.addEventListener("input",function(){r(),e()}),n.addEventListener("focus",r),$('a[href="#searchModal"], .search-btn').on("click",r)})</script><div class="stars-con"><div id="stars"></div><div id="stars2"></div><div id="stars3"></div></div><script>function switchNightMode(){$('<div class="Cuteen_DarkSky"><div class="Cuteen_DarkPlanet"></div></div>').appendTo($("body")),setTimeout(function(){$("body").hasClass("DarkMode")?($("body").removeClass("DarkMode"),localStorage.setItem("isDark","0"),$("#sum-moon-icon").removeClass("fa-sun").addClass("fa-moon")):($("body").addClass("DarkMode"),localStorage.setItem("isDark","1"),$("#sum-moon-icon").addClass("fa-sun").removeClass("fa-moon")),setTimeout(function(){$(".Cuteen_DarkSky").fadeOut(1e3,function(){$(this).remove()})},2e3)})}</script><div id="backTop" class="top-scroll"><button type="button" class="btn-floating btn-large waves-effect waves-light" aria-label="回到顶部"><i class="fas fa-arrow-up" aria-hidden="true"></i></button></div><script src="/libs/materialize/materialize.min.js" defer></script><script src="/libs/masonry/masonry.pkgd.min.js" defer></script><script src="/libs/aos/aos.js"></script><script src="/libs/lightGallery/js/lightgallery-all.min.js" defer></script><script src="/libs/scrollprogress/scrollProgress.min.js"></script><script src="/js/matery.js?v=3f7ec091" defer></script><script src="/js/responsive-tables.js?v=6ebf2b5e"></script><script src="/js/infinite-scroll.js?v=b6f5ebe2" defer></script><script>!function(){var t=document.createElement("script");t.src="https://zz.bdstatic.com/linksubmit/push.js";var e=document.getElementsByTagName("script")[0];e.parentNode.insertBefore(t,e)}()</script><script src="/js/fireworks.js" async></script><script>!function(){if(!new URLSearchParams(location.search).has("style-audit-preview")){var e=document.createElement("script");e.src="https://events.vercount.one/js",document.head.appendChild(e)}}()</script><script color="110,80,255" pointcolor="80,140,255" opacity="0.28" zindex="-1" count="80" src="/libs/background/canvas-nest.js"></script><script src="/libs/instantpage/instantpage.js" type="module"></script><script>window.Base64=window.Base64||{encode:function(e){return btoa(unescape(encodeURIComponent(e)))}}</script><script>$(function () {
+        const hasAttr = (e,a) => a.some(_=> e.attr(_)!==undefined);
+        $('a').each(function() {
+          const $this = $(this);
+          if(hasAttr($this,["data-fancybox","ignore-external-link"])) return;
+          const href = $this.attr('href');
+          if (href && href.match('^((http|https|thunder|qqdl|ed2k|Flashget|qbrowser|ftp|rtsp|mms)://)')) {
+            const strs = href.split('/');
+            if (strs.length >= 3) {
+                const host = strs[2];
+                if (host !== 'https://costalong.com' || window.location.host) {
+                    $this.attr('href', '/go.html?u='+Base64.encode(href)+'').attr('rel', 'external nofollow noopener noreferrer');
+                    if (true) {
+                        $this.attr('target', '_blank');
+                    }
+                }
+            }
+          }
+        });
+        });</script></body></html>

@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 360 486" role="img" aria-labelledby="diagram-title diagram-desc">
+<title id="diagram-title">Service 类型与 NodePort</title><desc id="diagram-desc">用 NodePort 实验理解服务对外暴露的端口，并区分 ClusterIP、LoadBalancer 与 ExternalName。</desc>
+<defs><pattern id="grid" width="32" height="32" patternUnits="userSpaceOnUse"><path d="M32 0 L0 0 0 32" fill="none" stroke="#1e293b" stroke-width=".6"/></pattern>
+<marker id="arrow" markerWidth="9" markerHeight="7" refX="8" refY="3.5" orient="auto"><path d="M0 0 L9 3.5 L0 7Z" fill="#94a3b8"/></marker></defs>
+<rect width="360" height="486" rx="16" fill="#0f172a"/><rect width="360" height="486" rx="16" fill="url(#grid)"/>
+<text x="24" y="29" fill="#f8fafc" font-family="'PingFang SC','Noto Sans SC',sans-serif" font-size="17" font-weight="700">Service 类型与 NodePort</text>
+<text x="24" y="51" fill="#94a3b8" font-family="'PingFang SC','Noto Sans SC',sans-serif" font-size="11.5">访问范围决定类型</text>
+<rect x="24" y="80" width="312" height="62" rx="10" fill="#152338" stroke="#22d3ee" stroke-width="1.4"/>
+<text x="180.0" y="107.0" text-anchor="middle" font-family="'PingFang SC','Noto Sans SC',sans-serif" font-size="14" fill="#f8fafc" font-weight="700">按访问范围选择</text>
+<text x="180.0" y="123.0" text-anchor="middle" font-family="'PingFang SC','Noto Sans SC',sans-serif" font-size="12" fill="#cbd5e1">四种 Service 行为不同</text>
+<path d="M180 142 V177 H98 V214" fill="none" stroke="#22d3ee" stroke-width="1.8" marker-end="url(#arrow)"/>
+<path d="M180 177 H262 V214" fill="none" stroke="#34d399" stroke-width="1.8" marker-end="url(#arrow)"/>
+<path d="M180 142 V163 H12 V376 H24" fill="none" stroke="#a78bfa" stroke-width="1.8" marker-end="url(#arrow)"/>
+<path d="M180 142 V163 H348 V376 H336" fill="none" stroke="#fbbf24" stroke-width="1.8" marker-end="url(#arrow)"/>
+<rect x="24" y="214" width="148" height="86" rx="10" fill="#152338" stroke="#22d3ee" stroke-width="1.4"/>
+<text x="98.0" y="253.0" text-anchor="middle" font-family="'PingFang SC','Noto Sans SC',sans-serif" font-size="14" fill="#f8fafc" font-weight="700">ClusterIP</text>
+<text x="98.0" y="269.0" text-anchor="middle" font-family="'PingFang SC','Noto Sans SC',sans-serif" font-size="12" fill="#cbd5e1">集群内虚拟地址</text>
+<rect x="188" y="214" width="148" height="86" rx="10" fill="#152338" stroke="#34d399" stroke-width="1.4"/>
+<text x="262.0" y="253.0" text-anchor="middle" font-family="'PingFang SC','Noto Sans SC',sans-serif" font-size="14" fill="#f8fafc" font-weight="700">NodePort</text>
+<text x="262.0" y="269.0" text-anchor="middle" font-family="'PingFang SC','Noto Sans SC',sans-serif" font-size="12" fill="#cbd5e1">每个节点开放端口</text>
+<rect x="24" y="340" width="148" height="86" rx="10" fill="#152338" stroke="#a78bfa" stroke-width="1.4"/>
+<text x="98.0" y="379.0" text-anchor="middle" font-family="'PingFang SC','Noto Sans SC',sans-serif" font-size="14" fill="#f8fafc" font-weight="700">LoadBalancer</text>
+<text x="98.0" y="395.0" text-anchor="middle" font-family="'PingFang SC','Noto Sans SC',sans-serif" font-size="12" fill="#cbd5e1">外部负载均衡入口</text>
+<rect x="188" y="340" width="148" height="86" rx="10" fill="#152338" stroke="#fbbf24" stroke-width="1.4"/>
+<text x="262.0" y="379.0" text-anchor="middle" font-family="'PingFang SC','Noto Sans SC',sans-serif" font-size="14" fill="#f8fafc" font-weight="700">ExternalName</text>
+<text x="262.0" y="395.0" text-anchor="middle" font-family="'PingFang SC','Noto Sans SC',sans-serif" font-size="12" fill="#cbd5e1">DNS CNAME；无代理</text>
+<line x1="24" y1="451" x2="336" y2="451" stroke="#334155"/>
+<text x="24" y="471" fill="#94a3b8" font-family="'PingFang SC','Noto Sans SC',sans-serif" font-size="10">costalong.com · Kubernetes 笔记</text></svg>

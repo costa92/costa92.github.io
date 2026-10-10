@@ -1,0 +1,521 @@
+<!DOCTYPE HTML><html lang="zh-CN"><head><meta charset="utf-8"><meta name="keywords" content="OpenClaw 完整使用指南：从安装到多 Agent 与自动化, costalong, 翼舞成梦, 后端开发, Go语言, Kubernetes, K8s, Linux, AI, 学习笔记"><meta name="description" content="一篇 OpenClaw 的命令与配置参考：安装升级、onboard、网关、Discord 多频道配置模板、工作区 Skill、模型与工具权限、记忆、多 Agent、ACP、定时任务和 Hooks，命令已按 2026.9.9 的 --help 复核。"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="renderer" content="webkit|ie-stand|ie-comp"><meta name="mobile-web-app-capable" content="yes"><meta name="format-detection" content="telephone=no"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><meta name="referrer" content="strict-origin-when-cross-origin"><meta name="google-adsense-account" content="ca-pub-8990123471955885"><script>!function(){if(!new URLSearchParams(location.search).has("style-audit-preview")){var n=!1;document.addEventListener("DOMContentLoaded",function(){if(!("IntersectionObserver"in window))return t();var n=new IntersectionObserver(function(e){e.some(function(e){return e.isIntersecting})&&(n.disconnect(),t())},{rootMargin:"200px 0px"});document.querySelectorAll("ins.adsbygoogle").forEach(function(e){n.observe(e)})}),window.addEventListener("load",function(){(window.requestIdleCallback||function(e){setTimeout(e,2e3)})(t,{timeout:4e3})})}function t(){if(!n){n=!0;var e=document.createElement("script");e.async=!0,e.src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8990123471955885",e.crossOrigin="anonymous",document.head.appendChild(e)}}}()</script><title>OpenClaw 完整使用指南：从安装到多 Agent 与自动化 | 翼舞成梦</title><meta property="og:site_name" content="翼舞成梦"><meta property="og:locale" content="zh_CN"><meta property="og:type" content="article"><meta property="og:title" content="OpenClaw 完整使用指南：从安装到多 Agent 与自动化"><meta property="og:description" content="一篇 OpenClaw 的命令与配置参考：安装升级、onboard、网关、Discord 多频道配置模板、工作区 Skill、模型与工具权限、记忆、多 Agent、ACP、定时任务和 Hooks，命令已按 2026.9.9 的 --help 复核。"><meta property="og:url" content="https://costalong.com/2026/03/04/openclaw-usage-guide/"><meta property="og:image" content="https://costalong.com/images/posts/openclaw-usage-guide_27f79b6afb5e.jpg"><meta name="twitter:card" content="summary_large_image"><script type="application/ld+json">{"@context":"https://schema.org","@type":"BlogPosting","headline":"OpenClaw 完整使用指南：从安装到多 Agent 与自动化","description":"一篇 OpenClaw 的命令与配置参考：安装升级、onboard、网关、Discord 多频道配置模板、工作区 Skill、模型与工具权限、记忆、多 Agent、ACP、定时任务和 Hooks，命令已按 2026.9.9 的 --help 复核。","image":"https://costalong.com/images/posts/openclaw-usage-guide_27f79b6afb5e.jpg","url":"https://costalong.com/2026/03/04/openclaw-usage-guide/","datePublished":"2026-03-04T04:00:00.000Z","dateModified":"2026-03-04T04:00:00.000Z","author":{"@type":"Person","name":"costalong"},"publisher":{"@type":"Person","name":"costalong"}}</script><link rel="canonical" href="https://costalong.com/2026/03/04/openclaw-usage-guide/"><link rel="alternate" type="application/atom+xml" title="翼舞成梦" href="https://costalong.com/atom.xml"><link rel="alternate" type="application/json" title="翼舞成梦" href="https://costalong.com/feed.json"><link rel="icon" type="image/png" href="/favicon.png"><link rel="stylesheet" href="/css/fonts.css?v=864fc7ac"><link rel="preload" href="/libs/awesome/webfonts/fa-solid-900.woff2" as="font" type="font/woff2" crossorigin><link rel="stylesheet" href="/libs/awesome/css/all.min.css"><link rel="stylesheet" href="/libs/materialize/materialize.min.css"><link rel="stylesheet" href="/libs/aos/aos.css"><link rel="stylesheet" href="/libs/animate/animate.min.css" media="print" onload='this.media="all"'><link rel="stylesheet" href="/libs/lightGallery/css/lightgallery.min.css" media="print" onload='this.media="all"'><link rel="stylesheet" href="/css/matery.css"><link rel="stylesheet" href="/css/my.css"><link rel="stylesheet" href="/css/dark.css" media="none" onload='"all"!=media&&(media="all")'><link rel="stylesheet" href="/css/infinite-scroll.css"><link rel="stylesheet" href="/css/sidebar.css"><link rel="stylesheet" href="/css/navbar.css"><link rel="stylesheet" href="/libs/tocbot/tocbot.css"><link rel="stylesheet" href="/css/post.css"><link rel="stylesheet" href="/css/reward.css" media="print" onload='this.media="all"'><link rel="stylesheet" href="/css/obsidian.css?v=fee1bba1"><link rel="stylesheet" href="/css/darkpremium.css?v=c801dadc"><link rel="stylesheet" href="/css/post-darkpremium.css?v=c09ea248"><script>!function(o){var t=[];o.$=o.jQuery=function(n){if("function"!=typeof n)throw new Error("jQuery 尚未加载：请写在 $(function () {...}) 里");t.push(n)},document.addEventListener("DOMContentLoaded",function(){o.jQuery.fn&&t.forEach(function(n){o.jQuery(n)})})}(window)</script><script src="/libs/jquery/jquery-3.6.0.min.js" defer></script><script>new MutationObserver(function(t){t.forEach(function(t){"attributes"===t.type&&"aria-hidden"===t.attributeName&&"true"===document.body.getAttribute("aria-hidden")&&document.body.removeAttribute("aria-hidden")})}).observe(document.documentElement,{attributes:!0,subtree:!0,attributeFilter:["aria-hidden"]}),window.addEventListener("DOMContentLoaded",function(){"true"===document.body.getAttribute("aria-hidden")&&document.body.removeAttribute("aria-hidden")})</script><meta name="generator" content="Hexo 8.1.2"><style>.github-emoji{position:relative;display:inline-block;width:1.2em;min-height:1.2em;overflow:hidden;vertical-align:top;color:transparent}.github-emoji>span{position:relative;z-index:10}.github-emoji .fancybox,.github-emoji img{margin:0!important;padding:0!important;border:none!important;outline:0!important;text-decoration:none!important;user-select:none!important;cursor:auto!important}.github-emoji img{height:1.2em!important;width:1.2em!important;position:absolute!important;left:50%!important;top:50%!important;transform:translate(-50%,-50%)!important;user-select:none!important;cursor:auto!important}.github-emoji-fallback{color:inherit}.github-emoji-fallback img{opacity:0!important}</style></head><body><a class="skip-link" href="#content-start">跳到正文</a><header class="dp-nav"><div class="dp-wrap"><div class="dp-nav-inner"><a class="dp-brand" href="/"><span class="mark"><img src="/medias/logo.webp" alt="" width="22" height="22"></span><span><span class="name">翼舞成梦</span><br><span class="dom">costalong.com</span></span></a><div class="dp-nav-links" role="navigation" aria-label="主导航"><a href="/">首页</a> <a href="/archives/">归档</a> <a href="/moments">Moments</a> <a href="/about/">关于</a> <a href="/explore/">探索</a> <a href="/galleries/">相册</a> <a href="/notes/">笔记</a> <a href="/contact/">留言板</a> <a href="/friends/">友情链接</a></div><div class="dp-nav-actions"><a href="#searchModal" class="icon-btn modal-trigger" title="搜索" aria-label="搜索"><i class="fas fa-search" aria-hidden="true"></i></a><a class="dp-nav-cta" href="/atom.xml"><i class="fas fa-rss" style="margin-right:6px" aria-hidden="true"></i> 订阅更新</a> <button type="button" data-target="mobile-nav" class="icon-btn dp-burger sidenav-trigger button-collapse" aria-label="打开菜单" aria-expanded="false" aria-controls="mobile-nav"><i class="fas fa-bars" aria-hidden="true"></i></button></div></div></div><div id="mobile-nav" class="side-nav sidenav"><div class="mobile-head bg-color"><img src="/medias/logo.webp" class="logo-img circle responsive-img" alt="网站头像"><div class="logo-name">翼舞成梦</div><div class="logo-desc">翼舞成梦的个人博客，专注于后端开发、K8s 容器化技术、Linux 运维以及人工智能学习笔记分享。</div></div><ul class="menu-list mobile-menu-list"><li class="m-nav-item"><a href="/" class="waves-effect waves-light"><i class="fa-fw fas fa-home"></i> 首页</a></li><li class="m-nav-item"><a href="/archives/" class="waves-effect waves-light"><i class="fa-fw fas fa-archive"></i> 归档</a></li><li class="m-nav-item"><a href="/moments" class="waves-effect waves-light"><i class="fa-fw fas fa-bolt"></i> Moments</a></li><li class="m-nav-item"><button type="button" class="m-nav-toggle" aria-expanded="false" aria-controls="mobile-submenu-3"><i class="fa-fw fas fa-compass" aria-hidden="true"></i> Discover<span class="m-icon" aria-hidden="true"><i class="fas fa-chevron-right"></i></span></button><ul id="mobile-submenu-3"><li><a href="/categories" class="m-sub-link"><i class="fa m-sub-icon fas fa-bookmark"></i> <span>分类</span></a></li><li><a href="/tags" class="m-sub-link"><i class="fa m-sub-icon fas fa-tags"></i> <span>标签</span></a></li></ul></li><li class="m-nav-item"><a href="/about/" class="waves-effect waves-light"><i class="fa-fw fas fa-user-circle"></i> 关于</a></li><li class="m-nav-item"><a href="/explore/" class="waves-effect waves-light"><i class="fa-fw fas fa-compass"></i> 探索</a></li><li class="m-nav-item"><a href="/galleries/" class="waves-effect waves-light"><i class="fa-fw fas fa-image"></i> 相册</a></li><li class="m-nav-item"><a href="/notes/" class="waves-effect waves-light"><i class="fa-fw fas fa-book-reader"></i> 笔记</a></li><li class="m-nav-item"><a href="/contact/" class="waves-effect waves-light"><i class="fa-fw fas fa-comments"></i> 留言板</a></li><li class="m-nav-item"><a href="/friends/" class="waves-effect waves-light"><i class="fa-fw fas fa-address-book"></i> 友情链接</a></li></ul></div></header><div id="content-start" tabindex="-1"></div><div class="dp-bg-field"><div class="glow v"></div><div class="glow c"></div><div class="glow i"></div></div><div class="dp"><header class="dp-page-hero dp-wrap post-dp-hero"><span class="eyebrow"><span class="dot"></span><i class="fas fa-folder-open"></i> &nbsp;Coding-Agent</span><h1 id="post-title" class="post-title"><span class="grad">OpenClaw 完整使用指南：从安装到多 Agent 与自动化</span></h1><div class="meta"><span><i class="far fa-calendar-minus"></i> &nbsp;2026-03-04</span><span><i class="fas fa-bookmark"></i> &nbsp;<a href="/categories/Coding-Agent/"><b>Coding-Agent</b></a></span> <span class="hero-tags"><a href="/tags/AI-Agent/"><span class="chip ai">AI Agent</span></a> <a href="/tags/OpenClaw/"><span class="chip">OpenClaw</span></a> <a href="/tags/CLI/"><span class="chip">CLI</span></a> <a href="/tags/%E8%87%AA%E5%8A%A8%E5%8C%96/"><span class="chip">自动化</span></a></span></div></header></div><main class="post-container content"><div class="row"><div id="main-content" class="col s12 m12 l9"><div id="artDetail"><div class="card"><div class="card-content article-info"><div class="row tag-cate"><div class="col s7"><div class="article-tag"><a href="/tags/AI-Agent/"><span class="chip bg-color ai">AI Agent</span></a> <a href="/tags/OpenClaw/"><span class="chip bg-color">OpenClaw</span></a> <a href="/tags/CLI/"><span class="chip bg-color">CLI</span></a> <a href="/tags/%E8%87%AA%E5%8A%A8%E5%8C%96/"><span class="chip bg-color">自动化</span></a> <a href="/tags/Discord/"><span class="chip bg-color">Discord</span></a></div></div><div class="col s5 right-align"><div class="post-cate"><i class="fas fa-bookmark fa-fw icon-category"></i> <a href="/categories/Coding-Agent/" class="post-category">Coding-Agent</a></div></div></div><div class="post-info"><div class="info-break-policy post-meta-words"><i class="far fa-file-word fa-fw"></i> <span class="post-meta-label">文章字数:&nbsp;&nbsp;</span> 6k</div><div id="busuanzi_container_page_pv" class="info-break-policy post-meta-views"><i class="far fa-eye fa-fw"></i> <span class="post-meta-label">阅读次数:&nbsp;&nbsp;</span><span id="busuanzi_value_page_pv"></span></div><div id="read_mode" class="info-break-policy post-meta-read-mode" style="display:inline" role="button" tabindex="0" aria-label="切换阅读模式" aria-pressed="false"><i class="fas fa-expand-arrows-alt" title="【进入/离开】 阅读模式" aria-hidden="true"></i> &nbsp;&nbsp; <span title="【进入/离开】阅读模式" aria-hidden="true">阅读模式</span></div></div></div><hr class="clearfix"><link rel="stylesheet" href="/libs/prism/prism.min.css"><div class="card-content article-card-content"><div id="articleContent"><p><img width="1344" height="768" style="--img-ar:1.7500" fetchpriority="high" decoding="async" src="/images/posts/openclaw-usage-guide_27f79b6afb5e.webp" alt="OpenClaw CLI 使用指南封面图，深色终端风格，展示多平台连接图标和蓝色蟹爪 logo"></p><blockquote><p><strong>版本说明</strong><br>本文最初基于 <strong>OpenClaw v2026.3.2</strong>（2026-03 发布）写成。截至 2026-10，npm 上的最新版是 <strong>2026.9.9</strong>，它要求 Node.js <strong>24.16+（24.x）或 26.1+</strong>，Node 22 已无法运行。文中命令已用 2026.9.9 的 <code>--help</code> 逐条核对，行为有变化的地方单独标注。执行 <code>openclaw -V</code> 可确认本地版本。</p></blockquote><p>OpenClaw 的定位可以用一句话概括：<strong>一个跑在你自己设备上的私人 AI 助手，通过你已经在用的聊天工具和你交互。</strong> 截至 2026-10，它在 GitHub 上的 Star 数已超过 39 万。</p><p>它不只是聊天机器人：能接管 WhatsApp、Telegram、Discord 等渠道的消息，执行 shell 命令、读写文件、抓网页，还能按计划自动跑任务，触发入口就是手机上已经装好的 IM。</p><p>我接入的是 Discord，在服务器频道里 @openclaw 就能让它执行命令、查文件、跑脚本。本文是一份偏参考手册的整理；更偏实战的技巧（安全加固、排障、Skill 选型、Agent 架构）放在了姊妹篇 <a href="/2026/03/05/openclaw-tips-essential-skills/">OpenClaw 进阶实战：12 个使用技巧与必装 Skills 清单</a>。</p><h2 id="安装与升级"><a href="#安装与升级" class="headerlink" title="安装与升级"></a>安装与升级</h2><p>OpenClaw 通过 npm 全局安装：</p><pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 检查 Node 版本：2026.9.9 需要 24.16+ 或 26.1+（v2026.3.x 时代 22 即可）</span>
+<span class="token function">node</span> <span class="token parameter variable">-v</span>
+
+<span class="token comment"># 安装最新版</span>
+<span class="token function">npm</span> <span class="token function">install</span> <span class="token parameter variable">-g</span> openclaw@latest
+
+<span class="token comment"># 验证安装</span>
+openclaw <span class="token parameter variable">-V</span>
+
+<span class="token comment"># 查看配置文件位置，默认 ~/.openclaw/openclaw.json</span>
+openclaw config <span class="token function">file</span>
+
+<span class="token comment"># 校验配置（不启动网关）</span>
+openclaw config validate <span class="token parameter variable">--json</span>
+<span class="token comment"># {"valid":true,"path":"/home/user/.openclaw/openclaw.json"}</span></code></pre><p>需要锁定版本（比如团队环境）时显式指定版本号，例如 <code>npm install -g openclaw@2026.3.2</code>。升级后建议跑一次 <code>openclaw doctor</code> 检查兼容性。</p><p><strong>检查更新与切换通道</strong>：</p><pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 查看当前安装方式、通道和可用版本</span>
+openclaw update status
+
+<span class="token comment"># 升级到当前通道的最新版</span>
+openclaw update
+
+<span class="token comment"># 切换通道：stable / extended-stable（按月支持）/ beta / dev</span>
+openclaw update <span class="token parameter variable">--channel</span> beta
+
+<span class="token comment"># 只预览更新动作，不实际安装</span>
+openclaw update --dry-run</code></pre><p><strong>安装 Shell 补全</strong>（支持 zsh / bash / fish / powershell）：</p><pre class="language-bash" data-language="bash"><code class="language-bash">openclaw completion <span class="token parameter variable">--install</span>
+openclaw completion <span class="token parameter variable">--shell</span> <span class="token function">bash</span> <span class="token parameter variable">--install</span></code></pre><h2 id="Onboard-向导：第一次配置"><a href="#Onboard-向导：第一次配置" class="headerlink" title="Onboard 向导：第一次配置"></a>Onboard 向导：第一次配置</h2><p>第一次使用从 <code>openclaw onboard</code> 开始。这个交互式向导依次完成模型认证、网关配置、渠道接入和 Skills 安装。</p><pre class="language-bash" data-language="bash"><code class="language-bash">openclaw onboard</code></pre><p>向导会问你：</p><ol><li><strong>AI 模型提供商</strong>：Anthropic、OpenAI、Gemini、OpenRouter、DeepSeek、Moonshot、MiniMax 等几十个 Provider，也可以填自定义 Base URL（本地 Ollama 或其他 OpenAI 兼容服务）</li><li><strong>网关绑定模式</strong>：<code>loopback</code>（仅本机）、<code>lan</code>（局域网）、<code>tailnet</code>（Tailscale 私有网络）、<code>auto</code>、<code>custom</code></li><li><strong>渠道接入</strong>：选择要接入的聊天平台</li><li><strong>是否安装 Daemon</strong>：让网关作为系统服务常驻后台</li></ol><p>Docker、CI 这类非交互场景，可以用参数跳过所有提示：</p><pre class="language-bash" data-language="bash"><code class="language-bash">openclaw onboard <span class="token punctuation">\</span>
+  --non-interactive <span class="token punctuation">\</span>
+  --accept-risk <span class="token punctuation">\</span>
+  --auth-choice anthropic-api-key <span class="token punctuation">\</span>
+  --anthropic-api-key <span class="token string">"<span class="token variable">$ANTHROPIC_API_KEY</span>"</span> <span class="token punctuation">\</span>
+  --gateway-bind loopback <span class="token punctuation">\</span>
+  --install-daemon</code></pre><p><code>--accept-risk</code> 是非交互模式的必填项，表示你知道 Agent 拥有较高的系统权限。</p><p><img width="1248" height="832" style="--img-ar:1.5000" loading="lazy" decoding="async" src="/images/posts/openclaw-usage-guide_db36975a3bd1.webp" alt="OpenClaw 四步 onboard 流程示意图：模型认证、网关配置、渠道接入、Skills 安装"></p><h2 id="网关：OpenClaw-的核心进程"><a href="#网关：OpenClaw-的核心进程" class="headerlink" title="网关：OpenClaw 的核心进程"></a>网关：OpenClaw 的核心进程</h2><p>网关（Gateway）是一个 WebSocket 服务：接收各渠道的消息，调度模型，执行工具调用，再把结果送回去。</p><pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 前台运行（调试用），默认端口 18789</span>
+openclaw gateway run
+
+<span class="token comment"># 指定端口；--force 会先结束占用该端口的进程</span>
+openclaw gateway run <span class="token parameter variable">--port</span> <span class="token number">18789</span> <span class="token parameter variable">--force</span>
+
+<span class="token comment"># 开发模式：状态隔离到 ~/.openclaw-dev，默认端口 19001</span>
+openclaw <span class="token parameter variable">--dev</span> gateway
+
+<span class="token comment"># 通过 Tailscale 对外暴露</span>
+openclaw gateway run <span class="token parameter variable">--tailscale</span> funnel</code></pre><p><strong>作为系统服务运行（推荐长期使用）</strong>：</p><pre class="language-bash" data-language="bash"><code class="language-bash">openclaw daemon <span class="token function">install</span>    <span class="token comment"># 安装并启动（launchd / systemd / schtasks）</span>
+openclaw daemon status
+openclaw daemon restart
+openclaw daemon stop</code></pre><p>装成服务后网关随系统启动，不用再手动前台运行。确认状态用 <code>openclaw health</code>，它会列出渠道连通性、默认 Agent 和会话存储：</p><pre class="language-bash" data-language="bash"><code class="language-bash">openclaw health
+<span class="token comment"># Discord: ok (@openclaw) (915ms)</span>
+<span class="token comment"># Agents: main (default)</span>
+<span class="token comment"># Session store: ~/.openclaw/agents/main/sessions/... (3 entries)</span></code></pre><h2 id="渠道接入"><a href="#渠道接入" class="headerlink" title="渠道接入"></a>渠道接入</h2><p>OpenClaw 支持二十多个聊天平台，常用的有 Discord、Telegram、WhatsApp、Slack、飞书、Signal、iMessage。</p><h3 id="Discord"><a href="#Discord" class="headerlink" title="Discord"></a>Discord</h3><pre class="language-bash" data-language="bash"><code class="language-bash">openclaw channels <span class="token function">add</span> <span class="token parameter variable">--channel</span> discord <span class="token parameter variable">--token</span> <span class="token operator">&lt;</span>DISCORD_BOT_TOKEN<span class="token operator">&gt;</span>
+
+openclaw channels list
+<span class="token comment"># Chat channels:</span>
+<span class="token comment"># - Discord default: configured, token=config, enabled</span>
+openclaw channels status
+<span class="token comment"># Discord: ok (@openclaw) (798ms)</span></code></pre><p>Bot 本身要先在 <a target="_blank" rel="noopener" href="https://discord.com/developers/applications">Discord Developer Portal</a> 创建：在 Bot 页拿到 Token，并打开 <strong>Message Content Intent</strong>（否则读不到消息内容）；用 OAuth2 URL Generator 勾选 <code>bot</code>、<code>applications.commands</code> 两个 scope 和发消息、读历史、建线程等权限，把 Bot 拉进服务器。</p><h3 id="Telegram"><a href="#Telegram" class="headerlink" title="Telegram"></a>Telegram</h3><pre class="language-bash" data-language="bash"><code class="language-bash">openclaw channels <span class="token function">add</span> <span class="token parameter variable">--channel</span> telegram <span class="token parameter variable">--token</span> <span class="token operator">&lt;</span>YOUR_BOT_TOKEN<span class="token operator">&gt;</span>
+openclaw channels logs <span class="token parameter variable">--channel</span> telegram</code></pre><p>v2026.3.2 起，Telegram 的流式预览默认从 <code>off</code> 改为 <code>partial</code>，新接入的 Telegram 渠道会边生成边更新消息。</p><h3 id="WhatsApp"><a href="#WhatsApp" class="headerlink" title="WhatsApp"></a>WhatsApp</h3><p>WhatsApp 走 Web Session（扫码登录）：</p><pre class="language-bash" data-language="bash"><code class="language-bash">openclaw channels login <span class="token parameter variable">--channel</span> whatsapp
+<span class="token comment"># 终端展示二维码，用手机 WhatsApp 扫码</span></code></pre><p>登录后 Session 会持久化，断网重连后自动恢复。</p><h2 id="Discord-多频道配置模板"><a href="#Discord-多频道配置模板" class="headerlink" title="Discord 多频道配置模板"></a>Discord 多频道配置模板</h2><p>只接一个频道时，<code>channels add</code> 就够了。如果你在一个服务器里有多个频道，希望 <code>#general</code> 自动回复、<code>#code-review</code> 需要 @ 才回复、<code>#onboarding</code> 交给另一个 Agent，就需要理解 Discord 的层级如何映射到配置。</p><p>Discord 有四层：<strong>Guild（服务器）→ Category（分类）→ Channel（频道）→ Thread（线程）</strong>。OpenClaw 的配置只关心其中三层：Guild 是入口，Channel 决定是否响应，Thread 默认继承父频道。Category 只是视觉分组，配置里不用声明。所有 ID 都是 17–20 位的 Snowflake 数字，在 Discord 客户端打开「用户设置 → 高级 → 开发者模式」后，右键服务器、频道、用户即可复制。</p><p>下面是一个技术社区的配置骨架（JSON5，字段已对照 2026.9.9 的 <code>openclaw config schema</code> 核对），ID 全部是占位符：</p><pre class="language-json5" data-language="json5"><code class="language-json5"><span class="token punctuation">{</span>
+  <span class="token property unquoted">channels</span><span class="token operator">:</span> <span class="token punctuation">{</span>
+    <span class="token property unquoted">discord</span><span class="token operator">:</span> <span class="token punctuation">{</span>
+      <span class="token property unquoted">enabled</span><span class="token operator">:</span> <span class="token boolean">true</span><span class="token punctuation">,</span>
+      <span class="token property unquoted">token</span><span class="token operator">:</span> <span class="token string">"${DISCORD_BOT_TOKEN}"</span><span class="token punctuation">,</span>
+      <span class="token property unquoted">groupPolicy</span><span class="token operator">:</span> <span class="token string">"allowlist"</span><span class="token punctuation">,</span>   <span class="token comment">// 只在 guilds 里声明的服务器响应（当前默认值）</span>
+      <span class="token property unquoted">dmPolicy</span><span class="token operator">:</span> <span class="token string">"pairing"</span><span class="token punctuation">,</span>        <span class="token comment">// 陌生人私聊需要先配对验证（当前默认值）</span>
+      <span class="token property unquoted">historyLimit</span><span class="token operator">:</span> <span class="token number">20</span><span class="token punctuation">,</span>           <span class="token comment">// 频道里每次携带的历史消息数</span>
+      <span class="token property unquoted">streaming</span><span class="token operator">:</span> <span class="token punctuation">{</span> <span class="token property unquoted">mode</span><span class="token operator">:</span> <span class="token string">"partial"</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>   <span class="token comment">// off | partial | block | progress</span>
+
+      <span class="token property unquoted">guilds</span><span class="token operator">:</span> <span class="token punctuation">{</span>
+        <span class="token property">"123456789012345678"</span><span class="token operator">:</span> <span class="token punctuation">{</span>           <span class="token comment">// Guild ID</span>
+          <span class="token property unquoted">requireMention</span><span class="token operator">:</span> <span class="token boolean">true</span><span class="token punctuation">,</span>           <span class="token comment">// 默认需要 @Bot 才回复</span>
+          <span class="token property unquoted">channels</span><span class="token operator">:</span> <span class="token punctuation">{</span>
+            <span class="token property">"111111111111111111"</span><span class="token operator">:</span> <span class="token punctuation">{</span> <span class="token property unquoted">enabled</span><span class="token operator">:</span> <span class="token boolean">true</span><span class="token punctuation">,</span> <span class="token property unquoted">requireMention</span><span class="token operator">:</span> <span class="token boolean">false</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>  <span class="token comment">// #general：自动回复</span>
+            <span class="token property">"222222222222222222"</span><span class="token operator">:</span> <span class="token punctuation">{</span> <span class="token property unquoted">enabled</span><span class="token operator">:</span> <span class="token boolean">true</span><span class="token punctuation">,</span> <span class="token property unquoted">requireMention</span><span class="token operator">:</span> <span class="token boolean">true</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>   <span class="token comment">// #code-review</span>
+            <span class="token property">"333333333333333333"</span><span class="token operator">:</span> <span class="token punctuation">{</span> <span class="token property unquoted">enabled</span><span class="token operator">:</span> <span class="token boolean">true</span><span class="token punctuation">,</span> <span class="token property unquoted">requireMention</span><span class="token operator">:</span> <span class="token boolean">false</span> <span class="token punctuation">}</span>   <span class="token comment">// #onboarding</span>
+            <span class="token comment">// 未声明的频道（如 #announcements）不响应</span>
+          <span class="token punctuation">}</span>
+        <span class="token punctuation">}</span>
+      <span class="token punctuation">}</span>
+    <span class="token punctuation">}</span>
+  <span class="token punctuation">}</span><span class="token punctuation">,</span>
+
+  <span class="token comment">// 线程绑定策略（Discord 和 Telegram 共用）</span>
+  <span class="token property unquoted">session</span><span class="token operator">:</span> <span class="token punctuation">{</span>
+    <span class="token property unquoted">threadBindings</span><span class="token operator">:</span> <span class="token punctuation">{</span> <span class="token property unquoted">enabled</span><span class="token operator">:</span> <span class="token boolean">true</span><span class="token punctuation">,</span> <span class="token property unquoted">idleHours</span><span class="token operator">:</span> <span class="token number">24</span><span class="token punctuation">,</span> <span class="token property unquoted">maxAgeHours</span><span class="token operator">:</span> <span class="token number">168</span> <span class="token punctuation">}</span>
+  <span class="token punctuation">}</span><span class="token punctuation">,</span>
+
+  <span class="token comment">// 让特定频道交给特定 Agent；未匹配的走默认 Agent，规则按声明顺序匹配</span>
+  <span class="token property unquoted">bindings</span><span class="token operator">:</span> <span class="token punctuation">[</span>
+    <span class="token punctuation">{</span>
+      <span class="token property unquoted">agentId</span><span class="token operator">:</span> <span class="token string">"code-reviewer"</span><span class="token punctuation">,</span>
+      <span class="token property unquoted">match</span><span class="token operator">:</span> <span class="token punctuation">{</span>
+        <span class="token property unquoted">channel</span><span class="token operator">:</span> <span class="token string">"discord"</span><span class="token punctuation">,</span>
+        <span class="token property unquoted">guildId</span><span class="token operator">:</span> <span class="token string">"123456789012345678"</span><span class="token punctuation">,</span>
+        <span class="token property unquoted">peer</span><span class="token operator">:</span> <span class="token punctuation">{</span> <span class="token property unquoted">kind</span><span class="token operator">:</span> <span class="token string">"channel"</span><span class="token punctuation">,</span> <span class="token property unquoted">id</span><span class="token operator">:</span> <span class="token string">"222222222222222222"</span> <span class="token punctuation">}</span>
+      <span class="token punctuation">}</span>
+    <span class="token punctuation">}</span><span class="token punctuation">,</span>
+    <span class="token punctuation">{</span>
+      <span class="token property unquoted">agentId</span><span class="token operator">:</span> <span class="token string">"onboarding-guide"</span><span class="token punctuation">,</span>
+      <span class="token property unquoted">match</span><span class="token operator">:</span> <span class="token punctuation">{</span>
+        <span class="token property unquoted">channel</span><span class="token operator">:</span> <span class="token string">"discord"</span><span class="token punctuation">,</span>
+        <span class="token property unquoted">guildId</span><span class="token operator">:</span> <span class="token string">"123456789012345678"</span><span class="token punctuation">,</span>
+        <span class="token property unquoted">peer</span><span class="token operator">:</span> <span class="token punctuation">{</span> <span class="token property unquoted">kind</span><span class="token operator">:</span> <span class="token string">"channel"</span><span class="token punctuation">,</span> <span class="token property unquoted">id</span><span class="token operator">:</span> <span class="token string">"333333333333333333"</span> <span class="token punctuation">}</span>
+      <span class="token punctuation">}</span>
+    <span class="token punctuation">}</span>
+  <span class="token punctuation">]</span>
+<span class="token punctuation">}</span></code></pre><p>几个容易踩的点：</p><ul><li><strong>配置查找顺序是 Thread → Channel → Guild → 全局默认</strong>。频道级的 <code>requireMention</code> 会覆盖 Guild 级。</li><li><strong>线程默认继承父频道的配置</strong>。子 Agent 或 ACP 会话可以绑定到某个线程，之后该线程的消息持续路由到同一个会话；<code>/agents</code> 查看绑定状态，<code>/session unbind</code> 解除，<code>session.threadBindings</code> 控制绑定空闲多久后自动清理。</li><li>旧版本里 <code>streaming</code> 是字符串（<code>"partial"</code>），2026.9.9 的 schema 里是对象 <code>{ mode: "partial" }</code>；升级后配置报错时先跑 <code>openclaw doctor --fix</code>。</li><li>Bot 在线但不回复时，按顺序查：Guild ID 是否在 <code>guilds</code> 里、频道是否 <code>enabled: true</code>、<code>requireMention</code> 下是否真的 @ 了 Bot、Developer Portal 里 Message Content Intent 是否打开。</li></ul><p>Bot 能执行的 Discord 操作按组开关（<code>channels.discord.actions</code>），角色管理、封禁踢人这类高风险操作组默认关闭，需要时再显式开启。</p><h2 id="Skills：扩展-Agent-能力"><a href="#Skills：扩展-Agent-能力" class="headerlink" title="Skills：扩展 Agent 能力"></a>Skills：扩展 Agent 能力</h2><h3 id="工作区-Skill：一个-SKILL-md-就够"><a href="#工作区-Skill：一个-SKILL-md-就够" class="headerlink" title="工作区 Skill：一个 SKILL.md 就够"></a>工作区 Skill：一个 SKILL.md 就够</h3><p><strong>工作区 Skill</strong> 是你私有的轻量技能，只需要一个 <code>SKILL.md</code>：YAML front-matter 写元数据，正文写给模型看的指令。每个 Skill 是 <code>skills/</code> 下的一个目录：</p><pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token function">mkdir</span> <span class="token parameter variable">-p</span> ~/.openclaw/workspace/skills/git-daily-report</code></pre><p><code>~/.openclaw/workspace/skills/git-daily-report/SKILL.md</code>：</p><pre class="language-markdown" data-language="markdown"><code class="language-markdown"><span class="token front-matter-block"><span class="token punctuation">---</span>
+<span class="token front-matter yaml language-yaml"><span class="token key atrule">name</span><span class="token punctuation">:</span> git_daily_report
+<span class="token key atrule">description</span><span class="token punctuation">:</span> 生成今日工作日报，汇总 git commits、未关闭 Issues、明日计划</span>
+<span class="token punctuation">---</span></span>
+
+<span class="token title important"><span class="token punctuation">#</span> Git Daily Report Skill</span>
+
+当用户说"生成日报"、"今天做了什么"、"写日报"时触发此 Skill。
+
+<span class="token title important"><span class="token punctuation">##</span> 执行步骤</span>
+
+<span class="token list punctuation">1.</span> 用 bash 工具获取今日 git log：
+   git log --since=midnight --oneline --all
+
+<span class="token list punctuation">2.</span> 获取未关闭的 GitHub Issues（如果 gh 已登录）：
+   gh issue list --state open --limit 10
+   如果 gh 未登录或不在 GitHub 仓库中，跳过此步骤，注明"无 GitHub 数据"。
+
+<span class="token list punctuation">3.</span> 将以上信息整合为 Markdown 日报发送给用户。
+
+<span class="token title important"><span class="token punctuation">##</span> 输出格式</span>
+
+<span class="token title important"><span class="token punctuation">###</span> 今日进展</span>
+{列出今日 git commits，按仓库分组}
+
+<span class="token title important"><span class="token punctuation">###</span> 待处理事项</span>
+{列出 open issues，附编号和标题}
+
+<span class="token title important"><span class="token punctuation">###</span> 明日计划</span>
+（请补充）</code></pre><p>写完后 Skill 会被自动发现，不用重启网关。确认它已就绪：</p><pre class="language-bash" data-language="bash"><code class="language-bash">openclaw skills list
+<span class="token comment"># ✓ ready   📦 git_daily_report  生成今日工作日报...  openclaw-workspace</span></code></pre><p>之后在 Discord 里发 <code>@openclaw 生成日报</code>，Agent 就会按这个 Skill 执行。也可以从命令行直接测试：</p><pre class="language-bash" data-language="bash"><code class="language-bash">openclaw agent <span class="token parameter variable">--agent</span> main <span class="token parameter variable">--message</span> <span class="token string">"使用 git_daily_report skill 生成今日摘要"</span></code></pre><p>Skill 里不一定要定义自定义工具。多数时候给模型清晰的文字指令，告诉它怎么用已有的 bash / 浏览器工具，就足够了；需要严格参数校验时才值得写 JSON Schema 工具。</p><h3 id="Skill-的加载位置"><a href="#Skill-的加载位置" class="headerlink" title="Skill 的加载位置"></a>Skill 的加载位置</h3><p>同名 Skill 出现在多个位置时，优先级高的生效（截至 2026.9.9 的文档）：</p><table><thead><tr><th>优先级</th><th>来源</th><th>路径</th></tr></thead><tbody><tr><td>最高</td><td>工作区 Skill</td><td><code>&lt;workspace&gt;/skills</code></td></tr><tr><td>2</td><td>项目 Agent Skill</td><td><code>&lt;workspace&gt;/.agents/skills</code></td></tr><tr><td>3</td><td>个人 Agent Skill</td><td><code>~/.agents/skills</code></td></tr><tr><td>4</td><td>本机共享 Skill</td><td><code>~/.openclaw/skills</code></td></tr><tr><td>较低</td><td>随安装附带的内置 Skill</td><td>安装包内</td></tr></tbody></table><p>多 Agent 时每个 Agent 有自己的 workspace，放在各自 workspace 下的 Skill 只对该 Agent 可见；放在 <code>~/.openclaw/skills</code> 的对所有 Agent 可见。</p><h3 id="查看依赖是否就绪"><a href="#查看依赖是否就绪" class="headerlink" title="查看依赖是否就绪"></a>查看依赖是否就绪</h3><pre class="language-bash" data-language="bash"><code class="language-bash">openclaw skills list      <span class="token comment"># 每个 Skill 的状态：ready / missing</span>
+openclaw skills check     <span class="token comment"># 汇总：多少就绪、多少缺依赖</span>
+openclaw skills info <span class="token operator">&lt;</span>name<span class="token operator">&gt;</span></code></pre><p><code>missing</code> 通常是对应的命令行工具没装，比如内置的 <code>1password</code> 需要 <code>op</code> CLI、<code>summarize</code> 需要 <code>summarize</code> 命令。装好依赖后会自动变成 ready。</p><h3 id="从-ClawHub-安装社区-Skill-与插件"><a href="#从-ClawHub-安装社区-Skill-与插件" class="headerlink" title="从 ClawHub 安装社区 Skill 与插件"></a>从 ClawHub 安装社区 Skill 与插件</h3><p>公共 Skill 发布在 <a target="_blank" rel="noopener" href="https://clawhub.ai/">ClawHub</a>（源码见 <a target="_blank" rel="noopener" href="https://github.com/openclaw/clawhub">openclaw/clawhub</a>）。2026.9.9 已经内置了安装命令，Skill 用 <code>@作者/slug</code> 引用：</p><pre class="language-bash" data-language="bash"><code class="language-bash">openclaw skills search <span class="token string">"github"</span>
+openclaw skills <span class="token function">install</span> @owner/skill-name
+openclaw skills update</code></pre><p>插件（npm 包或本地目录形式的扩展，可以注册工具、渠道、Hook）由 <code>plugins</code> 子命令管理：</p><pre class="language-bash" data-language="bash"><code class="language-bash">openclaw plugins list
+openclaw plugins <span class="token function">install</span> <span class="token operator">&lt;</span>npm 包名或本地路径<span class="token operator">&gt;</span>
+openclaw plugins inspect <span class="token operator">&lt;</span>id<span class="token operator">&gt;</span>      <span class="token comment"># 旧名 plugins info 仍可用</span>
+openclaw plugins update <span class="token parameter variable">--all</span>
+openclaw plugins disable <span class="token operator">&lt;</span>id<span class="token operator">&gt;</span>
+openclaw plugins <span class="token builtin class-name">enable</span> <span class="token operator">&lt;</span>id<span class="token operator">&gt;</span>
+openclaw plugins uninstall <span class="token operator">&lt;</span>id<span class="token operator">&gt;</span>
+openclaw plugins doctor            <span class="token comment"># 排查插件加载问题</span></code></pre><p>任何第三方 Skill 都能调用你的 Agent 工具集。ClawHub 曾在 2026 年 2 月被发现上百个恶意 Skill，安装前务必看 ClawHub 页面上的安全审计结果，具体做法见<a href="/2026/03/05/openclaw-tips-essential-skills/">进阶篇的安全部分</a>。</p><h2 id="模型配置"><a href="#模型配置" class="headerlink" title="模型配置"></a>模型配置</h2><p>OpenClaw 支持几十个模型 Provider。我的配置是：默认模型 <strong>DeepSeek-V3.2</strong>（通过 SiliconFlow），失败时回退到本地 Ollama。</p><pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 查看当前默认模型、fallback 和各 Provider 认证状态</span>
+openclaw models status
+<span class="token comment"># Default: siliconflow/Pro/deepseek-ai/DeepSeek-V3.2</span>
+<span class="token comment"># Fallbacks: ollama/llama3.3, ollama/qwen2.5-coder:32b</span>
+
+<span class="token comment"># 列出模型、设置默认模型和图像模型</span>
+openclaw models list
+openclaw models <span class="token builtin class-name">set</span> siliconflow/Pro/deepseek-ai/DeepSeek-V3.2
+openclaw models set-image <span class="token operator">&lt;</span>provider/model-id<span class="token operator">&gt;</span>
+
+<span class="token comment"># 管理 fallback 链</span>
+openclaw models fallbacks list
+openclaw models fallbacks <span class="token function">add</span> ollama/llama3.3
+
+<span class="token comment"># 扫描 OpenRouter 免费模型，探测哪些支持工具调用</span>
+openclaw models scan</code></pre><p><strong>认证与别名</strong>：</p><pre class="language-bash" data-language="bash"><code class="language-bash">openclaw models auth <span class="token function">add</span>        <span class="token comment"># 交互式添加 API Key 或 Token</span>
+openclaw models auth login      <span class="token comment"># OAuth / API Key 登录某个 Provider</span>
+openclaw models auth list
+
+<span class="token comment"># 给长模型 ID 起短名</span>
+openclaw models aliases <span class="token function">add</span> ds siliconflow/Pro/deepseek-ai/DeepSeek-V3.2
+openclaw models aliases list</code></pre><h2 id="配置管理"><a href="#配置管理" class="headerlink" title="配置管理"></a>配置管理</h2><p>配置文件是 JSON5，默认在 <code>~/.openclaw/openclaw.json</code>。日常改配置尽量走 CLI，它会做 schema 校验：</p><pre class="language-bash" data-language="bash"><code class="language-bash">openclaw config get agents.defaults.compaction.mode
+openclaw config <span class="token builtin class-name">set</span> gateway.port <span class="token number">19001</span> --strict-json
+openclaw config <span class="token builtin class-name">unset</span> <span class="token operator">&lt;</span>path<span class="token operator">&gt;</span>
+
+<span class="token comment"># 一次合并多处修改（对象递归合并、数组和标量直接替换）</span>
+openclaw config patch <span class="token parameter variable">--file</span> ./openclaw.patch.json5 --dry-run
+
+<span class="token comment"># 不启动网关，只校验配置（v2026.3.2 新增）</span>
+openclaw config validate
+
+<span class="token comment"># 打印完整 JSON Schema，查字段名最可靠的方式</span>
+openclaw config schema</code></pre><p><code>config validate</code> 值得养成习惯：改完配置、重启网关之前跑一次，避免网关一启动就因为字段写错崩掉。</p><p>主要顶层块：</p><table><thead><tr><th>块</th><th>作用</th><th>常用字段</th></tr></thead><tbody><tr><td><code>models</code></td><td>模型 Provider 注册</td><td><code>providers.&lt;id&gt;.baseUrl</code> / <code>apiKey</code> / <code>api</code> / <code>models[]</code></td></tr><tr><td><code>agents</code></td><td>Agent 默认值与各 Agent 覆盖</td><td><code>defaults.model.primary</code>、<code>defaults.workspace</code>、<code>defaults.compaction</code>、<code>entries</code></td></tr><tr><td><code>tools</code></td><td>工具权限</td><td><code>profile</code>、<code>allow</code>、<code>deny</code>、<code>byProvider</code></td></tr><tr><td><code>channels</code></td><td>渠道连接</td><td><code>discord.token</code>、<code>groupPolicy</code>、<code>dmPolicy</code>、<code>guilds</code></td></tr><tr><td><code>bindings</code></td><td>消息路由到哪个 Agent</td><td><code>agentId</code>、<code>match</code></td></tr><tr><td><code>session</code></td><td>会话作用域</td><td><code>dmScope</code> 等</td></tr><tr><td><code>hooks</code></td><td>自动化钩子</td><td><code>internal.entries.&lt;name&gt;.enabled</code></td></tr><tr><td><code>memory</code></td><td>记忆与语义检索</td><td><code>search.provider</code></td></tr><tr><td><code>gateway</code></td><td>网关监听参数</td><td><code>port</code>、<code>bind</code>、<code>auth</code></td></tr><tr><td><code>plugins</code></td><td>插件启用状态</td><td><code>entries.&lt;name&gt;.enabled</code></td></tr></tbody></table><p><code>meta</code>、<code>wizard</code> 两个顶层字段由 OpenClaw 自己维护（版本号、向导运行时间），不用手动改。</p><h2 id="Tools-配置：控制-Agent-能做什么"><a href="#Tools-配置：控制-Agent-能做什么" class="headerlink" title="Tools 配置：控制 Agent 能做什么"></a>Tools 配置：控制 Agent 能做什么</h2><p><code>tools</code> 决定 Agent 能调用哪些工具，核心逻辑是<strong>先用 profile 设基线，再用 allow / deny 精调</strong>，deny 优先于 allow。</p><table><thead><tr><th>Profile</th><th>大致范围</th><th>适用场景</th></tr></thead><tbody><tr><td><code>minimal</code></td><td>几乎只有会话状态查询</td><td>只读、极简场景</td></tr><tr><td><code>messaging</code></td><td>消息收发、会话管理</td><td>聊天助手</td></tr><tr><td><code>coding</code></td><td>文件系统、运行时（shell）、会话、记忆、图像等</td><td>开发者场景</td></tr><tr><td><code>full</code></td><td>不限制</td><td>完全信任的环境</td></tr></tbody></table><p>v2026.3.2 起，新安装的默认 profile 改成了 <code>messaging</code>，不再默认开放 shell 和文件工具。我的做法是保持 <code>messaging</code>，只额外放开 Discord、<code>exec</code>（shell）和 <code>fs</code>（文件系统）：</p><pre class="language-json5" data-language="json5"><code class="language-json5"><span class="token comment">// ~/.openclaw/openclaw.json</span>
+<span class="token punctuation">{</span>
+  <span class="token property unquoted">tools</span><span class="token operator">:</span> <span class="token punctuation">{</span>
+    <span class="token property unquoted">profile</span><span class="token operator">:</span> <span class="token string">"messaging"</span><span class="token punctuation">,</span>
+    <span class="token property unquoted">allow</span><span class="token operator">:</span> <span class="token punctuation">[</span><span class="token string">"discord"</span><span class="token punctuation">,</span> <span class="token string">"exec"</span><span class="token punctuation">,</span> <span class="token string">"fs"</span><span class="token punctuation">]</span>
+  <span class="token punctuation">}</span>
+<span class="token punctuation">}</span></code></pre><p>反过来，想在 <code>coding</code> 的基础上禁掉某一类工具，可以按组 deny：</p><pre class="language-json5" data-language="json5"><code class="language-json5"><span class="token punctuation">{</span>
+  <span class="token property unquoted">tools</span><span class="token operator">:</span> <span class="token punctuation">{</span>
+    <span class="token property unquoted">profile</span><span class="token operator">:</span> <span class="token string">"coding"</span><span class="token punctuation">,</span>
+    <span class="token property unquoted">deny</span><span class="token operator">:</span> <span class="token punctuation">[</span><span class="token string">"group:runtime"</span><span class="token punctuation">]</span>   <span class="token comment">// 禁掉 exec、process 等运行时工具</span>
+  <span class="token punctuation">}</span>
+<span class="token punctuation">}</span></code></pre><pre class="language-bash" data-language="bash"><code class="language-bash">openclaw config get tools.profile
+openclaw config <span class="token builtin class-name">set</span> tools.profile coding</code></pre><p><code>tools.byProvider</code> 还能针对某个 Provider 或模型单独收窄权限，比如给便宜的备用模型只开 <code>minimal</code>，用法见<a href="/2026/03/05/openclaw-tips-essential-skills/">进阶篇第 6 条</a>。</p><h2 id="记忆系统"><a href="#记忆系统" class="headerlink" title="记忆系统"></a>记忆系统</h2><p>OpenClaw 的长期记忆是 workspace 下的 Markdown 文件（默认 <code>~/.openclaw/workspace/memory/</code>），通过向量索引加全文检索做语义搜索。</p><pre class="language-bash" data-language="bash"><code class="language-bash">openclaw memory status            <span class="token comment"># 索引状态、embedding provider、文件数</span>
+openclaw memory status <span class="token parameter variable">--deep</span>     <span class="token comment"># 额外探测 embedding provider 是否可用</span>
+openclaw memory search <span class="token string">"deployment notes"</span>
+openclaw memory index <span class="token parameter variable">--force</span>     <span class="token comment"># 全量重建索引</span></code></pre><p><img width="900" height="720" style="--img-ar:1.2500" loading="lazy" decoding="async" src="/images/posts/openclaw-usage-guide_b1a3655366d1.webp" alt="openclaw memory status 输出：embedding provider、索引文件数、向量与全文检索状态"></p><p>我第一次跑 <code>memory status</code> 时提示 <code>memory directory missing</code>，因为目录还没创建。手动 <code>mkdir -p ~/.openclaw/workspace/memory</code> 后，Agent 会自动往里写记忆文件。</p><p>v2026.3.2 增加了 <strong>Ollama embedding</strong> 支持，可以完全在本地做语义检索。按 2026.9.9 的 schema，配置路径是 <code>memory.search</code>：</p><pre class="language-json5" data-language="json5"><code class="language-json5"><span class="token punctuation">{</span>
+  <span class="token property unquoted">memory</span><span class="token operator">:</span> <span class="token punctuation">{</span>
+    <span class="token property unquoted">search</span><span class="token operator">:</span> <span class="token punctuation">{</span>
+      <span class="token property unquoted">provider</span><span class="token operator">:</span> <span class="token string">"ollama"</span>
+    <span class="token punctuation">}</span>
+  <span class="token punctuation">}</span>
+<span class="token punctuation">}</span></code></pre><h2 id="多-Agent：独立-workspace-与路由"><a href="#多-Agent：独立-workspace-与路由" class="headerlink" title="多 Agent：独立 workspace 与路由"></a>多 Agent：独立 workspace 与路由</h2><p>Agent 配置分两层：<code>agents.defaults</code> 是所有 Agent 的基线，每个 Agent 可以单独覆盖。</p><pre class="language-json5" data-language="json5"><code class="language-json5"><span class="token punctuation">{</span>
+  <span class="token property unquoted">agents</span><span class="token operator">:</span> <span class="token punctuation">{</span>
+    <span class="token property unquoted">defaults</span><span class="token operator">:</span> <span class="token punctuation">{</span>
+      <span class="token property unquoted">model</span><span class="token operator">:</span> <span class="token punctuation">{</span>
+        <span class="token property unquoted">primary</span><span class="token operator">:</span> <span class="token string">"siliconflow/Pro/deepseek-ai/DeepSeek-V3.2"</span><span class="token punctuation">,</span>
+        <span class="token property unquoted">fallbacks</span><span class="token operator">:</span> <span class="token punctuation">[</span><span class="token string">"ollama/llama3.3"</span><span class="token punctuation">,</span> <span class="token string">"ollama/qwen2.5-coder:32b"</span><span class="token punctuation">]</span>
+      <span class="token punctuation">}</span><span class="token punctuation">,</span>
+      <span class="token property unquoted">workspace</span><span class="token operator">:</span> <span class="token string">"~/.openclaw/workspace"</span><span class="token punctuation">,</span>
+      <span class="token property unquoted">compaction</span><span class="token operator">:</span> <span class="token punctuation">{</span> <span class="token property unquoted">mode</span><span class="token operator">:</span> <span class="token string">"safeguard"</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>   <span class="token comment">// 2026.9.9 可选 safeguard / default</span>
+      <span class="token property unquoted">maxConcurrent</span><span class="token operator">:</span> <span class="token number">4</span><span class="token punctuation">,</span>
+      <span class="token property unquoted">subagents</span><span class="token operator">:</span> <span class="token punctuation">{</span> <span class="token property unquoted">maxConcurrent</span><span class="token operator">:</span> <span class="token number">8</span> <span class="token punctuation">}</span>
+    <span class="token punctuation">}</span>
+  <span class="token punctuation">}</span>
+<span class="token punctuation">}</span></code></pre><h3 id="用-CLI-管理-Agent"><a href="#用-CLI-管理-Agent" class="headerlink" title="用 CLI 管理 Agent"></a>用 CLI 管理 Agent</h3><pre class="language-bash" data-language="bash"><code class="language-bash">openclaw agents list
+
+<span class="token comment"># 新建 Agent（非交互式需要 --workspace）</span>
+openclaw agents <span class="token function">add</span> work <span class="token parameter variable">--workspace</span> ~/.openclaw/workspace-work --non-interactive
+
+<span class="token comment"># 把某个渠道的消息路由给它</span>
+openclaw agents <span class="token builtin class-name">bind</span> <span class="token parameter variable">--agent</span> work <span class="token parameter variable">--bind</span> telegram
+
+<span class="token comment"># 设置名字和 emoji</span>
+openclaw agents set-identity <span class="token parameter variable">--agent</span> work <span class="token parameter variable">--name</span> <span class="token string">"工作助手"</span> <span class="token parameter variable">--emoji</span> 💼
+
+openclaw agents bindings
+openclaw agents delete work      <span class="token comment"># 同时清理 workspace 和状态</span></code></pre><p>建好之后用 <code>openclaw agent --agent work --message "介绍一下你自己"</code> 发一条消息，可以确认它和 main Agent 的上下文、Skills、记忆互不影响。</p><h3 id="在配置文件里按-Agent-覆盖"><a href="#在配置文件里按-Agent-覆盖" class="headerlink" title="在配置文件里按 Agent 覆盖"></a>在配置文件里按 Agent 覆盖</h3><pre class="language-json5" data-language="json5"><code class="language-json5"><span class="token punctuation">{</span>
+  <span class="token property unquoted">agents</span><span class="token operator">:</span> <span class="token punctuation">{</span>
+    <span class="token property unquoted">entries</span><span class="token operator">:</span> <span class="token punctuation">{</span>
+      <span class="token property unquoted">work</span><span class="token operator">:</span> <span class="token punctuation">{</span>
+        <span class="token property unquoted">workspace</span><span class="token operator">:</span> <span class="token string">"~/.openclaw/workspace-work"</span><span class="token punctuation">,</span>
+        <span class="token property unquoted">model</span><span class="token operator">:</span> <span class="token punctuation">{</span> <span class="token property unquoted">primary</span><span class="token operator">:</span> <span class="token string">"anthropic/&lt;模型 ID&gt;"</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
+        <span class="token property unquoted">tools</span><span class="token operator">:</span> <span class="token punctuation">{</span> <span class="token property unquoted">profile</span><span class="token operator">:</span> <span class="token string">"coding"</span> <span class="token punctuation">}</span>
+      <span class="token punctuation">}</span><span class="token punctuation">,</span>
+      <span class="token property unquoted">support</span><span class="token operator">:</span> <span class="token punctuation">{</span>
+        <span class="token comment">// 支持类 Agent 只允许消息工具，不让它跑 shell</span>
+        <span class="token property unquoted">tools</span><span class="token operator">:</span> <span class="token punctuation">{</span> <span class="token property unquoted">profile</span><span class="token operator">:</span> <span class="token string">"messaging"</span><span class="token punctuation">,</span> <span class="token property unquoted">allow</span><span class="token operator">:</span> <span class="token punctuation">[</span><span class="token string">"slack"</span><span class="token punctuation">]</span> <span class="token punctuation">}</span>
+      <span class="token punctuation">}</span>
+    <span class="token punctuation">}</span>
+  <span class="token punctuation">}</span>
+<span class="token punctuation">}</span></code></pre><p>v2026.3.x 的配置用的是数组 <code>agents.list: [{ id: "work", ... }]</code>。2026.9.9 的规范写法是以 ID 为键的 <code>agents.entries</code>，旧的 <code>agents.list</code> 写法在 <code>config set / patch / unset</code> 中仍被接受，写回时会转成新格式。</p><blockquote><p><strong>路径规则</strong></p><ul><li>每个 Agent 的状态目录：<code>~/.openclaw/agents/&lt;agentId&gt;/agent/</code></li><li>每个 Agent 的会话记录：<code>~/.openclaw/agents/&lt;agentId&gt;/sessions/</code></li><li>认证信息按 Agent 隔离，<strong>不同 Agent 之间不会自动共享</strong></li></ul></blockquote><p><img width="1248" height="832" style="--img-ar:1.5000" loading="lazy" decoding="async" src="/images/posts/openclaw-usage-guide_504ea8dc7ba4.webp" alt="OpenClaw 多 Agent 路由示意图：网关把不同渠道的消息分发给不同 Agent"></p><h2 id="ACP：让编辑器接入-OpenClaw"><a href="#ACP：让编辑器接入-OpenClaw" class="headerlink" title="ACP：让编辑器接入 OpenClaw"></a>ACP：让编辑器接入 OpenClaw</h2><p>ACP 是 <strong>Agent Client Protocol</strong>（Zed 等编辑器在用的开放协议）。<code>openclaw acp</code> 是一个桥：一端通过 stdio 讲 ACP 给 IDE，另一端通过 WebSocket 把请求转发给 OpenClaw 网关。编辑器里配置它作为 ACP agent 后，就能直接把任务交给你的 OpenClaw 会话。</p><pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 作为 IDE 的 ACP agent 启动（通常由编辑器拉起）</span>
+openclaw acp
+
+<span class="token comment"># 绑定到已有会话，不存在就报错，避免意外新建会话</span>
+openclaw acp <span class="token parameter variable">--session</span> agent:main:main --require-existing
+
+<span class="token comment"># 连接远端网关（Tailscale 或公网地址）</span>
+openclaw acp <span class="token parameter variable">--url</span> wss://gateway-host:18789 --token-file ~/.openclaw/gateway.token</code></pre><p><code>openclaw acp client</code> 是内置的调试客户端，它会拉起 ACP 桥并让你在终端里交互输入，用来在没有 IDE 的情况下验证链路：</p><pre class="language-bash" data-language="bash"><code class="language-bash">openclaw acp client <span class="token parameter variable">--cwd</span> ~/projects/myapp</code></pre><p><img width="920" height="352" style="--img-ar:2.6136" loading="lazy" decoding="async" src="/images/posts/openclaw-usage-guide_7b9924a091c2.webp" alt="openclaw acp client 启动界面，展示 Session 和可用的斜杠命令列表"></p><p>在提示符下输入问题即可对话，常用的斜杠命令有：</p><table><thead><tr><th>命令</th><th>说明</th></tr></thead><tbody><tr><td><code>/status</code></td><td>当前会话状态</td></tr><tr><td><code>/usage</code></td><td>token 用量</td></tr><tr><td><code>/model</code></td><td>切换当前会话的模型</td></tr><tr><td><code>/compact</code></td><td>压缩上下文</td></tr><tr><td><code>/think</code></td><td>调整思考深度</td></tr><tr><td><code>/elevated</code></td><td>临时提升工具权限</td></tr><tr><td><code>/bash &lt;cmd&gt;</code></td><td>直接执行 shell 命令</td></tr><tr><td><code>/subagents</code></td><td>查看活跃的子 Agent</td></tr><tr><td><code>/stop</code></td><td>停止当前任务</td></tr><tr><td><code>exit</code></td><td>退出客户端</td></tr></tbody></table><p><img width="920" height="513" style="--img-ar:1.7934" loading="lazy" decoding="async" src="/images/posts/openclaw-usage-guide_73ad3549fd6b.webp" alt="ACP 交互式对话示例：中文问答和 /usage 显示的 token 统计"></p><p>v2026.3.2 起 <code>acp.dispatch.enabled</code> 默认为 <code>true</code>。安全敏感的环境可以关掉：</p><pre class="language-bash" data-language="bash"><code class="language-bash">openclaw config <span class="token builtin class-name">set</span> acp.dispatch.enabled <span class="token boolean">false</span></code></pre><p>想在脚本或 CI 里调用 Agent，更直接的方式是 <code>openclaw agent</code>，它跑一轮对话后退出：</p><pre class="language-bash" data-language="bash"><code class="language-bash">openclaw agent <span class="token parameter variable">--agent</span> main <span class="token parameter variable">--message</span> <span class="token string">"检查 /tmp 下最大的 5 个文件"</span>
+openclaw agent <span class="token parameter variable">--agent</span> main --message-file ./task.md <span class="token parameter variable">--json</span></code></pre><p>和 Claude Code 协作，2026.9.9 提供了 <code>openclaw attach</code>：它为 Claude Code 签发一个限定范围的 MCP 授权，让 Claude Code 绑定到某个网关会话里使用 OpenClaw 的工具。</p><h2 id="定时任务"><a href="#定时任务" class="headerlink" title="定时任务"></a>定时任务</h2><p><code>cron</code> 子命令（2026.9.9 起也叫 <code>automations</code>）让 Agent 按计划自动执行任务。</p><pre class="language-bash" data-language="bash"><code class="language-bash">openclaw <span class="token function">cron</span> list
+openclaw <span class="token function">cron</span> <span class="token function">rm</span> <span class="token operator">&lt;</span>job-id<span class="token operator">&gt;</span>
+openclaw <span class="token function">cron</span> runs              <span class="token comment"># 运行历史</span></code></pre><p><strong>每日日报 + 每周周报</strong>：</p><pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 每天 8 点（上海时区）生成日报，并把结果发到 Discord 频道</span>
+openclaw <span class="token function">cron</span> <span class="token function">add</span> <span class="token punctuation">\</span>
+  <span class="token parameter variable">--name</span> <span class="token string">"morning-report"</span> <span class="token punctuation">\</span>
+  <span class="token parameter variable">--cron</span> <span class="token string">"0 8 * * *"</span> <span class="token punctuation">\</span>
+  <span class="token parameter variable">--tz</span> <span class="token string">"Asia/Shanghai"</span> <span class="token punctuation">\</span>
+  <span class="token parameter variable">--message</span> <span class="token string">"使用 git_daily_report skill 生成今日工作摘要"</span> <span class="token punctuation">\</span>
+  <span class="token parameter variable">--channel</span> discord <span class="token punctuation">\</span>
+  <span class="token parameter variable">--to</span> <span class="token string">"channel:123456789012345678"</span> <span class="token punctuation">\</span>
+  <span class="token parameter variable">--announce</span>
+
+<span class="token comment"># 每周一 9 点生成周报</span>
+openclaw <span class="token function">cron</span> <span class="token function">add</span> <span class="token punctuation">\</span>
+  <span class="token parameter variable">--name</span> <span class="token string">"weekly-summary"</span> <span class="token punctuation">\</span>
+  <span class="token parameter variable">--cron</span> <span class="token string">"0 9 * * 1"</span> <span class="token punctuation">\</span>
+  <span class="token parameter variable">--tz</span> <span class="token string">"Asia/Shanghai"</span> <span class="token punctuation">\</span>
+  <span class="token parameter variable">--message</span> <span class="token string">"汇总过去一周的 git 提交和完成情况，生成周报"</span> <span class="token punctuation">\</span>
+  <span class="token parameter variable">--channel</span> discord <span class="token punctuation">\</span>
+  <span class="token parameter variable">--to</span> <span class="token string">"channel:123456789012345678"</span> <span class="token punctuation">\</span>
+  <span class="token parameter variable">--announce</span></code></pre><p>几个参数的含义：</p><ul><li><code>--announce</code>：任务完成后把最终结果投递到指定渠道，相当于让 Agent 主动给你汇报。旧的 <code>--deliver</code> 已标记为弃用。</li><li><code>--channel discord</code> 只选平台，<strong>必须再用 <code>--to</code> 指定接收目标</strong>，否则会报 <code>Discord recipient is required</code>。频道写 <code>channel:&lt;频道ID&gt;</code>，私信写 <code>user:&lt;用户ID&gt;</code>；只写一串数字会被当作频道 ID。怎么拿到这些 ID，见<a href="/2026/03/05/openclaw-tips-essential-skills/">进阶篇第 12 条</a>。</li><li>已创建的任务用 <code>openclaw cron edit &lt;job-id&gt; --to "channel:&lt;ID&gt;"</code> 补参数，不用删了重建。</li></ul><p>其他常用写法：</p><pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 每 30 分钟执行一次</span>
+openclaw <span class="token function">cron</span> <span class="token function">add</span> <span class="token parameter variable">--name</span> <span class="token string">"health-check"</span> <span class="token punctuation">\</span>
+  <span class="token parameter variable">--every</span> 30m <span class="token punctuation">\</span>
+  <span class="token parameter variable">--message</span> <span class="token string">"检查网关状态，如有异常通知我"</span> <span class="token punctuation">\</span>
+  <span class="token parameter variable">--channel</span> discord <span class="token parameter variable">--to</span> <span class="token string">"user:123456789012345678"</span> <span class="token parameter variable">--announce</span>
+
+<span class="token comment"># 一次性任务：20 分钟后执行，成功后自动删除</span>
+<span class="token comment"># --at 支持时长（20m、1h）或 ISO 8601 时间</span>
+openclaw <span class="token function">cron</span> <span class="token function">add</span> <span class="token parameter variable">--at</span> <span class="token string">"20m"</span> <span class="token punctuation">\</span>
+  <span class="token parameter variable">--message</span> <span class="token string">"提醒我：站会即将开始"</span> <span class="token punctuation">\</span>
+  <span class="token parameter variable">--channel</span> discord <span class="token parameter variable">--to</span> <span class="token string">"user:123456789012345678"</span> <span class="token parameter variable">--announce</span> <span class="token punctuation">\</span>
+  --delete-after-run</code></pre><h2 id="Hooks：事件钩子"><a href="#Hooks：事件钩子" class="headerlink" title="Hooks：事件钩子"></a>Hooks：事件钩子</h2><p>Hooks 在特定事件发生时自动执行：网关启动、Agent 初始化、用户执行 <code>/new</code> 等命令。v2026.3.2 内置 4 个，2026.9.9 又多了一个 <code>compaction-notifier</code>（上下文压缩开始和结束时在聊天里提示）。</p><pre class="language-bash" data-language="bash"><code class="language-bash">openclaw hooks list
+openclaw hooks check
+openclaw hooks info session-memory
+openclaw hooks <span class="token builtin class-name">enable</span> session-memory
+openclaw hooks disable command-logger</code></pre><p><img width="820" height="625" style="--img-ar:1.3120" loading="lazy" decoding="async" src="/images/posts/openclaw-usage-guide_988f9196ef92.webp" alt="openclaw hooks list / check / info 输出：内置 Hook 列表与就绪状态"></p><table><thead><tr><th>Hook</th><th>触发事件</th><th>作用</th></tr></thead><tbody><tr><td><code>boot-md</code></td><td><code>gateway:startup</code></td><td>网关启动时执行 workspace 下的 <code>BOOT.md</code></td></tr><tr><td><code>bootstrap-extra-files</code></td><td><code>agent:bootstrap</code></td><td>Agent 初始化时按 glob 注入额外文件</td></tr><tr><td><code>command-logger</code></td><td><code>command</code></td><td>把命令事件以 JSONL 写入 <code>~/.openclaw/logs/commands.log</code></td></tr><tr><td><code>session-memory</code></td><td><code>command:new</code> / <code>command:reset</code></td><td>执行 <code>/new</code> 或 <code>/reset</code> 时把会话上下文存成记忆文件</td></tr></tbody></table><p>默认只启用 <code>boot-md</code>，其余需要手动 enable。<code>session-memory</code> 默认保存最近 15 条消息，可以调大：</p><pre class="language-bash" data-language="bash"><code class="language-bash">openclaw config <span class="token builtin class-name">set</span> hooks.internal.entries.session-memory.messages <span class="token number">20</span>
+<span class="token comment"># 提示 Restart the gateway to apply 后重启网关</span></code></pre><p><strong>boot-md：网关启动时自检</strong>。在 workspace 根目录放一个 <code>BOOT.md</code>，网关每次启动都会让 Agent 执行其中的指令：</p><pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token function">cat</span> <span class="token operator">&gt;</span> ~/.openclaw/workspace/BOOT.md <span class="token operator">&lt;&lt;</span> <span class="token string">'EOF'
+# BOOT.md — 网关启动时执行
+
+1. 检查本地 Ollama 是否在线：运行 `curl -s http://localhost:11434/api/version`
+2. 报告当前时间、网关状态和活跃会话数
+3. 向默认 Discord 频道发送一条启动通知
+EOF</span></code></pre><p><strong>bootstrap-extra-files：多项目上下文注入</strong>。每个项目有自己的 <code>AGENTS.md</code> 时，可以在 Agent 初始化时一次性注入：</p><pre class="language-bash" data-language="bash"><code class="language-bash">openclaw hooks <span class="token builtin class-name">enable</span> bootstrap-extra-files
+openclaw config <span class="token builtin class-name">set</span> hooks.internal.entries.bootstrap-extra-files.paths <span class="token string">'["projects/*/AGENTS.md","projects/*/TOOLS.md"]'</span></code></pre><p>验证方法：执行一次 <code>/new</code> 后，<code>~/.openclaw/logs/commands.log</code> 应该多出一行 JSONL；<code>memory/</code> 目录下会多一个以日期加对话主题命名的 Markdown 文件。</p><p>第三方 Hook 以插件包形式分发，2026.9.9 起 <code>openclaw hooks install</code> 已弃用，改用 <code>openclaw plugins install</code>。</p><h2 id="调试与日常维护"><a href="#调试与日常维护" class="headerlink" title="调试与日常维护"></a>调试与日常维护</h2><p>出问题时按这个顺序查，详细的排障思路见<a href="/2026/03/05/openclaw-tips-essential-skills/">进阶篇的调试部分</a>：</p><pre class="language-bash" data-language="bash"><code class="language-bash">openclaw doctor             <span class="token comment"># 全面健康检查</span>
+openclaw doctor <span class="token parameter variable">--fix</span>       <span class="token comment"># 应用推荐的修复</span>
+openclaw doctor <span class="token parameter variable">--deep</span>      <span class="token comment"># 额外扫描系统里是否有多余的网关安装</span>
+
+openclaw status             <span class="token comment"># 网关、渠道、Agent、会话的总览</span>
+openclaw status <span class="token parameter variable">--all</span>       <span class="token comment"># 只读的完整诊断报告，适合贴给别人看</span>
+openclaw status <span class="token parameter variable">--deep</span>      <span class="token comment"># 主动探测各渠道连通性</span>
+
+openclaw logs <span class="token parameter variable">--follow</span>      <span class="token comment"># 实时跟踪网关日志</span>
+openclaw channels logs <span class="token parameter variable">--channel</span> discord</code></pre><p><strong>会话列表</strong>能看出每个会话的上下文占用，回复变慢时先看这里：</p><pre class="language-bash" data-language="bash"><code class="language-bash">openclaw sessions
+openclaw sessions --all-agents</code></pre><p><strong>安全审计</strong>建议在新增渠道或修改工具权限后都跑一次：</p><pre class="language-bash" data-language="bash"><code class="language-bash">openclaw security audit
+openclaw security audit <span class="token parameter variable">--deep</span>   <span class="token comment"># 额外探测运行中的网关</span>
+openclaw security audit <span class="token parameter variable">--fix</span>    <span class="token comment"># 自动修复文件权限等安全问题</span></code></pre><p>我第一次跑时有两条 CRITICAL：Discord 的 <code>groupPolicy</code> 是 <code>open</code>（任何人 @Bot 都能触发工具调用），以及 credentials 目录权限过宽。处理方法见进阶篇第 5 条。</p><p><strong>终端 UI</strong>：<code>openclaw tui</code> 是在终端里运行的控制台，适合 SSH 环境；<code>openclaw dashboard</code> 则会用当前 token 打开浏览器里的 Control UI。</p><p><strong>重置</strong>（不可逆，先备份 <code>~/.openclaw/openclaw.json</code>）：</p><pre class="language-bash" data-language="bash"><code class="language-bash">openclaw reset --dry-run <span class="token parameter variable">--scope</span> config --non-interactive <span class="token parameter variable">--yes</span>   <span class="token comment"># 预览</span>
+openclaw reset <span class="token parameter variable">--scope</span> config <span class="token parameter variable">--yes</span> --non-interactive             <span class="token comment"># 只清配置</span>
+openclaw reset <span class="token parameter variable">--scope</span> config+creds+sessions <span class="token parameter variable">--yes</span> --non-interactive
+openclaw reset <span class="token parameter variable">--scope</span> full <span class="token parameter variable">--yes</span> --non-interactive               <span class="token comment"># 完全重置</span></code></pre><h2 id="版本变更要点"><a href="#版本变更要点" class="headerlink" title="版本变更要点"></a>版本变更要点</h2><p><strong>v2026.3.2 的三处 Breaking Change</strong>：</p><ol><li><strong><code>tools.profile</code> 默认值改为 <code>messaging</code></strong>，不再默认开放编码和系统工具，需要时手动设成 <code>coding</code>。</li><li><strong>ACP dispatch 默认开启</strong>（<code>acp.dispatch.enabled = true</code>）。</li><li><strong>插件 SDK 移除 <code>registerHttpHandler</code></strong>，改用 <code>registerHttpRoute({ path, auth, match, handler })</code>，只影响自定义插件开发者。</li></ol><p><strong>升级到 2026.9.9 时要注意的</strong>（2026-10 复核）：</p><ol><li>Node.js 最低要求提到 24.16 / 26.1。</li><li><code>agents.list</code> 的规范写法变成 <code>agents.entries</code>，Discord 的 <code>streaming</code> 变成对象。</li><li>ClawHub Skill 可以直接 <code>openclaw skills install @owner/slug</code>；<code>hooks install</code> 弃用，改走 <code>plugins install</code>。</li><li><code>cron add</code> 的 <code>--deliver</code> 弃用，用 <code>--announce</code>。</li></ol><h2 id="常用命令速查"><a href="#常用命令速查" class="headerlink" title="常用命令速查"></a>常用命令速查</h2><table><thead><tr><th>场景</th><th>命令</th></tr></thead><tbody><tr><td>确认版本 / 检查更新</td><td><code>openclaw -V</code> / <code>openclaw update status</code></td></tr><tr><td>升级</td><td><code>openclaw update</code></td></tr><tr><td>首次配置</td><td><code>openclaw onboard</code></td></tr><tr><td>前台启动网关</td><td><code>openclaw gateway run</code></td></tr><tr><td>网关作为服务</td><td><code>openclaw daemon install</code> / <code>status</code> / <code>restart</code></td></tr><tr><td>健康检查</td><td><code>openclaw health</code> / <code>openclaw doctor</code></td></tr><tr><td>全局状态</td><td><code>openclaw status</code></td></tr><tr><td>实时日志</td><td><code>openclaw logs --follow</code></td></tr><tr><td>渠道</td><td><code>openclaw channels list</code> / <code>channels add --channel &lt;name&gt;</code></td></tr><tr><td>模型</td><td><code>openclaw models status</code> / <code>models set &lt;id&gt;</code></td></tr><tr><td>配置读写 / 校验</td><td><code>openclaw config get</code> / <code>set</code> / <code>validate</code></td></tr><tr><td>Skills</td><td><code>openclaw skills list</code> / <code>check</code> / <code>install @owner/slug</code></td></tr><tr><td>插件</td><td><code>openclaw plugins list</code> / <code>install &lt;spec&gt;</code></td></tr><tr><td>记忆检索</td><td><code>openclaw memory search "&lt;text&gt;"</code></td></tr><tr><td>Agent</td><td><code>openclaw agents list</code> / <code>add &lt;id&gt;</code> / <code>bind --agent &lt;id&gt; --bind &lt;channel&gt;</code></td></tr><tr><td>单次对话</td><td><code>openclaw agent --agent &lt;id&gt; --message "&lt;prompt&gt;"</code></td></tr><tr><td>ACP 调试客户端</td><td><code>openclaw acp client</code></td></tr><tr><td>定时任务</td><td><code>openclaw cron list</code> / <code>cron add ...</code></td></tr><tr><td>Hooks</td><td><code>openclaw hooks list</code> / <code>enable &lt;name&gt;</code></td></tr><tr><td>会话</td><td><code>openclaw sessions</code></td></tr><tr><td>安全审计</td><td><code>openclaw security audit</code></td></tr><tr><td>终端 UI / 控制台</td><td><code>openclaw tui</code> / <code>openclaw dashboard</code></td></tr></tbody></table><h2 id="从哪里开始"><a href="#从哪里开始" class="headerlink" title="从哪里开始"></a>从哪里开始</h2><p>不需要一次配齐所有功能。比较顺的上手路径是：<code>openclaw onboard</code> 完成基础配置，接入一个你最常用的渠道，发几条消息确认链路通了，再跑一次 <code>openclaw security audit</code>，然后根据实际需求逐步加 Skills、定时任务和第二个 Agent。</p><hr><p><strong>参考资料</strong></p><ul><li><a target="_blank" rel="noopener" href="https://github.com/openclaw/openclaw">OpenClaw 官方仓库</a></li><li><a target="_blank" rel="noopener" href="https://docs.openclaw.ai/cli">OpenClaw CLI 文档</a></li><li><a target="_blank" rel="noopener" href="https://docs.openclaw.ai/channels/discord">OpenClaw Discord 渠道文档</a></li><li><a target="_blank" rel="noopener" href="https://clawhub.ai/">ClawHub Skill 注册中心</a></li><li><a target="_blank" rel="noopener" href="https://github.com/VoltAgent/awesome-openclaw-skills">awesome-openclaw-skills 社区精选</a></li></ul></div><hr><div class="hexo-ad" aria-label="赞助内容"><div class="hexo-ad-script"><style>.hexo-article-ad-slot{display:block;width:100%;max-width:320px;height:100px;margin:0 auto}@media (min-width:500px){.hexo-article-ad-slot{max-width:468px;height:60px}}@media (min-width:800px){.hexo-article-ad-slot{max-width:728px;height:90px}}</style><ins class="adsbygoogle hexo-article-ad-slot" style="display:block" data-ad-client="ca-pub-8990123471955885" data-ad-slot="4326698678"></ins><script>(adsbygoogle=window.adsbygoogle||[]).push({})</script></div></div><style>.hexo-ad{margin:1.2rem auto;text-align:center}.hexo-ad-img{max-width:100%;height:auto;border-radius:8px;box-shadow:0 2px 8px rgba(0,0,0,.08)}.hexo-ad-script{margin:0 auto}</style><div class="reprint" id="reprint-statement"><div class="reprint__author"><span class="reprint-meta" style="font-weight:700"><i class="fas fa-user">文章作者:</i></span> <span class="reprint-info"><a href="/about" rel="external nofollow noreferrer">costalong</a></span></div><div class="reprint__type"><span class="reprint-meta" style="font-weight:700"><i class="fas fa-link">文章链接:</i></span> <span class="reprint-info"><a href="https://costalong.com/2026/03/04/openclaw-usage-guide/">https://costalong.com/2026/03/04/openclaw-usage-guide/</a> <button class="reprint-copy-link" type="button" data-copy-url="https://costalong.com/2026/03/04/openclaw-usage-guide/" aria-label="复制文章链接" title="复制文章链接"><i class="fas fa-copy" aria-hidden="true"></i> <span>复制链接</span></button><span class="reprint-copy-status" role="status" aria-live="polite"></span></span></div><div class="reprint__notice"><span class="reprint-meta" style="font-weight:700"><i class="fas fa-copyright">版权声明:</i></span> <span class="reprint-info">本博客所有文章除特別声明外，均采用 <a href="https://creativecommons.org/licenses/by/4.0/deed.zh" rel="external nofollow noreferrer" target="_blank">CC BY 4.0</a> 许可协议。转载请注明来源 <a href="/about" target="_blank">costalong</a> !</span></div></div><script async defer>document.addEventListener("copy", function (e) {
+        if (window.__articlePermalinkCopy) return;
+        let toastHTML = '<span>复制成功，请遵循本文的转载规则</span><button class="btn-flat toast-action" onclick="navToReprintStatement()" style="font-size: smaller">查看</a>';
+        M.toast({html: toastHTML})
+      });
+
+      document.addEventListener("click", async function (e) {
+        const button = e.target.closest(".reprint-copy-link");
+        if (!button) return;
+
+        const row = button.closest(".reprint__type .reprint-info");
+        const permalink = button.dataset.copyUrl;
+        if (!row || !permalink) return;
+
+        const status = row.querySelector(".reprint-copy-status");
+        const fallbackCopy = function (text) {
+          const textarea = document.createElement("textarea");
+          textarea.value = text;
+          textarea.setAttribute("readonly", "");
+          textarea.style.position = "fixed";
+          textarea.style.opacity = "0";
+          document.body.appendChild(textarea);
+          textarea.select();
+          window.__articlePermalinkCopy = true;
+          let copied = false;
+          try {
+            copied = document.execCommand("copy");
+          } finally {
+            window.__articlePermalinkCopy = false;
+            textarea.remove();
+          }
+          if (!copied) throw new Error("Clipboard copy failed");
+        };
+
+        try {
+          if (navigator.clipboard && navigator.clipboard.writeText) {
+            try {
+              await navigator.clipboard.writeText(permalink);
+            } catch (error) {
+              fallbackCopy(permalink);
+            }
+          } else {
+            fallbackCopy(permalink);
+          }
+          status.textContent = "已复制";
+          button.classList.add("is-copied");
+        } catch (error) {
+          status.textContent = "复制失败，请长按链接复制";
+        }
+
+        window.setTimeout(function () {
+          status.textContent = "";
+          button.classList.remove("is-copied");
+        }, 2200);
+      });
+
+      function navToReprintStatement() {
+        $("html, body").animate({scrollTop: $("#reprint-statement").offset().top - 80}, 800);
+      }</script><div class="tag_share" style="display:block"><div class="post-meta__tag-list" style="display:inline-block"><div class="article-tag"><a href="/tags/AI-Agent/"><span class="chip bg-color ai">AI Agent</span></a> <a href="/tags/OpenClaw/"><span class="chip bg-color">OpenClaw</span></a> <a href="/tags/CLI/"><span class="chip bg-color">CLI</span></a> <a href="/tags/%E8%87%AA%E5%8A%A8%E5%8C%96/"><span class="chip bg-color">自动化</span></a> <a href="/tags/Discord/"><span class="chip bg-color">Discord</span></a></div></div><div class="post_share" style="zoom:80%;width:fit-content;display:inline-block;float:right;margin:-.15rem 0"><link rel="stylesheet" href="/libs/share/css/share.min.css"><div id="article-share"><div class="social-share" data-sites="twitter,facebook,google,qq,qzone,wechat,weibo,douban,linkedin" data-wechat-qrcode-helper="<p>微信扫一扫即可分享！</p>"></div><script src="/libs/share/js/social-share.min.js"></script></div></div></div><div id="reward"><a href="#rewardModal" class="reward-link modal-trigger btn-floating btn-medium waves-effect waves-light red">赏</a><div id="rewardModal" class="modal"><div class="modal-content"><a class="close modal-close"><i class="fas fa-times"></i></a><h4 class="reward-title">你的赏识是我前进的动力</h4><div class="reward-content"><div class="reward-tabs"><ul class="tabs row"><li class="tab col s6 alipay-tab waves-effect waves-light"><a href="#alipay">支付宝</a></li><li class="tab col s6 wechat-tab waves-effect waves-light"><a href="#wechat">微 信</a></li></ul><div id="alipay"><img src="/images/reward/alipay.jpg" class="reward-img" loading="lazy" alt="支付宝打赏二维码"></div><div id="wechat"><img src="/images/reward/wechat.jpg" class="reward-img" loading="lazy" alt="微信打赏二维码"></div></div></div></div></div></div><script>$(function(){$(".tabs").tabs()})</script></div></div><section class="post-related" aria-labelledby="post-related-title"><h2 id="post-related-title">继续阅读</h2><div class="post-related-grid"><a class="post-related-card" href="/2026/10/10/grok-bot-practical-cases/"><span class="post-related-date">2026-10-10</span> <strong>Grok Bot 实用案例：6 个可改写的任务模板与审批边界</strong> <span class="post-related-summary">从公开资料、报销核对、性能排查、测试环境复现、团队简报到广告预算建议，提供 6 个有输入要求、交付标准和停止边界的 Grok Bot 任务模板。</span></a> <a class="post-related-card" href="/2026/10/10/grok-bot-skill-cross-bot/"><span class="post-related-date">2026-10-10</span> <strong>Grok Bot Skill 跨 Bot 实测：独立会话能否找到私有技能</strong> <span class="post-related-summary">在独立 Bot 中调用私有阅读 Skill，整理 Grok Bot 审批文档；检查新会话中的技能标签、文件卡片与官方事实。</span></a> <a class="post-related-card" href="/2026/10/10/grok-bot-skill-reuse/"><span class="post-related-date">2026-10-10</span> <strong>Grok Bot 进阶实测：复用 Skill 处理新文档，并在另一个 Bot 中调用</strong> <span class="post-related-summary">复用已保存的阅读笔记 Skill：换一篇官方文档并逐项核对交付文件，再新建一个 Bot 调用同一 Skill，附三个待改进问题和拟追加的指令建议。</span></a></div></section><style>.valine-card{margin:1.5rem auto}.valine-card .card-content{padding:20px 20px 5px 20px}#vcomments textarea{box-sizing:border-box;background:url(/medias/comment_bg.png) 100% 100% no-repeat}#vcomments p{margin:2px 2px 10px;font-size:1.05rem;line-height:1.78rem}#vcomments blockquote p{text-indent:.2rem}#vcomments a{padding:0 2px;color:#4cbf30;font-weight:500;text-decoration:none}#vcomments img{max-width:100%;height:auto;cursor:pointer}#vcomments ol li{list-style-type:decimal}#vcomments ol,ul{display:block;padding-left:2em;word-spacing:.05rem}#vcomments ul li,ol li{display:list-item;line-height:1.8rem;font-size:1rem}#vcomments ul li{list-style-type:disc}#vcomments ul ul li{list-style-type:circle}#vcomments table,td,th{padding:12px 13px;border:1px solid #dfe2e5}#vcomments table,td,th{border:0}table tr:nth-child(2n),thead{background-color:#fafafa}#vcomments table th{background-color:#f2f2f2;min-width:80px}#vcomments table td{min-width:80px}#vcomments h1{font-size:1.85rem;font-weight:700;line-height:2.2rem}#vcomments h2{font-size:1.65rem;font-weight:700;line-height:1.9rem}#vcomments h3{font-size:1.45rem;font-weight:700;line-height:1.7rem}#vcomments h4{font-size:1.25rem;font-weight:700;line-height:1.5rem}#vcomments h5{font-size:1.1rem;font-weight:700;line-height:1.4rem}#vcomments h6{font-size:1rem;line-height:1.3rem}#vcomments p{font-size:1rem;line-height:1.5rem}#vcomments hr{margin:12px 0;border:0;border-top:1px solid #ccc}#vcomments blockquote{margin:15px 0;border-left:5px solid #42b983;padding:1rem .8rem .3rem .8rem;color:#666;background-color:rgba(66,185,131,.1)}#vcomments pre{font-family:monospace,monospace;padding:1.2em;margin:.5em 0;background:#272822;overflow:auto;border-radius:.3em;tab-size:4}#vcomments code{font-family:monospace,monospace;padding:1px 3px;font-size:.92rem;color:#e96900;background-color:#f8f8f8;border-radius:2px}#vcomments pre code{font-family:monospace,monospace;padding:0;color:#e8eaf6;background-color:#272822}#vcomments pre[class*=language-]{padding:1.2em;margin:.5em 0}#vcomments code[class*=language-],pre[class*=language-]{color:#e8eaf6}#vcomments [type=checkbox]:not(:checked),[type=checkbox]:checked{position:inherit;margin-left:-1.3rem;margin-right:.4rem;margin-top:-1px;vertical-align:middle;left:unset;visibility:visible}#vcomments b,strong{font-weight:700}#vcomments dfn{font-style:italic}#vcomments small{font-size:85%}#vcomments cite{font-style:normal}#vcomments mark{background-color:#fcf8e3;padding:.2em}#vcomments table,td,th{padding:12px 13px;border:1px solid #dfe2e5}table tr:nth-child(2n),thead{background-color:#fafafa}#vcomments table th{background-color:#f2f2f2;min-width:80px}#vcomments table td{min-width:80px}#vcomments [type=checkbox]:not(:checked),[type=checkbox]:checked{position:inherit;margin-left:-1.3rem;margin-right:.4rem;margin-top:-1px;vertical-align:middle;left:unset;visibility:visible}</style><div class="card valine-card" data-aos="fade-up"><div class="comment_headling" style="font-size:20px;font-weight:700;padding:20px 20px 8px 20px"><i class="fas fa-comments fa-fw" aria-hidden="true"></i> <span>评论</span></div><div id="vcomments" class="card-content" style="display:grid"></div></div><script>!function(){var e=document.getElementById("vcomments"),t=["/libs/valine/av-min.js","/libs/valine/Valine.min.js"];function i(e){if(e!==t.length){var n=document.createElement("script");n.src=t[e],n.onload=function(){i(e+1)},document.body.appendChild(n)}else new Valine({el:"#vcomments",appId:"wCf5tlcDtIMPMtrnfln6u3fL-MdYXbMMI",appKey:"pvzhB4VvZzNeC5gtXTaIv0oo",serverURLs:"https://wcf5tlcd.api.lncldglobal.com",notify:!1,verify:!1,visitor:!0,recordIP:!1,avatar:"mm",pageSize:"10",lang:"zh-cn",placeholder:"有什么想说的，在这里留言…"})}if(!("IntersectionObserver"in window))return i(0);var n=new IntersectionObserver(function(e){e[0].isIntersecting&&(n.disconnect(),i(0))},{rootMargin:"600px 0px"});n.observe(e)}()</script><article id="prenext-posts" class="prev-next articles"><div class="row article-row"><div class="article col s12 m6" data-aos="fade-up"><div class="article-badge left-badge text-color"><i class="fas fa-chevron-left"></i> &nbsp;上一篇</div><div class="card"><a href="/2026/03/05/openclaw-tips-essential-skills/"><div class="card-image card-image-V"><div class="box-content"><p class="title">阅读全文</p><span class="post" style="width:180px">OpenClaw 进阶实战：12 个使用技巧与必装 Skills 清单</span></div><img src="/images/posts/openclaw-tips-essential-skills_114d50fb95f7-card.webp" width="400" height="300" loading="lazy" class="responsive-img" alt="OpenClaw 进阶实战：12 个使用技巧与必装 Skills 清单"> <span class="card-title title-V">OpenClaw 进阶实战：12 个使用技巧与必装 Skills 清单</span></div></a><div class="card-content article-content"><div class="summary block-with-text">OpenClaw 装好之后的进阶用法：脚本化调用、危险操作预演、安全审计与 Discord 白名单、cron 投递目标的写法，6 个按 ClawHub 当前状态核实过的 Skill，3 种 Agent 架构，以及 Discord 回 XML…</div><div class="publish-info"><span class="publish-date"><i class="far fa-clock fa-fw icon-date"></i> 2026-03-05</span><span class="publish-author"><i class="fas fa-bookmark fa-fw icon-category"></i> <a href="/categories/Coding-Agent/" class="post-category">Coding-Agent</a></span></div></div><div class="card-action article-tags"><a href="/tags/AI-Agent/"><span class="chip bg-color ai">AI Agent</span></a> <a href="/tags/ClawHub/"><span class="chip bg-color">ClawHub</span></a> <a href="/tags/OpenClaw/"><span class="chip bg-color">OpenClaw</span></a> <a href="/tags/Skills/"><span class="chip bg-color">Skills</span></a> <a href="/tags/%E5%AE%89%E5%85%A8%E5%8A%A0%E5%9B%BA/"><span class="chip bg-color">安全加固</span></a> <a href="/tags/Discord/"><span class="chip bg-color">Discord</span></a></div></div></div><div class="article col s12 m6" data-aos="fade-up"><div class="article-badge right-badge text-color">下一篇&nbsp;<i class="fas fa-chevron-right"></i></div><div class="card"><a href="/2026/03/02/ollama-local-llm-deploy/"><div class="card-image card-image-V"><div class="box-content"><p class="title">阅读全文</p><span class="post" style="width:180px">Ollama 本地部署大模型实战：从安装到 API 调用全流程</span></div><img src="/images/posts/ollama-local-llm-deploy_010ab8ff9d76-card.webp" width="400" height="300" loading="lazy" class="responsive-img" alt="Ollama 本地部署大模型实战：从安装到 API 调用全流程"> <span class="card-title title-V">Ollama 本地部署大模型实战：从安装到 API 调用全流程</span></div></a><div class="card-content article-content"><div class="summary block-with-text">用 Ollama 在本机跑开源大模型的完整流程：安装、模型管理、ollama ps 怎么看、REST 与 OpenAI 兼容接口、Modelfile 定制上下文、ollama launch 一条命令接入 Claude Code 等编程工具、…</div><div class="publish-info"><span class="publish-date"><i class="far fa-clock fa-fw icon-date"></i> 2026-03-02</span><span class="publish-author"><i class="fas fa-bookmark fa-fw icon-category"></i> <a href="/categories/AI/" class="post-category">AI</a></span></div></div><div class="card-action article-tags"><a href="/tags/Claude-Code/"><span class="chip bg-color">Claude Code</span></a> <a href="/tags/Ollama/"><span class="chip bg-color ai">Ollama</span></a> <a href="/tags/LLM/"><span class="chip bg-color ai">LLM</span></a> <a href="/tags/%E6%9C%AC%E5%9C%B0%E9%83%A8%E7%BD%B2/"><span class="chip bg-color">本地部署</span></a> <a href="/tags/%E5%A4%A7%E6%A8%A1%E5%9E%8B/"><span class="chip bg-color ai">大模型</span></a></div></div></div></div></article></div><script src="/libs/codeBlock/codeBlockFuction.js"></script><script src="/libs/codeBlock/codeLang.js"></script><script src="/libs/codeBlock/codeCopy.js"></script><script src="/libs/codeBlock/codeShrink.js"></script><script>!function(){function t(n){var t=n.closest?n.closest(".img-item"):null;if(t){var e=t.nextElementSibling;e&&e.classList.contains("caption")&&(e.style.display="none"),t.style.display="none"}else n.style.display="none"}$(function(){setTimeout(function(){document.querySelectorAll("#articleContent img").forEach(function(n){n.addEventListener("error",function(){t(this)},{once:!0}),n.complete&&0===n.naturalWidth&&t(n)})},0)})}()</script><script>$(function(){$("#read_mode").on("click",function(){var a=$("#artDetail .card").first();a.toggleClass("card-block-fullscreen"),$("html").toggleClass("card-block-fullscreen-html-scroll"),$(this).attr("aria-pressed",String(a.hasClass("card-block-fullscreen")));var s=$(this).find("i");s.hasClass("fa-expand-arrows-alt")?s.removeClass("fa-expand-arrows-alt").addClass("fa-compress-arrows-alt"):s.removeClass("fa-compress-arrows-alt").addClass("fa-expand-arrows-alt")}).on("keydown",function(a){"Enter"!==a.key&&" "!==a.key||(a.preventDefault(),$(this).trigger("click"))})})</script></div><div id="toc-aside" class="expanded col l3 hide-on-med-and-down"><div class="toc-widget card"><div class="toc-title"><i class="far fa-list-alt"></i>&nbsp;&nbsp;目录</div><div id="toc-content"></div></div></div></div><div id="floating-toc-btn"><button type="button" class="btn-floating btn-large bg-color" aria-label="打开文章目录" aria-controls="toc-aside mobile-toc-drawer" aria-expanded="false"><i class="fas fa-list-ul" aria-hidden="true"></i></button></div><div id="mobile-toc-overlay" class="mobile-toc-overlay" aria-hidden="true"></div><div id="mobile-toc-drawer" class="mobile-toc-drawer" role="dialog" aria-modal="true" aria-label="文章目录" aria-hidden="true" inert><div class="mobile-toc-header"><span class="mobile-toc-title"><i class="far fa-list-alt"></i> &nbsp;&nbsp;目录</span> <button type="button" id="mobile-toc-close" class="mobile-toc-close" aria-label="关闭文章目录"><i class="fas fa-times" aria-hidden="true"></i></button></div><div class="mobile-toc-body" id="mobile-toc-body"></div></div><script src="/libs/tocbot/tocbot.min.js"></script><script>$(function () {
+        tocbot.init({
+            tocSelector: '#toc-content',
+            contentSelector: '#articleContent',
+            headingsOffset: -($(window).height() * 0.4 - 45),
+            collapseDepth: Number('3'),
+            headingSelector: 'h2, h3, h4'
+        });
+
+        // Set scroll toc fixed.
+        let tocHeight = parseInt($(window).height() * 0.4 - 64);
+        let $tocWidget = $('.toc-widget');
+        $(window).scroll(function () {
+            let scroll = $(window).scrollTop();
+            /* add post toc fixed. */
+            if (scroll > tocHeight) {
+                $tocWidget.addClass('toc-fixed');
+            } else {
+                $tocWidget.removeClass('toc-fixed');
+            }
+        });
+
+        
+        /* 修复文章卡片 div 的宽度. */
+        let fixPostCardWidth = function (srcId, targetId) {
+            let srcDiv = $('#' + srcId);
+            if (srcDiv.length === 0) {
+                return;
+            }
+
+            let w = srcDiv.width();
+            if (w >= 450) {
+                w = w + 21;
+            } else if (w >= 350 && w < 450) {
+                w = w + 18;
+            } else if (w >= 300 && w < 350) {
+                w = w + 16;
+            } else {
+                w = w + 14;
+            }
+            $('#' + targetId).width(w);
+        };
+
+        // 切换TOC目录展开收缩的相关操作.
+        const expandedClass = 'expanded';
+        let $tocAside = $('#toc-aside');
+        let $mainContent = $('#main-content');
+
+        /* 目录只有一两条时，侧栏几乎是空的，右侧留下一大片空白。
+           这种情况直接不要侧栏，让正文占满整行（正文自身仍有 measure 行宽上限，
+           由 .no-toc 负责居中）。 */
+        if ($('#toc-content .toc-link').length < 3) {
+            $tocAside.removeClass(expandedClass).hide();
+            $mainContent.removeClass('l9').addClass('no-toc');
+            $('#floating-toc-btn').hide();
+        }
+
+        // 移动端 TOC 抽屉逻辑
+        let $overlay = $('#mobile-toc-overlay');
+        let $drawer = $('#mobile-toc-drawer');
+        let $drawerBody = $('#mobile-toc-body');
+        let $tocTrigger = $('#floating-toc-btn .btn-floating');
+        let drawerOpen = false;
+
+        function openMobileDrawer() {
+            // 克隆桌面端 TOC 内容到抽屉
+            $drawerBody.html($('#toc-content').html());
+            $overlay.addClass('active');
+            $drawer.addClass('active').attr('aria-hidden', 'false').removeAttr('inert');
+            $tocTrigger.attr({'aria-expanded': 'true', 'aria-label': '关闭文章目录'});
+            $('body').css('overflow', 'hidden');
+            drawerOpen = true;
+            $('#mobile-toc-close').trigger('focus');
+
+            // 点击抽屉内链接后自动关闭
+            $drawerBody.find('.toc-link').on('click', function() {
+                closeMobileDrawer(false);
+            });
+        }
+
+        function closeMobileDrawer(restoreFocus) {
+            $overlay.removeClass('active');
+            $drawer.removeClass('active').attr('aria-hidden', 'true');
+            // Let a clicked TOC anchor complete its native hash navigation before making it inert.
+            if (restoreFocus === false) {
+                window.setTimeout(function () { $drawer.attr('inert', ''); }, 0);
+            } else {
+                $drawer.attr('inert', '');
+            }
+            $tocTrigger.attr({'aria-expanded': 'false', 'aria-label': '打开文章目录'});
+            $('body').css('overflow', '');
+            drawerOpen = false;
+            if (restoreFocus !== false) $tocTrigger.trigger('focus');
+        }
+
+        $overlay.on('click', function () { closeMobileDrawer(); });
+        $('#mobile-toc-close').on('click', function () { closeMobileDrawer(); });
+        $(document).on('keydown', function (event) {
+            if (drawerOpen && event.key === 'Escape') closeMobileDrawer();
+        });
+
+        $(window).on('resize', function () {
+            if ($(window).width() > 1199 && drawerOpen) closeMobileDrawer(false);
+            if ($(window).width() > 1199) {
+                const expanded = $tocAside.hasClass(expandedClass);
+                $tocTrigger.attr({'aria-expanded': String(expanded), 'aria-label': expanded ? '收起文章目录' : '展开文章目录'});
+            } else if (!drawerOpen) {
+                $tocTrigger.attr({'aria-expanded': 'false', 'aria-label': '打开文章目录'});
+            }
+        });
+
+        if ($(window).width() > 1199 && $tocAside.hasClass(expandedClass)) {
+            $tocTrigger.attr({'aria-expanded': 'true', 'aria-label': '收起文章目录'});
+        }
+
+        $tocTrigger.on('click', function () {
+            // 1199px 及以下打开抽屉：993–1199 侧栏太窄，CSS 已把它隐藏
+            if ($(window).width() <= 1199) {
+                if (drawerOpen) {
+                    closeMobileDrawer();
+                } else {
+                    openMobileDrawer();
+                }
+                return;
+            }
+
+            // 桌面端保持原有折叠逻辑
+            if ($tocAside.hasClass(expandedClass)) {
+                $tocAside.removeClass(expandedClass).hide();
+                $tocTrigger.attr({'aria-expanded': 'false', 'aria-label': '展开文章目录'});
+                // 只去掉 l9 会让 col s12 m12 在大屏退回整行宽度，正文行宽从 788px
+                // 涨到 1092px（中文行太长且不居中，右侧空一大片）。补一个类来封顶并居中。
+                $mainContent.removeClass('l9').addClass('toc-collapsed');
+            } else {
+                $tocAside.addClass(expandedClass).show();
+                $tocTrigger.attr({'aria-expanded': 'true', 'aria-label': '收起文章目录'});
+                $mainContent.addClass('l9').removeClass('toc-collapsed');
+            }
+            fixPostCardWidth('artDetail', 'prenext-posts');
+        });
+        
+    });</script></main><div class="progress-bar"></div><footer class="dp-footer page-footer"><div class="dp-wrap dp-foot-grid"><div class="l">&copy; <span id="year">2023-2026</span> <b>翼舞成梦</b> · costalong.com — 用 <a href="https://hexo.io/" target="_blank" rel="noopener">Hexo</a> 构建，内容均为原创工程笔记。</div><div class="dp-foot-links"><a href="/advertise/">广告合作</a> <a href="/privacy/">隐私政策</a> <a href="/atom.xml">RSS</a> <a href="/archives">归档</a> <a href="/about">关于</a> <a href="https://github.com/costa92" target="_blank" rel="noopener">GitHub</a> <a href="/sitemap.xml">sitemap</a></div></div><div class="dp-wrap" style="margin-top:16px;display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;font-size:12.5px;color:var(--text-mut)"><div class="footer-social"><a href="https://github.com/costa92" class="tooltipped" aria-label="访问我的GitHub" target="_blank" rel="noopener" data-tooltip="访问我的GitHub" data-position="top" data-delay="50"><i class="fab fa-github"></i></a><a href="mailto:costa9293@gmail.com" class="tooltipped" aria-label="邮件联系我" target="_blank" rel="noopener" data-tooltip="邮件联系我" data-position="top" data-delay="50"><i class="fas fa-envelope-open"></i></a><a href="tencent://AddContact/?fromId=50&fromSubId=1&subcmd=all&uin=944310536" class="tooltipped" aria-label="QQ联系我" target="_blank" rel="noopener" data-tooltip="QQ联系我: 944310536" data-position="top" data-delay="50"><i class="fab fa-qq"></i></a><a href="/atom.xml" class="tooltipped" aria-label="RSS 订阅" target="_blank" rel="noopener" data-tooltip="RSS 订阅" data-position="top" data-delay="50"><i class="fas fa-rss"></i></a></div><div class="footer-stats" style="font-family:var(--font-mono)"><span id="busuanzi_container_site_pv"><i class="far fa-eye"></i> &nbsp;<span id="busuanzi_value_site_pv"></span></span> <span id="busuanzi_container_site_uv">&nbsp;&middot;&nbsp;<i class="fas fa-users"></i>&nbsp;<span id="busuanzi_value_site_uv"></span></span> &nbsp;&middot;&nbsp;<a href="https://beian.miit.gov.cn/#/Integrated/index" target="_blank" rel="noopener">湘ICP备15006875号</a></div></div></footer><div id="searchModal" class="modal" role="dialog" aria-modal="true" aria-labelledby="searchTitle"><div class="modal-content"><div class="search-header"><label for="searchInput" id="searchTitle" class="title"><i class="fas fa-search" aria-hidden="true"></i> &nbsp;&nbsp;搜索</label> <input type="search" id="searchInput" name="s" placeholder="请输入搜索的关键字" class="search-input" aria-controls="searchResult"></div><div id="searchStatus" class="search-status" role="status" aria-live="polite"></div><div id="searchResult"></div></div></div><script>$(function(){"use strict";var n=document.getElementById("searchInput"),l=document.getElementById("searchResult"),t=document.getElementById("searchStatus"),a=null,c=!1;function o(e){t.textContent=e}function e(){l.replaceChildren();var e=n.value.trim().toLocaleLowerCase();if(e)if(a){var r=e.split(/[\s\-]+/).filter(Boolean),t=a.filter(function(t){return r.every(function(e){return t.searchText.includes(e)})}).slice(0,20);if(t.length){o("找到 "+t.length+" 条相关内容"+(20===t.length?"（最多显示 20 条）":""));var i=document.createElement("ul");i.className="search-result-list",t.forEach(function(e){var t=document.createElement("li"),n=document.createElement("a");if(n.className="search-result-title",n.href=e.url,n.textContent=e.title,t.appendChild(n),e.content){var l=e.content.toLocaleLowerCase().indexOf(r[0]),a=Math.max(0,l-35),c=document.createElement("p");c.className="search-result",c.textContent=(a?"…":"")+e.content.slice(a,a+130)+(a+130<e.content.length?"…":""),t.appendChild(c)}i.appendChild(t)}),l.appendChild(i)}else o("没有找到相关内容，请换个关键词试试。")}else o(c?"正在加载搜索索引…":"搜索索引暂时不可用，请稍后重试。");else o("")}function r(){a||c||(c=!0,e(),$.ajax({url:"/search.xml",dataType:"xml"}).done(function(e){a=$("entry",e).map(function(){var e,t=$("title",this).text().trim(),n=(e=$("content",this).text(),String(e||"").replace(/<[^>]*>/g," ").replace(/\s+/g," ").trim()),l=$("url",this).text().trim();return t&&l?{title:t,content:n,url:"/"===l.charAt(0)?l:"/"+l,searchText:(t+" "+n).toLocaleLowerCase()}:null}).get()}).fail(function(){a=null}).always(function(){c=!1,e()}))}n.addEventListener("input",function(){r(),e()}),n.addEventListener("focus",r),$('a[href="#searchModal"], .search-btn').on("click",r)})</script><div class="stars-con"><div id="stars"></div><div id="stars2"></div><div id="stars3"></div></div><script>function switchNightMode(){$('<div class="Cuteen_DarkSky"><div class="Cuteen_DarkPlanet"></div></div>').appendTo($("body")),setTimeout(function(){$("body").hasClass("DarkMode")?($("body").removeClass("DarkMode"),localStorage.setItem("isDark","0"),$("#sum-moon-icon").removeClass("fa-sun").addClass("fa-moon")):($("body").addClass("DarkMode"),localStorage.setItem("isDark","1"),$("#sum-moon-icon").addClass("fa-sun").removeClass("fa-moon")),setTimeout(function(){$(".Cuteen_DarkSky").fadeOut(1e3,function(){$(this).remove()})},2e3)})}</script><div id="backTop" class="top-scroll"><button type="button" class="btn-floating btn-large waves-effect waves-light" aria-label="回到顶部"><i class="fas fa-arrow-up" aria-hidden="true"></i></button></div><script src="/libs/materialize/materialize.min.js" defer></script><script src="/libs/masonry/masonry.pkgd.min.js" defer></script><script src="/libs/aos/aos.js"></script><script src="/libs/lightGallery/js/lightgallery-all.min.js" defer></script><script src="/libs/scrollprogress/scrollProgress.min.js"></script><script src="/js/matery.js?v=3f7ec091" defer></script><script src="/js/responsive-tables.js?v=6ebf2b5e"></script><script src="/js/infinite-scroll.js?v=b6f5ebe2" defer></script><script>!function(){var t=document.createElement("script");t.src="https://zz.bdstatic.com/linksubmit/push.js";var e=document.getElementsByTagName("script")[0];e.parentNode.insertBefore(t,e)}()</script><script src="/js/fireworks.js" async></script><script>!function(){if(!new URLSearchParams(location.search).has("style-audit-preview")){var e=document.createElement("script");e.src="https://events.vercount.one/js",document.head.appendChild(e)}}()</script><script color="110,80,255" pointcolor="80,140,255" opacity="0.28" zindex="-1" count="80" src="/libs/background/canvas-nest.js"></script><script src="/libs/instantpage/instantpage.js" type="module"></script><script>window.Base64=window.Base64||{encode:function(e){return btoa(unescape(encodeURIComponent(e)))}}</script><script>$(function () {
+        const hasAttr = (e,a) => a.some(_=> e.attr(_)!==undefined);
+        $('a').each(function() {
+          const $this = $(this);
+          if(hasAttr($this,["data-fancybox","ignore-external-link"])) return;
+          const href = $this.attr('href');
+          if (href && href.match('^((http|https|thunder|qqdl|ed2k|Flashget|qbrowser|ftp|rtsp|mms)://)')) {
+            const strs = href.split('/');
+            if (strs.length >= 3) {
+                const host = strs[2];
+                if (host !== 'https://costalong.com' || window.location.host) {
+                    $this.attr('href', '/go.html?u='+Base64.encode(href)+'').attr('rel', 'external nofollow noopener noreferrer');
+                    if (true) {
+                        $this.attr('target', '_blank');
+                    }
+                }
+            }
+          }
+        });
+        });</script></body></html>

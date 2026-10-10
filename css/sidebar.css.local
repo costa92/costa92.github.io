@@ -1,0 +1,147 @@
+/**
+ * 首页侧边栏样式
+ * Extracted from index-sidebar.ejs inline styles
+ */
+
+.index-sidebar {
+    margin-top: 15px;
+}
+
+.profile-card {
+    padding: 24px;
+    text-align: center;
+    border-radius: var(--radius-card);
+}
+
+.profile-image img {
+    width: 100px;
+    height: 100px;
+    margin: 0 auto 16px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    border: 3px solid #fff;
+}
+
+.profile-name {
+    margin: 0 0 8px;
+    font-weight: 700;
+    color: var(--color-text);
+}
+
+.profile-career {
+    color: var(--color-text-secondary);
+    font-size: 0.9rem;
+    margin-bottom: 12px;
+}
+
+.profile-introduction {
+    font-size: 0.85rem;
+    color: var(--color-text-muted);
+    line-height: 1.6;
+}
+
+.card-title-wrapper {
+    padding: 16px 20px;
+    font-weight: 700;
+    font-size: 1.1rem;
+    border-bottom: 1px solid #f0f0f0;
+    color: var(--color-text);
+}
+
+.card-title-wrapper i {
+    margin-right: 8px;
+    color: var(--color-primary);
+}
+
+.notebook-sidebar-card {
+    border-radius: var(--radius-card);
+    overflow: hidden;
+}
+
+.notebook-sidebar-item {
+    display: flex;
+    align-items: center;
+    padding: 12px 20px;
+    color: #555;
+    transition: all 0.2s;
+    border-bottom: 1px solid #f9f9f9;
+}
+
+.notebook-sidebar-item:hover {
+    background: #f5faff;
+    color: var(--color-primary);
+}
+
+.notebook-sidebar-item i {
+    width: 24px;
+    margin-right: 12px;
+    font-size: 1rem;
+}
+
+.notebook-sidebar-item .notebook-name {
+    flex: 1;
+    font-size: 0.95rem;
+}
+
+.notebook-sidebar-item .badge {
+    font-size: 0.75rem;
+    color: #999;
+    background: #f0f0f0;
+    padding: 2px 8px;
+    border-radius: var(--radius-card);
+}
+
+.btn-block {
+    display: block;
+    text-align: center;
+    background: linear-gradient(to right, var(--color-primary) 0%, var(--color-primary-dark) 100%);
+    color: #fff;
+    padding: 10px;
+    border-radius: 6px;
+    font-weight: 600;
+}
+
+.tag-sidebar-card {
+    padding-bottom: 20px;
+    border-radius: var(--radius-card);
+}
+
+.tag-cloud {
+    padding: 15px 20px;
+}
+
+.tag-cloud a {
+    display: inline-block;
+    margin: 4px 8px;
+    color: var(--color-text-secondary);
+    transition: color 0.2s;
+}
+
+.tag-cloud a:hover {
+    color: var(--color-primary);
+}
+
+/* 深色模式适配 */
+body.DarkMode .profile-card,
+body.DarkMode .notebook-sidebar-card,
+body.DarkMode .tag-sidebar-card {
+    background: var(--color-bg-card);
+}
+
+body.DarkMode .profile-name,
+body.DarkMode .card-title-wrapper {
+    color: var(--color-text);
+    border-bottom-color: #333;
+}
+
+body.DarkMode .notebook-sidebar-item {
+    color: var(--color-text-secondary);
+    border-bottom-color: #333;
+}
+
+body.DarkMode .notebook-sidebar-item:hover {
+    background: #333;
+}
+
+body.DarkMode .tag-cloud a {
+    color: var(--color-text-muted);
+}

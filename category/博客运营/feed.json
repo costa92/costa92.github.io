@@ -1,0 +1,23 @@
+{
+    "version": "https://jsonfeed.org/version/1",
+    "title": "翼舞成梦",
+    "subtitle": "翼舞成梦",
+    "icon": "https://costalong.com/images/favicon.ico",
+    "description": "翼舞成梦的个人博客，专注于后端开发、K8s 容器化技术、Linux 运维以及人工智能学习笔记分享。",
+    "home_page_url": "https://costalong.com",
+    "items": [
+        {
+            "id": "https://costalong.com/2026/10/03/hexo-blog-advertising-guide/",
+            "url": "https://costalong.com/2026/10/03/hexo-blog-advertising-guide/",
+            "title": "Hexo 博客如何接广告：从合作广告位到 AdSense 代码",
+            "date_published": "2026-10-03T06:40:00.000Z",
+            "content_html": "<p>本站现在有两个广告位置：首页右侧侧栏和文章末尾。首页暂时展示“广告合作”入口；收到广告主的素材或取得广告联盟代码后，才会显示真正的广告。这样的文字赞助卡形式参考了 <a href=\"https://codex-resets.com/zh-CN\">Codex Resets 的赞助区</a>，但本站没有复制它的价格或付款流程。</p>\n<h2 id=\"路线一：直接招商\"><a href=\"#路线一：直接招商\" class=\"headerlink\" title=\"路线一：直接招商\"></a>路线一：直接招商</h2><p>如果你是希望在本站投放产品的广告主，不需要注册账号。打开<a href=\"/advertise/\">广告合作页</a>，邮件提供产品介绍、目标链接、投放时间、图片或文字素材。双方确认位置、排期与报价，内容审核通过后才会上线。</p>\n<p>站长收到素材后，编辑 <code>source/_data/hexo_ad_sidebar.yml</code> 可投放首页侧栏。文字卡只需填写 <code>title</code>、<code>description</code> 和 <code>link</code>，图片卡则填写 <code>image</code> 和 <code>link</code>。文章末尾广告编辑 <code>source/_data/hexo_ad.yml</code>。两处广告可分别开关，内容会明确标注“赞助内容”。没有广告时保持 <code>enable: false</code>。</p>\n<h2 id=\"路线二：申请-Google-AdSense\"><a href=\"#路线二：申请-Google-AdSense\" class=\"headerlink\" title=\"路线二：申请 Google AdSense\"></a>路线二：申请 Google AdSense</h2><p>AdSense 是另一种来源：广告由 Google 填充，站长需要先申请账号与站点，审核通过后获取广告代码。以下流程以 <a href=\"https://support.google.com/adsense/answer/10162?hl=zh-Hans\">Google 官方注册说明</a>和<a href=\"https://support.google.com/adsense/answer/9274025?hl=zh-Hans\">展示广告单元说明</a>为准。</p>\n<ol>\n<li>进入 <a href=\"https://adsense.google.com/\">AdSense 官网</a>注册。添加网站时填写自己的主域名，例如 <code>costalong.com</code>，不要填某篇文章的 URL。完成付款资料、站点连接和后台要求的验证。站点需要审核；后台显示“就绪”后才可以正常展示广告。具体状态见<a href=\"https://support.google.com/adsense/answer/12131223?hl=zh-Hans\">站点管理说明</a>。</li>\n<li>后台会提供发布商 ID，格式为 <code>ca-pub-</code> 加数字。把它填到 <code>_config.hexo-theme-matery.yml</code> 的 <code>adsense.client</code>，构建并部署。主题会在每页 <code>&lt;head&gt;</code> 加载 AdSense 脚本，用于连接站点。本站已填入 <code>ca-pub-8990123471955885</code>，并在 <code>source/ads.txt</code> 声明 Google 为授权卖方。这里不能使用文章末尾的广告位代替 <code>&lt;head&gt;</code> 验证代码；Google 的<a href=\"https://support.google.com/adsense/answer/9274516?hl=zh-Hans\">代码放置说明</a>明确要求将站点代码放在 <code>&lt;head&gt;</code>。</li>\n<li>审核通过后，在后台依次选择“广告 → 按广告单元 → 展示广告”。为首页侧栏和文章末尾分别创建一个自适应广告单元，点击“保存并获取代码”。每个单元会有自己的 <code>data-ad-slot</code>。</li>\n<li>将首页单元的 <code>&lt;ins class=\"adsbygoogle\"&gt;</code> 和初始化脚本填入 <code>source/_data/hexo_ad_sidebar.yml</code> 的 <code>script: |</code>，文章单元填入 <code>source/_data/hexo_ad.yml</code>。把对应的 <code>enable</code> 改成 <code>true</code>。全站脚本已经由 <code>adsense.client</code> 加载，不要在每个广告位重复加入同一个脚本标签。</li>\n<li>运行 <code>npm run build</code>，检查生成的首页和文章 HTML 是否带有对应的广告代码，再部署。广告可能需要一段时间才出现；如果一直没有，先查看 AdSense 的站点与广告单元状态。不要点击自己的广告进行测试。</li>\n</ol>\n<p>例如，侧栏数据文件中的广告单元可以这样填写。两个数字都要换成自己后台生成的值：</p>\n<pre class=\"language-yaml\" data-language=\"yaml\"><code class=\"language-yaml\"><span class=\"token key atrule\">enable</span><span class=\"token punctuation\">:</span> <span class=\"token boolean important\">true</span>\n<span class=\"token key atrule\">image</span><span class=\"token punctuation\">:</span>\n<span class=\"token key atrule\">link</span><span class=\"token punctuation\">:</span>\n<span class=\"token key atrule\">script</span><span class=\"token punctuation\">:</span> <span class=\"token punctuation\">|</span><span class=\"token scalar string\">\n  &lt;style type=\"text/css\"&gt;\n  .dp .ad-panel-script .hexo-sidebar-ad-slot { display:block; width:200px; height:200px; margin:0 auto; }\n  @media (min-width:360px) { .dp .ad-panel-script .hexo-sidebar-ad-slot { width:250px; height:250px; } }\n  &lt;/style&gt;\n  &lt;ins class=\"adsbygoogle hexo-sidebar-ad-slot\"\n       style=\"display:block\"\n       data-ad-client=\"ca-pub-1234567890123456\"\n       data-ad-slot=\"1234567890\"&gt;&lt;/ins&gt;\n  &lt;script&gt;(adsbygoogle = window.adsbygoogle || []).push({});&lt;/script&gt;</span></code></pre>\n\n<p>侧栏广告按屏宽限制为 200×200 或 250×250，避免自动尺寸把侧栏拉得过长；文章末尾仍用横幅。尺寸写法参照 <a href=\"https://support.google.com/adsense/answer/9183363?hl=zh-Hans\">Google 官方说明</a>。</p>\n<p>两条路线可以按需选择。本站的 AdSense 申请尚未通过，广告位代码已就绪，通过后广告出现的时间和填充情况由 Google 决定。本站没有预设赞助商，因此不会显示示例广告。</p>\n",
+            "tags": [
+                "博客运营",
+                "Hexo",
+                "AdSense",
+                "广告合作"
+            ]
+        }
+    ]
+}

@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 360 500" role="img" aria-labelledby="diagram-title diagram-desc">
+<title id="diagram-title">PodDisruptionBudget 与维护窗口</title><desc id="diagram-desc">用双副本 Deployment 和 PDB 观察可用中断数，理解节点维护期间的保护范围。</desc>
+<defs><pattern id="grid" width="32" height="32" patternUnits="userSpaceOnUse"><path d="M32 0 L0 0 0 32" fill="none" stroke="#1e293b" stroke-width=".6"/></pattern>
+<marker id="arrow" markerWidth="9" markerHeight="7" refX="8" refY="3.5" orient="auto"><path d="M0 0 L9 3.5 L0 7Z" fill="#94a3b8"/></marker></defs>
+<rect width="360" height="500" rx="16" fill="#0f172a"/><rect width="360" height="500" rx="16" fill="url(#grid)"/>
+<text x="24" y="29" fill="#f8fafc" font-family="'PingFang SC','Noto Sans SC',sans-serif" font-size="17" font-weight="700">PodDisruptionBudget 与维护窗口</text>
+<text x="24" y="51" fill="#94a3b8" font-family="'PingFang SC','Noto Sans SC',sans-serif" font-size="11.5">驱逐请求的两种结果</text>
+<rect x="24" y="80" width="312" height="62" rx="10" fill="#152338" stroke="#22d3ee" stroke-width="1.4"/>
+<text x="180.0" y="107.0" text-anchor="middle" font-family="'PingFang SC','Noto Sans SC',sans-serif" font-size="14" fill="#f8fafc" font-weight="700">drain 请求 eviction</text>
+<text x="180.0" y="123.0" text-anchor="middle" font-family="'PingFang SC','Noto Sans SC',sans-serif" font-size="12" fill="#cbd5e1">PDB 只约束自愿驱逐</text>
+<path d="M180 142 V184 H98 V222" fill="none" stroke="#34d399" stroke-width="1.8" marker-end="url(#arrow)"/>
+<path d="M180 184 H262 V222" fill="none" stroke="#fb7185" stroke-width="1.8" marker-end="url(#arrow)"/>
+<rect x="24" y="222" width="148" height="98" rx="10" fill="#152338" stroke="#34d399" stroke-width="1.4"/>
+<text x="98.0" y="267.0" text-anchor="middle" font-family="'PingFang SC','Noto Sans SC',sans-serif" font-size="14" fill="#f8fafc" font-weight="700">预算足够</text>
+<text x="98.0" y="283.0" text-anchor="middle" font-family="'PingFang SC','Noto Sans SC',sans-serif" font-size="12" fill="#cbd5e1">允许驱逐</text>
+<rect x="188" y="222" width="148" height="98" rx="10" fill="#152338" stroke="#fb7185" stroke-width="1.4"/>
+<text x="262.0" y="267.0" text-anchor="middle" font-family="'PingFang SC','Noto Sans SC',sans-serif" font-size="14" fill="#f8fafc" font-weight="700">预算不足</text>
+<text x="262.0" y="283.0" text-anchor="middle" font-family="'PingFang SC','Noto Sans SC',sans-serif" font-size="12" fill="#cbd5e1">拒绝；drain 等待</text>
+<rect x="24" y="374" width="312" height="70" rx="10" fill="#152338" stroke="#fbbf24" stroke-width="1.4"/>
+<text x="180.0" y="405.0" text-anchor="middle" font-family="'PingFang SC','Noto Sans SC',sans-serif" font-size="14" fill="#f8fafc" font-weight="700">节点故障属非自愿中断</text>
+<text x="180.0" y="421.0" text-anchor="middle" font-family="'PingFang SC','Noto Sans SC',sans-serif" font-size="12" fill="#cbd5e1">PDB 不能防止节点故障</text>
+<line x1="24" y1="465" x2="336" y2="465" stroke="#334155"/>
+<text x="24" y="485" fill="#94a3b8" font-family="'PingFang SC','Noto Sans SC',sans-serif" font-size="10">costalong.com · Kubernetes 笔记</text></svg>

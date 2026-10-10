@@ -1,0 +1,308 @@
+<!DOCTYPE HTML><html lang="zh-CN"><head><meta charset="utf-8"><meta name="keywords" content="MemPalace 从零上手：给 Claude Code 装本地 AI 记忆（零 API）, costalong, 翼舞成梦, 后端开发, Go语言, Kubernetes, K8s, Linux, AI, 学习笔记"><meta name="description" content="用 MemPalace 3.10 给 Claude Code 加一层本地记忆：从 init、mine、search 到 MCP 接入和 Stop / PreCompact 自动保存 hook 的正确写法，并对照仓库解释 96.6% R@5 这个 benchmark 数字怎么来、哪些说法已被项目自己撤回。"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="renderer" content="webkit|ie-stand|ie-comp"><meta name="mobile-web-app-capable" content="yes"><meta name="format-detection" content="telephone=no"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><meta name="referrer" content="strict-origin-when-cross-origin"><meta name="google-adsense-account" content="ca-pub-8990123471955885"><script>!function(){if(!new URLSearchParams(location.search).has("style-audit-preview")){var n=!1;document.addEventListener("DOMContentLoaded",function(){if(!("IntersectionObserver"in window))return t();var n=new IntersectionObserver(function(e){e.some(function(e){return e.isIntersecting})&&(n.disconnect(),t())},{rootMargin:"200px 0px"});document.querySelectorAll("ins.adsbygoogle").forEach(function(e){n.observe(e)})}),window.addEventListener("load",function(){(window.requestIdleCallback||function(e){setTimeout(e,2e3)})(t,{timeout:4e3})})}function t(){if(!n){n=!0;var e=document.createElement("script");e.async=!0,e.src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8990123471955885",e.crossOrigin="anonymous",document.head.appendChild(e)}}}()</script><title>MemPalace 从零上手：给 Claude Code 装本地 AI 记忆（零 API） | 翼舞成梦</title><meta property="og:site_name" content="翼舞成梦"><meta property="og:locale" content="zh_CN"><meta property="og:type" content="article"><meta property="og:title" content="MemPalace 从零上手：给 Claude Code 装本地 AI 记忆（零 API）"><meta property="og:description" content="用 MemPalace 3.10 给 Claude Code 加一层本地记忆：从 init、mine、search 到 MCP 接入和 Stop / PreCompact 自动保存 hook 的正确写法，并对照仓库解释 96.6% R@5 这个 benchmark 数字怎么来、哪些说法已被项目自己撤回。"><meta property="og:url" content="https://costalong.com/2026/04/16/mempalace-local-memory-tutorial/"><meta property="og:image" content="https://costalong.com/images/posts/mempalace-local-memory-tutorial_8be05252961f.jpg"><meta name="twitter:card" content="summary_large_image"><script type="application/ld+json">{"@context":"https://schema.org","@type":"BlogPosting","headline":"MemPalace 从零上手：给 Claude Code 装本地 AI 记忆（零 API）","description":"用 MemPalace 3.10 给 Claude Code 加一层本地记忆：从 init、mine、search 到 MCP 接入和 Stop / PreCompact 自动保存 hook 的正确写法，并对照仓库解释 96.6% R@5 这个 benchmark 数字怎么来、哪些说法已被项目自己撤回。","image":"https://costalong.com/images/posts/mempalace-local-memory-tutorial_8be05252961f.jpg","url":"https://costalong.com/2026/04/16/mempalace-local-memory-tutorial/","datePublished":"2026-04-16T04:00:00.000Z","dateModified":"2026-04-16T04:00:00.000Z","author":{"@type":"Person","name":"costalong"},"publisher":{"@type":"Person","name":"costalong"}}</script><link rel="canonical" href="https://costalong.com/2026/04/16/mempalace-local-memory-tutorial/"><link rel="alternate" type="application/atom+xml" title="翼舞成梦" href="https://costalong.com/atom.xml"><link rel="alternate" type="application/json" title="翼舞成梦" href="https://costalong.com/feed.json"><link rel="icon" type="image/png" href="/favicon.png"><link rel="stylesheet" href="/css/fonts.css?v=864fc7ac"><link rel="preload" href="/libs/awesome/webfonts/fa-solid-900.woff2" as="font" type="font/woff2" crossorigin><link rel="stylesheet" href="/libs/awesome/css/all.min.css"><link rel="stylesheet" href="/libs/materialize/materialize.min.css"><link rel="stylesheet" href="/libs/aos/aos.css"><link rel="stylesheet" href="/libs/animate/animate.min.css" media="print" onload='this.media="all"'><link rel="stylesheet" href="/libs/lightGallery/css/lightgallery.min.css" media="print" onload='this.media="all"'><link rel="stylesheet" href="/css/matery.css"><link rel="stylesheet" href="/css/my.css"><link rel="stylesheet" href="/css/dark.css" media="none" onload='"all"!=media&&(media="all")'><link rel="stylesheet" href="/css/infinite-scroll.css"><link rel="stylesheet" href="/css/sidebar.css"><link rel="stylesheet" href="/css/navbar.css"><link rel="stylesheet" href="/libs/tocbot/tocbot.css"><link rel="stylesheet" href="/css/post.css"><link rel="stylesheet" href="/css/reward.css" media="print" onload='this.media="all"'><link rel="stylesheet" href="/css/obsidian.css?v=fee1bba1"><link rel="stylesheet" href="/css/darkpremium.css?v=c801dadc"><link rel="stylesheet" href="/css/post-darkpremium.css?v=c09ea248"><script>!function(o){var t=[];o.$=o.jQuery=function(n){if("function"!=typeof n)throw new Error("jQuery 尚未加载：请写在 $(function () {...}) 里");t.push(n)},document.addEventListener("DOMContentLoaded",function(){o.jQuery.fn&&t.forEach(function(n){o.jQuery(n)})})}(window)</script><script src="/libs/jquery/jquery-3.6.0.min.js" defer></script><script>new MutationObserver(function(t){t.forEach(function(t){"attributes"===t.type&&"aria-hidden"===t.attributeName&&"true"===document.body.getAttribute("aria-hidden")&&document.body.removeAttribute("aria-hidden")})}).observe(document.documentElement,{attributes:!0,subtree:!0,attributeFilter:["aria-hidden"]}),window.addEventListener("DOMContentLoaded",function(){"true"===document.body.getAttribute("aria-hidden")&&document.body.removeAttribute("aria-hidden")})</script><meta name="generator" content="Hexo 8.1.2"><style>.github-emoji{position:relative;display:inline-block;width:1.2em;min-height:1.2em;overflow:hidden;vertical-align:top;color:transparent}.github-emoji>span{position:relative;z-index:10}.github-emoji .fancybox,.github-emoji img{margin:0!important;padding:0!important;border:none!important;outline:0!important;text-decoration:none!important;user-select:none!important;cursor:auto!important}.github-emoji img{height:1.2em!important;width:1.2em!important;position:absolute!important;left:50%!important;top:50%!important;transform:translate(-50%,-50%)!important;user-select:none!important;cursor:auto!important}.github-emoji-fallback{color:inherit}.github-emoji-fallback img{opacity:0!important}</style></head><body><a class="skip-link" href="#content-start">跳到正文</a><header class="dp-nav"><div class="dp-wrap"><div class="dp-nav-inner"><a class="dp-brand" href="/"><span class="mark"><img src="/medias/logo.webp" alt="" width="22" height="22"></span><span><span class="name">翼舞成梦</span><br><span class="dom">costalong.com</span></span></a><div class="dp-nav-links" role="navigation" aria-label="主导航"><a href="/">首页</a> <a href="/archives/">归档</a> <a href="/moments">Moments</a> <a href="/about/">关于</a> <a href="/explore/">探索</a> <a href="/galleries/">相册</a> <a href="/notes/">笔记</a> <a href="/contact/">留言板</a> <a href="/friends/">友情链接</a></div><div class="dp-nav-actions"><a href="#searchModal" class="icon-btn modal-trigger" title="搜索" aria-label="搜索"><i class="fas fa-search" aria-hidden="true"></i></a><a class="dp-nav-cta" href="/atom.xml"><i class="fas fa-rss" style="margin-right:6px" aria-hidden="true"></i> 订阅更新</a> <button type="button" data-target="mobile-nav" class="icon-btn dp-burger sidenav-trigger button-collapse" aria-label="打开菜单" aria-expanded="false" aria-controls="mobile-nav"><i class="fas fa-bars" aria-hidden="true"></i></button></div></div></div><div id="mobile-nav" class="side-nav sidenav"><div class="mobile-head bg-color"><img src="/medias/logo.webp" class="logo-img circle responsive-img" alt="网站头像"><div class="logo-name">翼舞成梦</div><div class="logo-desc">翼舞成梦的个人博客，专注于后端开发、K8s 容器化技术、Linux 运维以及人工智能学习笔记分享。</div></div><ul class="menu-list mobile-menu-list"><li class="m-nav-item"><a href="/" class="waves-effect waves-light"><i class="fa-fw fas fa-home"></i> 首页</a></li><li class="m-nav-item"><a href="/archives/" class="waves-effect waves-light"><i class="fa-fw fas fa-archive"></i> 归档</a></li><li class="m-nav-item"><a href="/moments" class="waves-effect waves-light"><i class="fa-fw fas fa-bolt"></i> Moments</a></li><li class="m-nav-item"><button type="button" class="m-nav-toggle" aria-expanded="false" aria-controls="mobile-submenu-3"><i class="fa-fw fas fa-compass" aria-hidden="true"></i> Discover<span class="m-icon" aria-hidden="true"><i class="fas fa-chevron-right"></i></span></button><ul id="mobile-submenu-3"><li><a href="/categories" class="m-sub-link"><i class="fa m-sub-icon fas fa-bookmark"></i> <span>分类</span></a></li><li><a href="/tags" class="m-sub-link"><i class="fa m-sub-icon fas fa-tags"></i> <span>标签</span></a></li></ul></li><li class="m-nav-item"><a href="/about/" class="waves-effect waves-light"><i class="fa-fw fas fa-user-circle"></i> 关于</a></li><li class="m-nav-item"><a href="/explore/" class="waves-effect waves-light"><i class="fa-fw fas fa-compass"></i> 探索</a></li><li class="m-nav-item"><a href="/galleries/" class="waves-effect waves-light"><i class="fa-fw fas fa-image"></i> 相册</a></li><li class="m-nav-item"><a href="/notes/" class="waves-effect waves-light"><i class="fa-fw fas fa-book-reader"></i> 笔记</a></li><li class="m-nav-item"><a href="/contact/" class="waves-effect waves-light"><i class="fa-fw fas fa-comments"></i> 留言板</a></li><li class="m-nav-item"><a href="/friends/" class="waves-effect waves-light"><i class="fa-fw fas fa-address-book"></i> 友情链接</a></li></ul></div></header><div id="content-start" tabindex="-1"></div><div class="dp-bg-field"><div class="glow v"></div><div class="glow c"></div><div class="glow i"></div></div><div class="dp"><header class="dp-page-hero dp-wrap post-dp-hero"><span class="eyebrow"><span class="dot"></span><i class="fas fa-folder-open"></i> &nbsp;Coding-Agent</span><h1 id="post-title" class="post-title"><span class="grad">MemPalace 从零上手：给 Claude Code 装本地 AI 记忆（零 API）</span></h1><div class="meta"><span><i class="far fa-calendar-minus"></i> &nbsp;2026-04-16</span><span><i class="fas fa-bookmark"></i> &nbsp;<a href="/categories/Coding-Agent/"><b>Coding-Agent</b></a></span> <span class="hero-tags"><a href="/tags/MCP/"><span class="chip">MCP</span></a> <a href="/tags/RAG/"><span class="chip">RAG</span></a> <a href="/tags/Claude-Code/"><span class="chip">Claude-Code</span></a> <a href="/tags/%E6%9C%AC%E5%9C%B0%E4%BC%98%E5%85%88/"><span class="chip">本地优先</span></a></span></div></header></div><main class="post-container content"><div class="row"><div id="main-content" class="col s12 m12 l9"><div id="artDetail"><div class="card"><div class="card-content article-info"><div class="row tag-cate"><div class="col s7"><div class="article-tag"><a href="/tags/MCP/"><span class="chip bg-color">MCP</span></a> <a href="/tags/RAG/"><span class="chip bg-color">RAG</span></a> <a href="/tags/Claude-Code/"><span class="chip bg-color">Claude-Code</span></a> <a href="/tags/%E6%9C%AC%E5%9C%B0%E4%BC%98%E5%85%88/"><span class="chip bg-color">本地优先</span></a> <a href="/tags/%E8%AE%B0%E5%BF%86%E7%B3%BB%E7%BB%9F/"><span class="chip bg-color">记忆系统</span></a></div></div><div class="col s5 right-align"><div class="post-cate"><i class="fas fa-bookmark fa-fw icon-category"></i> <a href="/categories/Coding-Agent/" class="post-category">Coding-Agent</a></div></div></div><div class="post-info"><div class="info-break-policy post-meta-words"><i class="far fa-file-word fa-fw"></i> <span class="post-meta-label">文章字数:&nbsp;&nbsp;</span> 2.7k</div><div id="busuanzi_container_page_pv" class="info-break-policy post-meta-views"><i class="far fa-eye fa-fw"></i> <span class="post-meta-label">阅读次数:&nbsp;&nbsp;</span><span id="busuanzi_value_page_pv"></span></div><div id="read_mode" class="info-break-policy post-meta-read-mode" style="display:inline" role="button" tabindex="0" aria-label="切换阅读模式" aria-pressed="false"><i class="fas fa-expand-arrows-alt" title="【进入/离开】 阅读模式" aria-hidden="true"></i> &nbsp;&nbsp; <span title="【进入/离开】阅读模式" aria-hidden="true">阅读模式</span></div></div></div><hr class="clearfix"><link rel="stylesheet" href="/libs/prism/prism.min.css"><div class="card-content article-card-content"><div id="articleContent"><p><img width="1600" height="893" style="--img-ar:1.7917" fetchpriority="high" decoding="async" src="/images/posts/mempalace-local-memory-tutorial_8be05252961f.webp" alt="MemPalace 作为记忆宫殿的概念封面，本地优先的 AI 记忆系统"></p><p>每次新开 Claude Code 会话，上下文从零开始。前一天讨论的技术选型、踩过的坑、字段命名，全部要重新喂一遍——长对话被压缩成几百字摘要，重要的取舍过程已经丢了。</p><p>MemPalace 的解法是逐字存储原文，用本地语义检索找回来，核心流程不需要任何 API key。这篇从安装到接入 Claude Code MCP 和自动保存 hook 全流程走一遍。命令和输出按 2026-10 的 3.10.0 版核对过，项目迭代很快，早期教程里的不少命令已经变了。</p><blockquote><p><strong>核心要点</strong></p><ul><li>本地优先：默认 ChromaDB 后端，embedding 用 ChromaDB 自带的 all-MiniLM-L6-v2（首次运行下载约 80 MB），检索不走网络</li><li>原文保留：wings（人/项目）→ rooms（话题）→ drawers（原文片段）三级结构</li><li>接入 Claude Code：截至 3.10.0 有 45 个 MCP 工具，另有 Stop / SessionEnd / PreCompact 三个自动保存 hook</li><li>Benchmark 可复现：LongMemEval raw 模式 96.6% R@5，held-out 450 题 98.4%</li></ul></blockquote><h2 id="MemPalace-是什么，为什么它反直觉"><a href="#MemPalace-是什么，为什么它反直觉" class="headerlink" title="MemPalace 是什么，为什么它反直觉"></a>MemPalace 是什么，为什么它反直觉</h2><p>业界做 AI 记忆的主流路线是”让 LLM 提取事实”——Mem0、Supermemory、Mastra 都走这条路。缺点是：LLM 只留下”用户偏好 PostgreSQL”，原始对话里讨论过的 SQLite、MongoDB、<strong>为什么不选</strong>的理由全部丢失。</p><p>MemPalace 的做法更朴素：原文切块、ChromaDB 默认 embedding、语义检索（新版本还叠加了 BM25 关键词分）。</p><p><img width="1600" height="893" style="--img-ar:1.7917" loading="lazy" decoding="async" src="/images/posts/mempalace-local-memory-tutorial_5335839a535f.webp" alt="传统 AI 记忆先让 LLM 抽取事实再存，MemPalace 直接逐字存储原文的对比示意"></p><p>看一眼它的自描述：</p><pre class="language-text" data-language="text"><code class="language-text">$ pip show mempalace | head -3
+Name: mempalace
+Version: 3.10.0
+Summary: Give your AI a memory — mine projects and conversations into a searchable palace. No API key required.</code></pre><p><code>mempalace --help</code> 里的子命令已经有二十多个，日常用到的主要是这几个：</p><pre class="language-text" data-language="text"><code class="language-text">init       Detect rooms from your folder structure
+mine       Mine files into the palace
+search     Find anything, exact words
+wake-up    Show L0 + L1 wake-up context (~600-900 tokens)
+hook       Run hook logic (reads JSON from stdin, outputs JSON to stdout)
+mcp        Show MCP setup command for connecting MemPalace to your AI client</code></pre><p>反直觉的地方在于：跳过”让 LLM 决定记什么”这一步后，recall 反而更高。项目把这个结论的依据——每道题的原始结果文件——都提交到了仓库里，后面专门讲。</p><h2 id="几分钟跑通第一条记忆"><a href="#几分钟跑通第一条记忆" class="headerlink" title="几分钟跑通第一条记忆"></a>几分钟跑通第一条记忆</h2><p>Python 要求 3.9 以上。官方推荐用 <code>uv tool install</code> 装到隔离环境，pip 也行：</p><pre class="language-bash" data-language="bash"><code class="language-bash">uv tool <span class="token function">install</span> mempalace   <span class="token comment"># 或 pip install mempalace</span>
+mempalace init ~/projects/myapp</code></pre><p><code>init</code> 会扫描项目目录，识别人名、项目名，并按目录结构建 room。注意 3.x 后期 <code>init</code> 默认会尝试用本地 Ollama 做实体识别的辅助判断，没有 Ollama 时会退回纯启发式；不想要这一步就加 <code>--no-llm</code>。它默认是交互式的，加 <code>--yes</code> 自动接受识别结果，加 <code>--auto-mine</code> 初始化完直接开挖。</p><p>接下来把项目文件和历史对话挖进去：</p><pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 挖项目代码与文档（默认 --mode projects）</span>
+mempalace mine ~/projects/myapp
+
+<span class="token comment"># 挖对话导出（Claude、ChatGPT、Slack 等导出格式）</span>
+mempalace mine ~/chats/ <span class="token parameter variable">--mode</span> convos</code></pre><p>两种模式走的是不同的切分策略：<code>--mode convos</code> 按一问一答切，项目模式按文件切块。第一次 mine 时会下载 embedding 模型。挖完就可以用自然语言搜了，<code>--wing</code> 限定项目、<code>--results</code> 控制条数。下面是我用两份示例文档建的小 palace 的真实输出：</p><pre class="language-text" data-language="text"><code class="language-text">$ mempalace search "why did we switch to GraphQL" --wing myapp --results 2
+
+  [1] myapp / documentation
+      Source: adr-graphql.md
+      Match:  cosine_sim=0.574  bm25=2.874
+
+      # ADR 003: Switch from REST to GraphQL
+      The frontend needed five REST requests to render the dashboard page. We decided to move to GraphQL with Apollo Server.
+      ...
+
+  [2] myapp / documentation
+      Source: db.md
+      Match:  cosine_sim=0.386  bm25=0.304
+      ...</code></pre><p>开新 session 时，<code>wake-up</code> 输出一段精简的背景上下文（身份 + 关键记忆，官方估计 600–900 token），可以直接贴给模型：</p><pre class="language-bash" data-language="bash"><code class="language-bash">mempalace wake-up <span class="token parameter variable">--wing</span> myapp</code></pre><h2 id="Palace-数据模型：Wings、Rooms、Drawers"><a href="#Palace-数据模型：Wings、Rooms、Drawers" class="headerlink" title="Palace 数据模型：Wings、Rooms、Drawers"></a>Palace 数据模型：Wings、Rooms、Drawers</h2><p><img width="1600" height="893" style="--img-ar:1.7917" loading="lazy" decoding="async" src="/images/posts/mempalace-local-memory-tutorial_305c0f25d937.webp" alt="Wings/Rooms/Drawers 三层数据模型的等距示意，展示从人物/项目到话题房间再到原文抽屉的结构"></p><p>Palace 不是扁平的 vector store。它把索引切成三层，让检索可以<strong>带作用域</strong>跑，而不是每次都在全库里捞：</p><table><thead><tr><th>层级</th><th>存的是什么</th><th>例子</th></tr></thead><tbody><tr><td>Wings 翼</td><td>人、项目（entity）</td><td><code>myapp</code>、<code>alice</code></td></tr><tr><td>Rooms 房间</td><td>话题，项目模式下通常来自目录结构</td><td><code>documentation</code>、<code>graphql-migration</code></td></tr><tr><td>Drawers 抽屉</td><td>原文片段</td><td>某个文件或某轮对话的一段原文</td></tr></tbody></table><p>这样”在 myapp 项目下找 graphql 迁移相关的对话”可以精确限制到一个 wing + 一个 room，避免把隔壁项目的 GraphQL 讨论也拉进来：</p><pre class="language-bash" data-language="bash"><code class="language-bash">mempalace search <span class="token string">"why we rejected federation"</span> <span class="token punctuation">\</span>
+  <span class="token parameter variable">--wing</span> myapp <span class="token parameter variable">--room</span> graphql-migration</code></pre><p>命令行之外也有 Python API，适合写到自己的脚本里。注意官方 <a target="_blank" rel="noopener" href="https://mempalaceofficial.com/reference/python-api">Python API 文档</a> 的示例漏了 palace 路径参数，3.10.0 里照抄会报 <code>missing 1 required positional argument: 'palace_path'</code>，下面是实际能跑的写法：</p><pre class="language-python" data-language="python"><code class="language-python"><span class="token keyword">from</span> mempalace<span class="token punctuation">.</span>config <span class="token keyword">import</span> MempalaceConfig
+<span class="token keyword">from</span> mempalace<span class="token punctuation">.</span>searcher <span class="token keyword">import</span> search_memories
+
+palace <span class="token operator">=</span> MempalaceConfig<span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">.</span>palace_path  <span class="token comment"># 默认 palace 位置</span>
+res <span class="token operator">=</span> search_memories<span class="token punctuation">(</span>
+    <span class="token string">"why we switched to GraphQL"</span><span class="token punctuation">,</span>
+    palace<span class="token punctuation">,</span>
+    wing<span class="token operator">=</span><span class="token string">"myapp"</span><span class="token punctuation">,</span>
+    n_results<span class="token operator">=</span><span class="token number">5</span><span class="token punctuation">,</span>
+<span class="token punctuation">)</span>
+<span class="token keyword">for</span> hit <span class="token keyword">in</span> res<span class="token punctuation">[</span><span class="token string">"results"</span><span class="token punctuation">]</span><span class="token punctuation">:</span>
+    <span class="token keyword">print</span><span class="token punctuation">(</span>hit<span class="token punctuation">[</span><span class="token string">"room"</span><span class="token punctuation">]</span><span class="token punctuation">,</span> hit<span class="token punctuation">[</span><span class="token string">"source_file"</span><span class="token punctuation">]</span><span class="token punctuation">,</span> hit<span class="token punctuation">[</span><span class="token string">"text"</span><span class="token punctuation">]</span><span class="token punctuation">[</span><span class="token punctuation">:</span><span class="token number">80</span><span class="token punctuation">]</span><span class="token punctuation">)</span></code></pre><p>存储后端是可替换的：截至 3.10.0，仓库 <code>mempalace/backends/</code> 下除了默认的 ChromaDB，还有 Qdrant、pgvector、Milvus 和基于 SQLite 的实现，<code>init</code> / <code>mine</code> / <code>search</code> 都接受 <code>--backend</code> 参数。</p><p>另外还有个基于本地 SQLite 的时序知识图谱，给每条”实体 A 与实体 B 的关系”带上有效期窗口。这一块单开一篇更合适，这里只提一句：它主要通过 MCP 工具使用（<code>mempalace_kg_add</code>、<code>mempalace_kg_query</code>、<code>mempalace_kg_timeline</code> 等），Python 里对应 <code>mempalace.knowledge_graph.KnowledgeGraph</code>。</p><h2 id="接入-Claude-Code：MCP-工具-自动保存-hook"><a href="#接入-Claude-Code：MCP-工具-自动保存-hook" class="headerlink" title="接入 Claude Code：MCP 工具 + 自动保存 hook"></a>接入 Claude Code：MCP 工具 + 自动保存 hook</h2><p><img width="1600" height="893" style="--img-ar:1.7917" loading="lazy" decoding="async" src="/images/posts/mempalace-local-memory-tutorial_b0771151498d.webp" alt="Claude Code 与 MemPalace 通过 MCP 协议和 hooks 自动保存记忆的流程图"></p><p>真正让 MemPalace 发挥价值的是自动化——人手动 <code>mine</code> 和 <code>wake-up</code> 几次就会忘。</p><p><strong>最省事的方式是装官方 Claude Code 插件</strong>，它会同时注册 MCP server 和自动保存 hook：</p><pre class="language-bash" data-language="bash"><code class="language-bash">claude plugin marketplace <span class="token function">add</span> MemPalace/mempalace
+claude plugin <span class="token function">install</span> <span class="token parameter variable">--scope</span> user mempalace
+<span class="token comment"># 重启 Claude Code 后在会话里跑 /mempalace:init 完成初始化</span></code></pre><p><strong>只想要 MCP 的话手动加一条</strong>。<code>mempalace mcp</code> 会直接打印适合你环境的命令：</p><pre class="language-bash" data-language="bash"><code class="language-bash">claude mcp <span class="token function">add</span> mempalace -- mempalace-mcp
+<span class="token comment"># 自定义 palace 路径：claude mcp add mempalace -- mempalace-mcp --palace /path/to/palace</span></code></pre><p>MCP 工具数量在不同版本差别很大：3.3.0 的 README 写的是 29 个，官方文档站有段时间还挂着更早的 19 个，而我用 3.10.0 的 <code>mempalace-mcp</code> 实际列出来是 45 个，覆盖读写抽屉、知识图谱、跨 wing 的 tunnel 导航、agent 日记和任务协调等场景。工具一多，每次会话光工具 schema 就要占不少上下文，所以新版本还提供了一个只有 3 个合并工具的轻量版 <code>mempalace-light-mcp</code>，官方说可以省约 92% 的 schema token。</p><p>配好之后对话里直接说”搜一下之前讨论 GraphQL 的那次”，Claude 就会调 <code>mempalace_search</code>；说”把刚才这段存到 myapp 项目下”，会走 <code>mempalace_add_drawer</code>。</p><p><strong>自动保存 hook</strong> 解决的是”忘了存”的问题：Stop hook 每隔 15 条用户消息让 Claude 把要点存进 palace，PreCompact hook 在上下文压缩<strong>之前</strong>强制抢救一次，SessionEnd hook 在正常退出时再补存一次。不装插件、手动配置的话，要按 Claude Code 的 hooks 格式写——每个事件是一个数组，里面是带 <code>hooks</code> 列表的匹配组，每条 hook 是 <code>type: "command"</code> 加 <code>command</code>。写在 <code>~/.claude/settings.json</code>（全局）或项目的 <code>.claude/settings.local.json</code>：</p><pre class="language-json" data-language="json"><code class="language-json"><span class="token punctuation">{</span>
+  <span class="token property">"hooks"</span><span class="token operator">:</span> <span class="token punctuation">{</span>
+    <span class="token property">"Stop"</span><span class="token operator">:</span> <span class="token punctuation">[</span>
+      <span class="token punctuation">{</span>
+        <span class="token property">"hooks"</span><span class="token operator">:</span> <span class="token punctuation">[</span>
+          <span class="token punctuation">{</span>
+            <span class="token property">"type"</span><span class="token operator">:</span> <span class="token string">"command"</span><span class="token punctuation">,</span>
+            <span class="token property">"command"</span><span class="token operator">:</span> <span class="token string">"mempalace hook run --hook stop --harness claude-code"</span><span class="token punctuation">,</span>
+            <span class="token property">"timeout"</span><span class="token operator">:</span> <span class="token number">30</span>
+          <span class="token punctuation">}</span>
+        <span class="token punctuation">]</span>
+      <span class="token punctuation">}</span>
+    <span class="token punctuation">]</span><span class="token punctuation">,</span>
+    <span class="token property">"PreCompact"</span><span class="token operator">:</span> <span class="token punctuation">[</span>
+      <span class="token punctuation">{</span>
+        <span class="token property">"hooks"</span><span class="token operator">:</span> <span class="token punctuation">[</span>
+          <span class="token punctuation">{</span>
+            <span class="token property">"type"</span><span class="token operator">:</span> <span class="token string">"command"</span><span class="token punctuation">,</span>
+            <span class="token property">"command"</span><span class="token operator">:</span> <span class="token string">"mempalace hook run --hook precompact --harness claude-code"</span><span class="token punctuation">,</span>
+            <span class="token property">"timeout"</span><span class="token operator">:</span> <span class="token number">90</span>
+          <span class="token punctuation">}</span>
+        <span class="token punctuation">]</span>
+      <span class="token punctuation">}</span>
+    <span class="token punctuation">]</span><span class="token punctuation">,</span>
+    <span class="token property">"SessionEnd"</span><span class="token operator">:</span> <span class="token punctuation">[</span>
+      <span class="token punctuation">{</span>
+        <span class="token property">"hooks"</span><span class="token operator">:</span> <span class="token punctuation">[</span>
+          <span class="token punctuation">{</span>
+            <span class="token property">"type"</span><span class="token operator">:</span> <span class="token string">"command"</span><span class="token punctuation">,</span>
+            <span class="token property">"command"</span><span class="token operator">:</span> <span class="token string">"mempalace hook run --hook session-end --harness claude-code"</span><span class="token punctuation">,</span>
+            <span class="token property">"timeout"</span><span class="token operator">:</span> <span class="token number">10</span>
+          <span class="token punctuation">}</span>
+        <span class="token punctuation">]</span>
+      <span class="token punctuation">}</span>
+    <span class="token punctuation">]</span>
+  <span class="token punctuation">}</span>
+<span class="token punctuation">}</span></code></pre><p>这和官方插件 <code>hooks.json</code> 里注册的三个事件、超时设置一致，只是把插件的 wrapper 脚本换成了直接调 CLI（需要 <code>mempalace</code> 在 PATH 上）。仓库 <code>hooks/</code> 目录下也有可以直接引用的 <code>mempal_save_hook.sh</code> / <code>mempal_precompact_hook.sh</code>，保存间隔 <code>SAVE_INTERVAL</code> 在脚本里改。网上流传的 <code>"PreCompact": "mempalace save ..."</code> 这种把命令直接写成字符串的配置，Claude Code 不认，<code>mempalace save</code> 这个子命令也不存在。</p><h2 id="性能可信吗？96-6-R-5-与团队的纠错记录"><a href="#性能可信吗？96-6-R-5-与团队的纠错记录" class="headerlink" title="性能可信吗？96.6% R@5 与团队的纠错记录"></a>性能可信吗？96.6% R@5 与团队的纠错记录</h2><p><img width="688" height="213" style="--img-ar:3.2300" loading="lazy" decoding="async" src="/images/posts/mempalace-local-memory-tutorial_50c2e0a76067.webp" alt="MemPalace README 中的 LongMemEval 结果表：Raw 96.6%、Hybrid v4 98.6%、Hybrid v4 加 LLM rerank 99.2%"></p><p>项目自己公布的 benchmark 是一回事，<strong>能不能在自己机器上跑出来同样的数</strong>是另一回事。MemPalace 把每个 benchmark 的逐题结果文件都提交到了 <code>benchmarks/</code> 下，复现步骤写在 <code>benchmarks/README.md</code>：</p><pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token function">git</span> clone https://github.com/MemPalace/mempalace.git
+<span class="token builtin class-name">cd</span> mempalace
+uv <span class="token function">sync</span> <span class="token parameter variable">--extra</span> dev   <span class="token comment"># 或 pip install -e ".[dev]"</span>
+
+<span class="token function">mkdir</span> <span class="token parameter variable">-p</span> /tmp/longmemeval-data
+<span class="token function">curl</span> <span class="token parameter variable">-fsSL</span> <span class="token parameter variable">-o</span> /tmp/longmemeval-data/longmemeval_s_cleaned.json <span class="token punctuation">\</span>
+  https://huggingface.co/datasets/xiaowu0162/longmemeval-cleaned/resolve/main/longmemeval_s_cleaned.json
+
+<span class="token comment"># raw 模式，即 96.6% 那个数；先加 --limit 20 试跑一小段</span>
+python benchmarks/longmemeval_bench.py /tmp/longmemeval-data/longmemeval_s_cleaned.json</code></pre><p>文档给出的预期输出是 <code>Recall@5: 0.966</code>、<code>Recall@10: 0.982</code>，在 Apple Silicon 上全量 500 题约 5 分钟。</p><p>README 里的几个关键数字（截至 2026-10）：</p><table><thead><tr><th>模式</th><th>数据集</th><th>指标</th><th>得分</th></tr></thead><tbody><tr><td>Raw（纯语义检索，无 LLM）</td><td>LongMemEval 500 题</td><td>R@5</td><td><strong>96.6%</strong></td></tr><tr><td>Hybrid v4 held-out</td><td>LongMemEval 450 题</td><td>R@5</td><td>98.4%</td></tr><tr><td>Hybrid v4 + LLM rerank</td><td>LongMemEval 500 题</td><td>R@5</td><td>≥99%</td></tr><tr><td>Hybrid v5（无 rerank）</td><td>LoCoMo 1,986 题</td><td>R@10</td><td>88.9%</td></tr></tbody></table><p>Hybrid v4 是在 50 道开发题上调参的，held-out 98.4% 是在另外 450 道没参与调参的题上测出来的，所以比全量的 98.6% 更能代表泛化能力。另外要注意，这些都是<strong>检索召回率</strong>（正确答案所在的会话有没有被捞进前 5 / 前 10），不是最终问答准确率，不能直接和别家公布的 QA accuracy 比。</p><p>让我多放一分信任的是团队的 <a target="_blank" rel="noopener" href="https://github.com/MemPalace/mempalace/blob/main/CHANGELOG.md">CHANGELOG.md</a>——公开记录撤回和修正。3.3.0（2026-04-13）这一版就改了一批说法：删掉把 retrieval recall 和竞品 QA accuracy 混在同一列的对比表，撤回”+34% palace boost”，把”Haiku rerank 100%”的标题数字换成 held-out 98.4%（最后那 0.6% 是对着具体错题调出来的，项目自己承认属于”teaching to the test”），删掉 LoCoMo top-50 下的 100% 这一行。更正和公告集中记录在仓库的 <code>docs/HISTORY.md</code> 里。这种主动认错的做法，比任何一次 README 里的 benchmark 截图都更有说服力。</p><h2 id="装之前：认准官方源，远离仿冒域名"><a href="#装之前：认准官方源，远离仿冒域名" class="headerlink" title="装之前：认准官方源，远离仿冒域名"></a>装之前：认准官方源，远离仿冒域名</h2><p><img width="1280" height="800" style="--img-ar:1.6000" loading="lazy" decoding="async" src="/images/posts/mempalace-local-memory-tutorial_456ea0e569b2.webp" alt="mempalaceofficial.com 官方文档站首页 hero 区"></p><p>README 顶部挂着一条仿冒站点警告：<code>mempalace.tech</code> 等域名与项目无关，可能分发恶意软件，社区在 issue #267、#326、#506 里多次报告过。<strong>官方只有这三个入口</strong>：</p><pre class="language-text" data-language="text"><code class="language-text">GitHub:  https://github.com/MemPalace/mempalace
+PyPI:    https://pypi.org/project/mempalace/
+Docs:    https://mempalaceofficial.com</code></pre><p>装完之后可以顺手验证一下来源，避免装到同名包：</p><pre class="language-bash" data-language="bash"><code class="language-bash">pip show mempalace <span class="token operator">|</span> <span class="token function">grep</span> <span class="token parameter variable">-E</span> <span class="token string">"^(Name|Version|Home-page)"</span>
+<span class="token comment"># 项目主页应指向 github.com/MemPalace/mempalace</span></code></pre><p>不要执行任何三方博客里的 <code>curl | sh</code> 安装脚本，官方安装方式只有 uv / pip 和 Claude Code 插件市场。</p><hr><p>装完、挖完、接上 MCP 和 hook 之后，日常基本不用再手动敲 <code>mempalace</code> 命令：Claude 会在需要时自己去 palace 里查，hook 负责定期存档。剩下要做的，是隔一段时间用 <code>mempalace status</code> 看看各个 wing 里存了些什么，删掉不该进去的内容。</p></div><hr><div class="hexo-ad" aria-label="赞助内容"><div class="hexo-ad-script"><style>.hexo-article-ad-slot{display:block;width:100%;max-width:320px;height:100px;margin:0 auto}@media (min-width:500px){.hexo-article-ad-slot{max-width:468px;height:60px}}@media (min-width:800px){.hexo-article-ad-slot{max-width:728px;height:90px}}</style><ins class="adsbygoogle hexo-article-ad-slot" style="display:block" data-ad-client="ca-pub-8990123471955885" data-ad-slot="4326698678"></ins><script>(adsbygoogle=window.adsbygoogle||[]).push({})</script></div></div><style>.hexo-ad{margin:1.2rem auto;text-align:center}.hexo-ad-img{max-width:100%;height:auto;border-radius:8px;box-shadow:0 2px 8px rgba(0,0,0,.08)}.hexo-ad-script{margin:0 auto}</style><div class="reprint" id="reprint-statement"><div class="reprint__author"><span class="reprint-meta" style="font-weight:700"><i class="fas fa-user">文章作者:</i></span> <span class="reprint-info"><a href="/about" rel="external nofollow noreferrer">costalong</a></span></div><div class="reprint__type"><span class="reprint-meta" style="font-weight:700"><i class="fas fa-link">文章链接:</i></span> <span class="reprint-info"><a href="https://costalong.com/2026/04/16/mempalace-local-memory-tutorial/">https://costalong.com/2026/04/16/mempalace-local-memory-tutorial/</a> <button class="reprint-copy-link" type="button" data-copy-url="https://costalong.com/2026/04/16/mempalace-local-memory-tutorial/" aria-label="复制文章链接" title="复制文章链接"><i class="fas fa-copy" aria-hidden="true"></i> <span>复制链接</span></button><span class="reprint-copy-status" role="status" aria-live="polite"></span></span></div><div class="reprint__notice"><span class="reprint-meta" style="font-weight:700"><i class="fas fa-copyright">版权声明:</i></span> <span class="reprint-info">本博客所有文章除特別声明外，均采用 <a href="https://creativecommons.org/licenses/by/4.0/deed.zh" rel="external nofollow noreferrer" target="_blank">CC BY 4.0</a> 许可协议。转载请注明来源 <a href="/about" target="_blank">costalong</a> !</span></div></div><script async defer>document.addEventListener("copy", function (e) {
+        if (window.__articlePermalinkCopy) return;
+        let toastHTML = '<span>复制成功，请遵循本文的转载规则</span><button class="btn-flat toast-action" onclick="navToReprintStatement()" style="font-size: smaller">查看</a>';
+        M.toast({html: toastHTML})
+      });
+
+      document.addEventListener("click", async function (e) {
+        const button = e.target.closest(".reprint-copy-link");
+        if (!button) return;
+
+        const row = button.closest(".reprint__type .reprint-info");
+        const permalink = button.dataset.copyUrl;
+        if (!row || !permalink) return;
+
+        const status = row.querySelector(".reprint-copy-status");
+        const fallbackCopy = function (text) {
+          const textarea = document.createElement("textarea");
+          textarea.value = text;
+          textarea.setAttribute("readonly", "");
+          textarea.style.position = "fixed";
+          textarea.style.opacity = "0";
+          document.body.appendChild(textarea);
+          textarea.select();
+          window.__articlePermalinkCopy = true;
+          let copied = false;
+          try {
+            copied = document.execCommand("copy");
+          } finally {
+            window.__articlePermalinkCopy = false;
+            textarea.remove();
+          }
+          if (!copied) throw new Error("Clipboard copy failed");
+        };
+
+        try {
+          if (navigator.clipboard && navigator.clipboard.writeText) {
+            try {
+              await navigator.clipboard.writeText(permalink);
+            } catch (error) {
+              fallbackCopy(permalink);
+            }
+          } else {
+            fallbackCopy(permalink);
+          }
+          status.textContent = "已复制";
+          button.classList.add("is-copied");
+        } catch (error) {
+          status.textContent = "复制失败，请长按链接复制";
+        }
+
+        window.setTimeout(function () {
+          status.textContent = "";
+          button.classList.remove("is-copied");
+        }, 2200);
+      });
+
+      function navToReprintStatement() {
+        $("html, body").animate({scrollTop: $("#reprint-statement").offset().top - 80}, 800);
+      }</script><div class="tag_share" style="display:block"><div class="post-meta__tag-list" style="display:inline-block"><div class="article-tag"><a href="/tags/MCP/"><span class="chip bg-color">MCP</span></a> <a href="/tags/RAG/"><span class="chip bg-color">RAG</span></a> <a href="/tags/Claude-Code/"><span class="chip bg-color">Claude-Code</span></a> <a href="/tags/%E6%9C%AC%E5%9C%B0%E4%BC%98%E5%85%88/"><span class="chip bg-color">本地优先</span></a> <a href="/tags/%E8%AE%B0%E5%BF%86%E7%B3%BB%E7%BB%9F/"><span class="chip bg-color">记忆系统</span></a></div></div><div class="post_share" style="zoom:80%;width:fit-content;display:inline-block;float:right;margin:-.15rem 0"><link rel="stylesheet" href="/libs/share/css/share.min.css"><div id="article-share"><div class="social-share" data-sites="twitter,facebook,google,qq,qzone,wechat,weibo,douban,linkedin" data-wechat-qrcode-helper="<p>微信扫一扫即可分享！</p>"></div><script src="/libs/share/js/social-share.min.js"></script></div></div></div><div id="reward"><a href="#rewardModal" class="reward-link modal-trigger btn-floating btn-medium waves-effect waves-light red">赏</a><div id="rewardModal" class="modal"><div class="modal-content"><a class="close modal-close"><i class="fas fa-times"></i></a><h4 class="reward-title">你的赏识是我前进的动力</h4><div class="reward-content"><div class="reward-tabs"><ul class="tabs row"><li class="tab col s6 alipay-tab waves-effect waves-light"><a href="#alipay">支付宝</a></li><li class="tab col s6 wechat-tab waves-effect waves-light"><a href="#wechat">微 信</a></li></ul><div id="alipay"><img src="/images/reward/alipay.jpg" class="reward-img" loading="lazy" alt="支付宝打赏二维码"></div><div id="wechat"><img src="/images/reward/wechat.jpg" class="reward-img" loading="lazy" alt="微信打赏二维码"></div></div></div></div></div></div><script>$(function(){$(".tabs").tabs()})</script></div></div><section class="post-related" aria-labelledby="post-related-title"><h2 id="post-related-title">继续阅读</h2><div class="post-related-grid"><a class="post-related-card" href="/2026/06/06/claude-minsearch-mcp-protobuf-rag/"><span class="post-related-date">2026-06-06</span> <strong>Claude 想看最新 protobuf 文档？用 minsearch + MCP 搭一个 100 行的迷你 RAG</strong> <span class="post-related-summary">用 minsearch 的 TF-IDF 索引加一个 stdio MCP server，约 100 行 Python 把 protobuf 官方文档接进 Claude Code；代…</span></a> <a class="post-related-card" href="/2026/04/27/karpathy-llm-wiki-architecture/"><span class="post-related-date">2026-04-27</span> <strong>Karpathy 的 LLM Wiki：三层架构搭建持久化的个人 AI 大脑</strong> <span class="post-related-summary">对照 Karpathy 的 LLM Wiki gist 原文，拆解 Raw Sources / Wiki / Schema 三层和 Ingest / Query / Lint 三个…</span></a> <a class="post-related-card" href="/2026/06/29/317/"><span class="post-related-date">2026-06-29</span> <strong>CodeGraph 进阶：装好之后，这 4 个用法才是真省事</strong> <span class="post-related-summary">上一篇把 CodeGraph 装好接上了，这篇讲装好之后的进阶玩法：怎么把 explore 问到点子上、改代码前用 impact/affected 看炸到谁、把它当库嵌进自己的工具…</span></a></div></section><style>.valine-card{margin:1.5rem auto}.valine-card .card-content{padding:20px 20px 5px 20px}#vcomments textarea{box-sizing:border-box;background:url(/medias/comment_bg.png) 100% 100% no-repeat}#vcomments p{margin:2px 2px 10px;font-size:1.05rem;line-height:1.78rem}#vcomments blockquote p{text-indent:.2rem}#vcomments a{padding:0 2px;color:#4cbf30;font-weight:500;text-decoration:none}#vcomments img{max-width:100%;height:auto;cursor:pointer}#vcomments ol li{list-style-type:decimal}#vcomments ol,ul{display:block;padding-left:2em;word-spacing:.05rem}#vcomments ul li,ol li{display:list-item;line-height:1.8rem;font-size:1rem}#vcomments ul li{list-style-type:disc}#vcomments ul ul li{list-style-type:circle}#vcomments table,td,th{padding:12px 13px;border:1px solid #dfe2e5}#vcomments table,td,th{border:0}table tr:nth-child(2n),thead{background-color:#fafafa}#vcomments table th{background-color:#f2f2f2;min-width:80px}#vcomments table td{min-width:80px}#vcomments h1{font-size:1.85rem;font-weight:700;line-height:2.2rem}#vcomments h2{font-size:1.65rem;font-weight:700;line-height:1.9rem}#vcomments h3{font-size:1.45rem;font-weight:700;line-height:1.7rem}#vcomments h4{font-size:1.25rem;font-weight:700;line-height:1.5rem}#vcomments h5{font-size:1.1rem;font-weight:700;line-height:1.4rem}#vcomments h6{font-size:1rem;line-height:1.3rem}#vcomments p{font-size:1rem;line-height:1.5rem}#vcomments hr{margin:12px 0;border:0;border-top:1px solid #ccc}#vcomments blockquote{margin:15px 0;border-left:5px solid #42b983;padding:1rem .8rem .3rem .8rem;color:#666;background-color:rgba(66,185,131,.1)}#vcomments pre{font-family:monospace,monospace;padding:1.2em;margin:.5em 0;background:#272822;overflow:auto;border-radius:.3em;tab-size:4}#vcomments code{font-family:monospace,monospace;padding:1px 3px;font-size:.92rem;color:#e96900;background-color:#f8f8f8;border-radius:2px}#vcomments pre code{font-family:monospace,monospace;padding:0;color:#e8eaf6;background-color:#272822}#vcomments pre[class*=language-]{padding:1.2em;margin:.5em 0}#vcomments code[class*=language-],pre[class*=language-]{color:#e8eaf6}#vcomments [type=checkbox]:not(:checked),[type=checkbox]:checked{position:inherit;margin-left:-1.3rem;margin-right:.4rem;margin-top:-1px;vertical-align:middle;left:unset;visibility:visible}#vcomments b,strong{font-weight:700}#vcomments dfn{font-style:italic}#vcomments small{font-size:85%}#vcomments cite{font-style:normal}#vcomments mark{background-color:#fcf8e3;padding:.2em}#vcomments table,td,th{padding:12px 13px;border:1px solid #dfe2e5}table tr:nth-child(2n),thead{background-color:#fafafa}#vcomments table th{background-color:#f2f2f2;min-width:80px}#vcomments table td{min-width:80px}#vcomments [type=checkbox]:not(:checked),[type=checkbox]:checked{position:inherit;margin-left:-1.3rem;margin-right:.4rem;margin-top:-1px;vertical-align:middle;left:unset;visibility:visible}</style><div class="card valine-card" data-aos="fade-up"><div class="comment_headling" style="font-size:20px;font-weight:700;padding:20px 20px 8px 20px"><i class="fas fa-comments fa-fw" aria-hidden="true"></i> <span>评论</span></div><div id="vcomments" class="card-content" style="display:grid"></div></div><script>!function(){var e=document.getElementById("vcomments"),t=["/libs/valine/av-min.js","/libs/valine/Valine.min.js"];function i(e){if(e!==t.length){var n=document.createElement("script");n.src=t[e],n.onload=function(){i(e+1)},document.body.appendChild(n)}else new Valine({el:"#vcomments",appId:"wCf5tlcDtIMPMtrnfln6u3fL-MdYXbMMI",appKey:"pvzhB4VvZzNeC5gtXTaIv0oo",serverURLs:"https://wcf5tlcd.api.lncldglobal.com",notify:!1,verify:!1,visitor:!0,recordIP:!1,avatar:"mm",pageSize:"10",lang:"zh-cn",placeholder:"有什么想说的，在这里留言…"})}if(!("IntersectionObserver"in window))return i(0);var n=new IntersectionObserver(function(e){e[0].isIntersecting&&(n.disconnect(),i(0))},{rootMargin:"600px 0px"});n.observe(e)}()</script><article id="prenext-posts" class="prev-next articles"><div class="row article-row"><div class="article col s12 m6" data-aos="fade-up"><div class="article-badge left-badge text-color"><i class="fas fa-chevron-left"></i> &nbsp;上一篇</div><div class="card"><a href="/2026/04/22/chatgpt-image-2-prompt-handbook/"><div class="card-image card-image-V"><div class="box-content"><p class="title">阅读全文</p><span class="post" style="width:180px">ChatGPT Image 2 提示词工程手册：50 多条中文模板 + 5 条设计原则 + Thinking 模式实战</span></div><img src="/images/posts/chatgpt-image-2-prompt-handbook_a80fc01c5ea4-card.webp" width="400" height="300" loading="lazy" class="responsive-img" alt="ChatGPT Image 2 提示词工程手册：50 多条中文模板 + 5 条设计原则 + Thinking 模式实战"> <span class="card-title title-V">ChatGPT Image 2 提示词工程手册：50 多条中文模板 + 5 条设计原则 + Thinking 模式实战</span></div></a><div class="card-content article-content"><div class="summary block-with-text">围绕 2026 年 4 月发布的 ChatGPT Images 2.0（gpt-image-2），总结 5 条提示词设计原则，按人像、产品、信息图、出版物、文字密集图、生活实用 6 个场景给出 50 多条可直接复制的中文提示词和出图效果，并…</div><div class="publish-info"><span class="publish-date"><i class="far fa-clock fa-fw icon-date"></i> 2026-04-22</span><span class="publish-author"><i class="fas fa-bookmark fa-fw icon-category"></i> <a href="/categories/AI/" class="post-category">AI</a></span></div></div><div class="card-action article-tags"><a href="/tags/ChatGPT/"><span class="chip bg-color ai">ChatGPT</span></a> <a href="/tags/OpenAI/"><span class="chip bg-color">OpenAI</span></a> <a href="/tags/GPT-Image-2/"><span class="chip bg-color ai">GPT-Image-2</span></a> <a href="/tags/AI%E7%BB%98%E7%94%BB/"><span class="chip bg-color ai">AI绘画</span></a> <a href="/tags/%E6%8F%90%E7%A4%BA%E8%AF%8D%E5%B7%A5%E7%A8%8B/"><span class="chip bg-color">提示词工程</span></a> <a href="/tags/%E5%9B%BE%E7%89%87%E7%94%9F%E6%88%90/"><span class="chip bg-color">图片生成</span></a></div></div></div><div class="article col s12 m6" data-aos="fade-up"><div class="article-badge right-badge text-color">下一篇&nbsp;<i class="fas fa-chevron-right"></i></div><div class="card"><a href="/2026/04/14/superpowers-gsd-workflow/"><div class="card-image card-image-V"><div class="box-content"><p class="title">阅读全文</p><span class="post" style="width:180px">Superpowers + GSD：Claude Code 的双模式工作流实战</span></div><img src="/images/posts/superpowers-gsd-workflow_5b17de9a2111-card.webp" width="400" height="300" loading="lazy" class="responsive-img" alt="Superpowers + GSD：Claude Code 的双模式工作流实战"> <span class="card-title title-V">Superpowers + GSD：Claude Code 的双模式工作流实战</span></div></a><div class="card-content article-content"><div class="summary block-with-text">讲清 Superpowers 技能库和 GSD 阶段管理在 Claude Code 里怎么分工：两者的安装与验证、各自的核心命令和产物放在哪，以及如何用 /gsd-import 把 Superpowers 写出的实现计划接进 GSD 的 p…</div><div class="publish-info"><span class="publish-date"><i class="far fa-clock fa-fw icon-date"></i> 2026-04-14</span><span class="publish-author"><i class="fas fa-bookmark fa-fw icon-category"></i> <a href="/categories/Coding-Agent/" class="post-category">Coding-Agent</a></span></div></div><div class="card-action article-tags"><a href="/tags/Claude-Code/"><span class="chip bg-color">Claude Code</span></a> <a href="/tags/%E5%B7%A5%E4%BD%9C%E6%B5%81/"><span class="chip bg-color">工作流</span></a> <a href="/tags/Superpowers/"><span class="chip bg-color">Superpowers</span></a> <a href="/tags/GSD/"><span class="chip bg-color">GSD</span></a> <a href="/tags/Agent/"><span class="chip bg-color">Agent</span></a></div></div></div></div></article></div><script src="/libs/codeBlock/codeBlockFuction.js"></script><script src="/libs/codeBlock/codeLang.js"></script><script src="/libs/codeBlock/codeCopy.js"></script><script src="/libs/codeBlock/codeShrink.js"></script><script>!function(){function t(n){var t=n.closest?n.closest(".img-item"):null;if(t){var e=t.nextElementSibling;e&&e.classList.contains("caption")&&(e.style.display="none"),t.style.display="none"}else n.style.display="none"}$(function(){setTimeout(function(){document.querySelectorAll("#articleContent img").forEach(function(n){n.addEventListener("error",function(){t(this)},{once:!0}),n.complete&&0===n.naturalWidth&&t(n)})},0)})}()</script><script>$(function(){$("#read_mode").on("click",function(){var a=$("#artDetail .card").first();a.toggleClass("card-block-fullscreen"),$("html").toggleClass("card-block-fullscreen-html-scroll"),$(this).attr("aria-pressed",String(a.hasClass("card-block-fullscreen")));var s=$(this).find("i");s.hasClass("fa-expand-arrows-alt")?s.removeClass("fa-expand-arrows-alt").addClass("fa-compress-arrows-alt"):s.removeClass("fa-compress-arrows-alt").addClass("fa-expand-arrows-alt")}).on("keydown",function(a){"Enter"!==a.key&&" "!==a.key||(a.preventDefault(),$(this).trigger("click"))})})</script></div><div id="toc-aside" class="expanded col l3 hide-on-med-and-down"><div class="toc-widget card"><div class="toc-title"><i class="far fa-list-alt"></i>&nbsp;&nbsp;目录</div><div id="toc-content"></div></div></div></div><div id="floating-toc-btn"><button type="button" class="btn-floating btn-large bg-color" aria-label="打开文章目录" aria-controls="toc-aside mobile-toc-drawer" aria-expanded="false"><i class="fas fa-list-ul" aria-hidden="true"></i></button></div><div id="mobile-toc-overlay" class="mobile-toc-overlay" aria-hidden="true"></div><div id="mobile-toc-drawer" class="mobile-toc-drawer" role="dialog" aria-modal="true" aria-label="文章目录" aria-hidden="true" inert><div class="mobile-toc-header"><span class="mobile-toc-title"><i class="far fa-list-alt"></i> &nbsp;&nbsp;目录</span> <button type="button" id="mobile-toc-close" class="mobile-toc-close" aria-label="关闭文章目录"><i class="fas fa-times" aria-hidden="true"></i></button></div><div class="mobile-toc-body" id="mobile-toc-body"></div></div><script src="/libs/tocbot/tocbot.min.js"></script><script>$(function () {
+        tocbot.init({
+            tocSelector: '#toc-content',
+            contentSelector: '#articleContent',
+            headingsOffset: -($(window).height() * 0.4 - 45),
+            collapseDepth: Number('3'),
+            headingSelector: 'h2, h3, h4'
+        });
+
+        // Set scroll toc fixed.
+        let tocHeight = parseInt($(window).height() * 0.4 - 64);
+        let $tocWidget = $('.toc-widget');
+        $(window).scroll(function () {
+            let scroll = $(window).scrollTop();
+            /* add post toc fixed. */
+            if (scroll > tocHeight) {
+                $tocWidget.addClass('toc-fixed');
+            } else {
+                $tocWidget.removeClass('toc-fixed');
+            }
+        });
+
+        
+        /* 修复文章卡片 div 的宽度. */
+        let fixPostCardWidth = function (srcId, targetId) {
+            let srcDiv = $('#' + srcId);
+            if (srcDiv.length === 0) {
+                return;
+            }
+
+            let w = srcDiv.width();
+            if (w >= 450) {
+                w = w + 21;
+            } else if (w >= 350 && w < 450) {
+                w = w + 18;
+            } else if (w >= 300 && w < 350) {
+                w = w + 16;
+            } else {
+                w = w + 14;
+            }
+            $('#' + targetId).width(w);
+        };
+
+        // 切换TOC目录展开收缩的相关操作.
+        const expandedClass = 'expanded';
+        let $tocAside = $('#toc-aside');
+        let $mainContent = $('#main-content');
+
+        /* 目录只有一两条时，侧栏几乎是空的，右侧留下一大片空白。
+           这种情况直接不要侧栏，让正文占满整行（正文自身仍有 measure 行宽上限，
+           由 .no-toc 负责居中）。 */
+        if ($('#toc-content .toc-link').length < 3) {
+            $tocAside.removeClass(expandedClass).hide();
+            $mainContent.removeClass('l9').addClass('no-toc');
+            $('#floating-toc-btn').hide();
+        }
+
+        // 移动端 TOC 抽屉逻辑
+        let $overlay = $('#mobile-toc-overlay');
+        let $drawer = $('#mobile-toc-drawer');
+        let $drawerBody = $('#mobile-toc-body');
+        let $tocTrigger = $('#floating-toc-btn .btn-floating');
+        let drawerOpen = false;
+
+        function openMobileDrawer() {
+            // 克隆桌面端 TOC 内容到抽屉
+            $drawerBody.html($('#toc-content').html());
+            $overlay.addClass('active');
+            $drawer.addClass('active').attr('aria-hidden', 'false').removeAttr('inert');
+            $tocTrigger.attr({'aria-expanded': 'true', 'aria-label': '关闭文章目录'});
+            $('body').css('overflow', 'hidden');
+            drawerOpen = true;
+            $('#mobile-toc-close').trigger('focus');
+
+            // 点击抽屉内链接后自动关闭
+            $drawerBody.find('.toc-link').on('click', function() {
+                closeMobileDrawer(false);
+            });
+        }
+
+        function closeMobileDrawer(restoreFocus) {
+            $overlay.removeClass('active');
+            $drawer.removeClass('active').attr('aria-hidden', 'true');
+            // Let a clicked TOC anchor complete its native hash navigation before making it inert.
+            if (restoreFocus === false) {
+                window.setTimeout(function () { $drawer.attr('inert', ''); }, 0);
+            } else {
+                $drawer.attr('inert', '');
+            }
+            $tocTrigger.attr({'aria-expanded': 'false', 'aria-label': '打开文章目录'});
+            $('body').css('overflow', '');
+            drawerOpen = false;
+            if (restoreFocus !== false) $tocTrigger.trigger('focus');
+        }
+
+        $overlay.on('click', function () { closeMobileDrawer(); });
+        $('#mobile-toc-close').on('click', function () { closeMobileDrawer(); });
+        $(document).on('keydown', function (event) {
+            if (drawerOpen && event.key === 'Escape') closeMobileDrawer();
+        });
+
+        $(window).on('resize', function () {
+            if ($(window).width() > 1199 && drawerOpen) closeMobileDrawer(false);
+            if ($(window).width() > 1199) {
+                const expanded = $tocAside.hasClass(expandedClass);
+                $tocTrigger.attr({'aria-expanded': String(expanded), 'aria-label': expanded ? '收起文章目录' : '展开文章目录'});
+            } else if (!drawerOpen) {
+                $tocTrigger.attr({'aria-expanded': 'false', 'aria-label': '打开文章目录'});
+            }
+        });
+
+        if ($(window).width() > 1199 && $tocAside.hasClass(expandedClass)) {
+            $tocTrigger.attr({'aria-expanded': 'true', 'aria-label': '收起文章目录'});
+        }
+
+        $tocTrigger.on('click', function () {
+            // 1199px 及以下打开抽屉：993–1199 侧栏太窄，CSS 已把它隐藏
+            if ($(window).width() <= 1199) {
+                if (drawerOpen) {
+                    closeMobileDrawer();
+                } else {
+                    openMobileDrawer();
+                }
+                return;
+            }
+
+            // 桌面端保持原有折叠逻辑
+            if ($tocAside.hasClass(expandedClass)) {
+                $tocAside.removeClass(expandedClass).hide();
+                $tocTrigger.attr({'aria-expanded': 'false', 'aria-label': '展开文章目录'});
+                // 只去掉 l9 会让 col s12 m12 在大屏退回整行宽度，正文行宽从 788px
+                // 涨到 1092px（中文行太长且不居中，右侧空一大片）。补一个类来封顶并居中。
+                $mainContent.removeClass('l9').addClass('toc-collapsed');
+            } else {
+                $tocAside.addClass(expandedClass).show();
+                $tocTrigger.attr({'aria-expanded': 'true', 'aria-label': '收起文章目录'});
+                $mainContent.addClass('l9').removeClass('toc-collapsed');
+            }
+            fixPostCardWidth('artDetail', 'prenext-posts');
+        });
+        
+    });</script></main><div class="progress-bar"></div><footer class="dp-footer page-footer"><div class="dp-wrap dp-foot-grid"><div class="l">&copy; <span id="year">2023-2026</span> <b>翼舞成梦</b> · costalong.com — 用 <a href="https://hexo.io/" target="_blank" rel="noopener">Hexo</a> 构建，内容均为原创工程笔记。</div><div class="dp-foot-links"><a href="/advertise/">广告合作</a> <a href="/privacy/">隐私政策</a> <a href="/atom.xml">RSS</a> <a href="/archives">归档</a> <a href="/about">关于</a> <a href="https://github.com/costa92" target="_blank" rel="noopener">GitHub</a> <a href="/sitemap.xml">sitemap</a></div></div><div class="dp-wrap" style="margin-top:16px;display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;font-size:12.5px;color:var(--text-mut)"><div class="footer-social"><a href="https://github.com/costa92" class="tooltipped" aria-label="访问我的GitHub" target="_blank" rel="noopener" data-tooltip="访问我的GitHub" data-position="top" data-delay="50"><i class="fab fa-github"></i></a><a href="mailto:costa9293@gmail.com" class="tooltipped" aria-label="邮件联系我" target="_blank" rel="noopener" data-tooltip="邮件联系我" data-position="top" data-delay="50"><i class="fas fa-envelope-open"></i></a><a href="tencent://AddContact/?fromId=50&fromSubId=1&subcmd=all&uin=944310536" class="tooltipped" aria-label="QQ联系我" target="_blank" rel="noopener" data-tooltip="QQ联系我: 944310536" data-position="top" data-delay="50"><i class="fab fa-qq"></i></a><a href="/atom.xml" class="tooltipped" aria-label="RSS 订阅" target="_blank" rel="noopener" data-tooltip="RSS 订阅" data-position="top" data-delay="50"><i class="fas fa-rss"></i></a></div><div class="footer-stats" style="font-family:var(--font-mono)"><span id="busuanzi_container_site_pv"><i class="far fa-eye"></i> &nbsp;<span id="busuanzi_value_site_pv"></span></span> <span id="busuanzi_container_site_uv">&nbsp;&middot;&nbsp;<i class="fas fa-users"></i>&nbsp;<span id="busuanzi_value_site_uv"></span></span> &nbsp;&middot;&nbsp;<a href="https://beian.miit.gov.cn/#/Integrated/index" target="_blank" rel="noopener">湘ICP备15006875号</a></div></div></footer><div id="searchModal" class="modal" role="dialog" aria-modal="true" aria-labelledby="searchTitle"><div class="modal-content"><div class="search-header"><label for="searchInput" id="searchTitle" class="title"><i class="fas fa-search" aria-hidden="true"></i> &nbsp;&nbsp;搜索</label> <input type="search" id="searchInput" name="s" placeholder="请输入搜索的关键字" class="search-input" aria-controls="searchResult"></div><div id="searchStatus" class="search-status" role="status" aria-live="polite"></div><div id="searchResult"></div></div></div><script>$(function(){"use strict";var n=document.getElementById("searchInput"),l=document.getElementById("searchResult"),t=document.getElementById("searchStatus"),a=null,c=!1;function o(e){t.textContent=e}function e(){l.replaceChildren();var e=n.value.trim().toLocaleLowerCase();if(e)if(a){var r=e.split(/[\s\-]+/).filter(Boolean),t=a.filter(function(t){return r.every(function(e){return t.searchText.includes(e)})}).slice(0,20);if(t.length){o("找到 "+t.length+" 条相关内容"+(20===t.length?"（最多显示 20 条）":""));var i=document.createElement("ul");i.className="search-result-list",t.forEach(function(e){var t=document.createElement("li"),n=document.createElement("a");if(n.className="search-result-title",n.href=e.url,n.textContent=e.title,t.appendChild(n),e.content){var l=e.content.toLocaleLowerCase().indexOf(r[0]),a=Math.max(0,l-35),c=document.createElement("p");c.className="search-result",c.textContent=(a?"…":"")+e.content.slice(a,a+130)+(a+130<e.content.length?"…":""),t.appendChild(c)}i.appendChild(t)}),l.appendChild(i)}else o("没有找到相关内容，请换个关键词试试。")}else o(c?"正在加载搜索索引…":"搜索索引暂时不可用，请稍后重试。");else o("")}function r(){a||c||(c=!0,e(),$.ajax({url:"/search.xml",dataType:"xml"}).done(function(e){a=$("entry",e).map(function(){var e,t=$("title",this).text().trim(),n=(e=$("content",this).text(),String(e||"").replace(/<[^>]*>/g," ").replace(/\s+/g," ").trim()),l=$("url",this).text().trim();return t&&l?{title:t,content:n,url:"/"===l.charAt(0)?l:"/"+l,searchText:(t+" "+n).toLocaleLowerCase()}:null}).get()}).fail(function(){a=null}).always(function(){c=!1,e()}))}n.addEventListener("input",function(){r(),e()}),n.addEventListener("focus",r),$('a[href="#searchModal"], .search-btn').on("click",r)})</script><div class="stars-con"><div id="stars"></div><div id="stars2"></div><div id="stars3"></div></div><script>function switchNightMode(){$('<div class="Cuteen_DarkSky"><div class="Cuteen_DarkPlanet"></div></div>').appendTo($("body")),setTimeout(function(){$("body").hasClass("DarkMode")?($("body").removeClass("DarkMode"),localStorage.setItem("isDark","0"),$("#sum-moon-icon").removeClass("fa-sun").addClass("fa-moon")):($("body").addClass("DarkMode"),localStorage.setItem("isDark","1"),$("#sum-moon-icon").addClass("fa-sun").removeClass("fa-moon")),setTimeout(function(){$(".Cuteen_DarkSky").fadeOut(1e3,function(){$(this).remove()})},2e3)})}</script><div id="backTop" class="top-scroll"><button type="button" class="btn-floating btn-large waves-effect waves-light" aria-label="回到顶部"><i class="fas fa-arrow-up" aria-hidden="true"></i></button></div><script src="/libs/materialize/materialize.min.js" defer></script><script src="/libs/masonry/masonry.pkgd.min.js" defer></script><script src="/libs/aos/aos.js"></script><script src="/libs/lightGallery/js/lightgallery-all.min.js" defer></script><script src="/libs/scrollprogress/scrollProgress.min.js"></script><script src="/js/matery.js?v=3f7ec091" defer></script><script src="/js/responsive-tables.js?v=6ebf2b5e"></script><script src="/js/infinite-scroll.js?v=b6f5ebe2" defer></script><script>!function(){var t=document.createElement("script");t.src="https://zz.bdstatic.com/linksubmit/push.js";var e=document.getElementsByTagName("script")[0];e.parentNode.insertBefore(t,e)}()</script><script src="/js/fireworks.js" async></script><script>!function(){if(!new URLSearchParams(location.search).has("style-audit-preview")){var e=document.createElement("script");e.src="https://events.vercount.one/js",document.head.appendChild(e)}}()</script><script color="110,80,255" pointcolor="80,140,255" opacity="0.28" zindex="-1" count="80" src="/libs/background/canvas-nest.js"></script><script src="/libs/instantpage/instantpage.js" type="module"></script><script>window.Base64=window.Base64||{encode:function(e){return btoa(unescape(encodeURIComponent(e)))}}</script><script>$(function () {
+        const hasAttr = (e,a) => a.some(_=> e.attr(_)!==undefined);
+        $('a').each(function() {
+          const $this = $(this);
+          if(hasAttr($this,["data-fancybox","ignore-external-link"])) return;
+          const href = $this.attr('href');
+          if (href && href.match('^((http|https|thunder|qqdl|ed2k|Flashget|qbrowser|ftp|rtsp|mms)://)')) {
+            const strs = href.split('/');
+            if (strs.length >= 3) {
+                const host = strs[2];
+                if (host !== 'https://costalong.com' || window.location.host) {
+                    $this.attr('href', '/go.html?u='+Base64.encode(href)+'').attr('rel', 'external nofollow noopener noreferrer');
+                    if (true) {
+                        $this.attr('target', '_blank');
+                    }
+                }
+            }
+          }
+        });
+        });</script></body></html>

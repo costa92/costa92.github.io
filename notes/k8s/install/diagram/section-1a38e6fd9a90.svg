@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 360 585" role="img" aria-labelledby="title desc">
+<title id="title">kubeadm 初始化后的检查点</title>
+<desc id="desc">前一阶段未验收就不要继续加入更多节点。</desc>
+<defs><pattern id="grid" width="32" height="32" patternUnits="userSpaceOnUse"><path d="M32 0 L0 0 0 32" fill="none" stroke="#1e293b" stroke-width=".6"/></pattern><marker id="arrow" markerWidth="9" markerHeight="7" refX="8" refY="3.5" orient="auto"><path d="M0 0 L9 3.5 L0 7Z" fill="#94a3b8"/></marker></defs>
+<rect width="360" height="585" rx="16" fill="#0f172a"/>
+<rect width="360" height="585" rx="16" fill="url(#grid)"/>
+<text x="24" y="32" fill="#f8fafc" font-family="'PingFang SC','Noto Sans SC','Microsoft YaHei',sans-serif" font-size="17" font-weight="700">kubeadm 初始化后的检查点</text>
+<text x="24" y="54" fill="#94a3b8" font-family="'PingFang SC','Noto Sans SC','Microsoft YaHei',sans-serif" font-size="11">加入节点并验证</text>
+<rect x="32" y="86" width="296" height="74" rx="11" fill="#142238" stroke="#22d3ee" stroke-width="1.5"/>
+<text x="180.0" y="116.0" text-anchor="middle" font-family="'PingFang SC','Noto Sans SC','Microsoft YaHei',sans-serif" font-size="15" font-weight="600" fill="#f8fafc">kubeadm init</text>
+<text x="180.0" y="137.0" text-anchor="middle" font-family="'PingFang SC','Noto Sans SC','Microsoft YaHei',sans-serif" font-size="12" font-weight="400" fill="#cbd5e1">生成控制平面</text>
+<rect x="32" y="198" width="296" height="74" rx="11" fill="#142238" stroke="#34d399" stroke-width="1.5"/>
+<text x="180.0" y="228.0" text-anchor="middle" font-family="'PingFang SC','Noto Sans SC','Microsoft YaHei',sans-serif" font-size="15" font-weight="600" fill="#f8fafc">安装 CNI</text>
+<text x="180.0" y="249.0" text-anchor="middle" font-family="'PingFang SC','Noto Sans SC','Microsoft YaHei',sans-serif" font-size="12" font-weight="400" fill="#cbd5e1">让 Pod 网络可用</text>
+<path d="M180 160 V190" fill="none" stroke="#64748b" stroke-width="2" marker-end="url(#arrow)"/>
+<rect x="32" y="310" width="296" height="74" rx="11" fill="#142238" stroke="#a78bfa" stroke-width="1.5"/>
+<text x="180.0" y="340.0" text-anchor="middle" font-family="'PingFang SC','Noto Sans SC','Microsoft YaHei',sans-serif" font-size="15" font-weight="600" fill="#f8fafc">kubeadm join</text>
+<text x="180.0" y="361.0" text-anchor="middle" font-family="'PingFang SC','Noto Sans SC','Microsoft YaHei',sans-serif" font-size="12" font-weight="400" fill="#cbd5e1">工作节点加入</text>
+<path d="M180 272 V302" fill="none" stroke="#64748b" stroke-width="2" marker-end="url(#arrow)"/>
+<rect x="32" y="422" width="296" height="74" rx="11" fill="#142238" stroke="#fbbf24" stroke-width="1.5"/>
+<text x="180.0" y="452.0" text-anchor="middle" font-family="'PingFang SC','Noto Sans SC','Microsoft YaHei',sans-serif" font-size="15" font-weight="600" fill="#f8fafc">kubectl get nodes</text>
+<text x="180.0" y="473.0" text-anchor="middle" font-family="'PingFang SC','Noto Sans SC','Microsoft YaHei',sans-serif" font-size="12" font-weight="400" fill="#cbd5e1">核对 Ready 状态</text>
+<path d="M180 384 V414" fill="none" stroke="#64748b" stroke-width="2" marker-end="url(#arrow)"/>
+<text x="180" y="534.0" text-anchor="middle" font-family="'PingFang SC','Noto Sans SC','Microsoft YaHei',sans-serif" font-size="11" font-weight="400" fill="#fbbf24">前一阶段未验收就不要继续加入更多节点。</text>
+<line x1="24" y1="552" x2="336" y2="552" stroke="#334155"/>
+<text x="24" y="571" fill="#94a3b8" font-family="'PingFang SC','Noto Sans SC','Microsoft YaHei',sans-serif" font-size="10">costalong.com · Kubernetes 笔记</text>
+</svg>
