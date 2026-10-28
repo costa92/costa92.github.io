@@ -1,0 +1,444 @@
+<!DOCTYPE HTML><html lang="zh-CN"><head><meta charset="utf-8"><meta name="keywords" content="kubectl 常用命令, costalong, 翼舞成梦, 后端开发, Go语言, Kubernetes, K8s, Linux, AI, 学习笔记"><meta name="description" content="用几个临时 Pod 和一个 Deployment 实测 kubectl 的查看、筛选、日志、exec、端口转发和清理，对比 apply / create / replace / edit 和两种 dry-run 的差别，并复现排序字段拼错、namespace 拼错、本地端口被占用等不报错却给出错误结果的情况。"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="renderer" content="webkit|ie-stand|ie-comp"><meta name="mobile-web-app-capable" content="yes"><meta name="format-detection" content="telephone=no"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><meta name="referrer" content="strict-origin-when-cross-origin"><meta name="google-adsense-account" content="ca-pub-8990123471955885"><title>kubectl 常用命令 | 翼舞成梦</title><meta property="og:site_name" content="翼舞成梦"><meta property="og:locale" content="zh_CN"><meta property="og:type" content="website"><meta property="og:title" content="kubectl 常用命令 | 翼舞成梦"><meta property="og:description" content="用几个临时 Pod 和一个 Deployment 实测 kubectl 的查看、筛选、日志、exec、端口转发和清理，对比 apply / create / replace / edit 和两种 dry-run 的差别，并复现排序字段拼错、namespace 拼错、本地端口被占用等不报错却给出错误结果的情况。"><meta property="og:url" content="https://costalong.com/notes/k8s/kubectl/"><meta property="og:image" content="https://costalong.com/medias/logo.webp"><meta name="twitter:card" content="summary"><link rel="canonical" href="https://costalong.com/notes/k8s/kubectl/"><link rel="alternate" type="application/atom+xml" title="翼舞成梦" href="https://costalong.com/atom.xml"><link rel="alternate" type="application/json" title="翼舞成梦" href="https://costalong.com/feed.json"><link rel="icon" type="image/png" href="/favicon.png"><link rel="stylesheet" href="/css/fonts.css?v=864fc7ac"><link rel="preload" href="/libs/awesome/webfonts/fa-solid-900.woff2" as="font" type="font/woff2" crossorigin><link rel="stylesheet" href="/libs/awesome/css/all.min.css"><link rel="stylesheet" href="/libs/materialize/materialize.min.css"><link rel="stylesheet" href="/libs/aos/aos.css"><link rel="stylesheet" href="/libs/animate/animate.min.css" media="print" onload='this.media="all"'><link rel="stylesheet" href="/libs/lightGallery/css/lightgallery.min.css" media="print" onload='this.media="all"'><link rel="stylesheet" href="/css/matery.css"><link rel="stylesheet" href="/css/my.css"><link rel="stylesheet" href="/css/dark.css" media="none" onload='"all"!=media&&(media="all")'><link rel="stylesheet" href="/css/infinite-scroll.css"><link rel="stylesheet" href="/css/sidebar.css"><link rel="stylesheet" href="/css/navbar.css"><link rel="stylesheet" href="/libs/tocbot/tocbot.css"><link rel="stylesheet" href="/css/post.css"><link rel="stylesheet" href="/css/reward.css" media="print" onload='this.media="all"'><link rel="stylesheet" href="/css/obsidian.css?v=fee1bba1"><link rel="stylesheet" href="/css/darkpremium.css?v=c801dadc"><link rel="stylesheet" href="/css/post-darkpremium.css?v=c09ea248"><script>!function(o){var t=[];o.$=o.jQuery=function(n){if("function"!=typeof n)throw new Error("jQuery 尚未加载：请写在 $(function () {...}) 里");t.push(n)},document.addEventListener("DOMContentLoaded",function(){o.jQuery.fn&&t.forEach(function(n){o.jQuery(n)})})}(window)</script><script src="/libs/jquery/jquery-3.6.0.min.js" defer></script><script>new MutationObserver(function(t){t.forEach(function(t){"attributes"===t.type&&"aria-hidden"===t.attributeName&&"true"===document.body.getAttribute("aria-hidden")&&document.body.removeAttribute("aria-hidden")})}).observe(document.documentElement,{attributes:!0,subtree:!0,attributeFilter:["aria-hidden"]}),window.addEventListener("DOMContentLoaded",function(){"true"===document.body.getAttribute("aria-hidden")&&document.body.removeAttribute("aria-hidden")})</script><meta name="generator" content="Hexo 8.1.2"><style>.github-emoji{position:relative;display:inline-block;width:1.2em;min-height:1.2em;overflow:hidden;vertical-align:top;color:transparent}.github-emoji>span{position:relative;z-index:10}.github-emoji .fancybox,.github-emoji img{margin:0!important;padding:0!important;border:none!important;outline:0!important;text-decoration:none!important;user-select:none!important;cursor:auto!important}.github-emoji img{height:1.2em!important;width:1.2em!important;position:absolute!important;left:50%!important;top:50%!important;transform:translate(-50%,-50%)!important;user-select:none!important;cursor:auto!important}.github-emoji-fallback{color:inherit}.github-emoji-fallback img{opacity:0!important}</style></head><body><!--email_off--> <a class="skip-link" href="#content-start">跳到正文</a><header class="dp-nav"><div class="dp-wrap"><div class="dp-nav-inner"><a class="dp-brand" href="/"><span class="mark"><img src="/medias/logo.webp" alt="" width="22" height="22"></span><span><span class="name">翼舞成梦</span><br><span class="dom">costalong.com</span></span></a><div class="dp-nav-links" role="navigation" aria-label="主导航"><a href="/">首页</a> <a href="/archives/">归档</a> <a href="/moments/">Moments</a> <a href="/about/">关于</a> <a href="/explore/">探索</a> <a href="/galleries/">相册</a> <a href="/notes/" class="active" aria-current="page">笔记</a> <a href="/contact/">留言板</a> <a href="/friends/">友情链接</a></div><div class="dp-nav-actions"><a href="#searchModal" class="icon-btn modal-trigger" title="搜索" aria-label="搜索"><i class="fas fa-search" aria-hidden="true"></i></a><a class="dp-nav-cta" href="/atom.xml"><i class="fas fa-rss" style="margin-right:6px" aria-hidden="true"></i> 订阅更新</a> <button type="button" data-target="mobile-nav" class="icon-btn dp-burger sidenav-trigger button-collapse" aria-label="打开菜单" aria-expanded="false" aria-controls="mobile-nav"><i class="fas fa-bars" aria-hidden="true"></i></button></div></div></div><div id="mobile-nav" class="side-nav sidenav"><div class="mobile-head bg-color"><img src="/medias/logo.webp" class="logo-img circle responsive-img" alt="网站头像"><div class="logo-name">翼舞成梦</div><div class="logo-desc">翼舞成梦的个人博客，专注于后端开发、K8s 容器化技术、Linux 运维以及人工智能学习笔记分享。</div></div><ul class="menu-list mobile-menu-list"><li class="m-nav-item"><a href="/" class="waves-effect waves-light"><i class="fa-fw fas fa-home"></i> 首页</a></li><li class="m-nav-item"><a href="/archives/" class="waves-effect waves-light"><i class="fa-fw fas fa-archive"></i> 归档</a></li><li class="m-nav-item"><a href="/moments/" class="waves-effect waves-light"><i class="fa-fw fas fa-bolt"></i> Moments</a></li><li class="m-nav-item"><button type="button" class="m-nav-toggle" aria-expanded="false" aria-controls="mobile-submenu-3"><i class="fa-fw fas fa-compass" aria-hidden="true"></i> Discover<span class="m-icon" aria-hidden="true"><i class="fas fa-chevron-right"></i></span></button><ul id="mobile-submenu-3"><li><a href="/categories/" class="m-sub-link"><i class="fa m-sub-icon fas fa-bookmark"></i> <span>分类</span></a></li><li><a href="/tags/" class="m-sub-link"><i class="fa m-sub-icon fas fa-tags"></i> <span>标签</span></a></li></ul></li><li class="m-nav-item"><a href="/about/" class="waves-effect waves-light"><i class="fa-fw fas fa-user-circle"></i> 关于</a></li><li class="m-nav-item"><a href="/explore/" class="waves-effect waves-light"><i class="fa-fw fas fa-compass"></i> 探索</a></li><li class="m-nav-item"><a href="/galleries/" class="waves-effect waves-light"><i class="fa-fw fas fa-image"></i> 相册</a></li><li class="m-nav-item"><a href="/notes/" class="waves-effect waves-light"><i class="fa-fw fas fa-book-reader"></i> 笔记</a></li><li class="m-nav-item"><a href="/contact/" class="waves-effect waves-light"><i class="fa-fw fas fa-comments"></i> 留言板</a></li><li class="m-nav-item"><a href="/friends/" class="waves-effect waves-light"><i class="fa-fw fas fa-address-book"></i> 友情链接</a></li></ul></div></header><div id="content-start" tabindex="-1"></div><link rel="stylesheet" href="/css/note.css"><link rel="stylesheet" href="/css/note-reader.css?v=dae76c7e"><div class="dp-bg-field"><div class="glow v"></div><div class="glow c"></div><div class="glow i"></div></div><main class="content dp dp-note note-has-series"><section class="dp-page-hero dp-wrap"><span class="eyebrow"><span class="dot"></span> NOTES · Kubernetes</span><h1><span class="grad">kubectl 常用命令</span></h1><div class="meta"><a href="/notes/"><i class="fas fa-book-reader"></i> 笔记</a> <span>Kubernetes</span> <span><b>进阶实践</b></span></div></section><section class="sec dp-wrap"><div class="note-layout"><aside id="note-sidebar-col" class="note-sidebar-col" aria-label="系列章节"><div class="panel note-sidebar-panel"><div class="note-sidebar-widget"><div class="note-sidebar-header"><i class="fas fa-dharmachakra"></i> <a href="/notes/k8s/concepts/">Kubernetes</a> <button type="button" class="note-sidebar-close hide-on-large-only" aria-label="关闭笔记目录"><i class="fas fa-times" aria-hidden="true"></i></button></div><div class="note-sidebar-body"><div class="note-chapter"><button type="button" class="note-chapter-title" aria-expanded="false" aria-controls="note-section-list-0"><i class="fas fa-chevron-right chapter-toggle-icon" aria-hidden="true"></i> <span>基础概念</span></button><ul class="note-section-list" id="note-section-list-0" style="display:none"><li class="note-section-item"><a href="/notes/k8s/concepts/">概念和术语</a></li><li class="note-section-item"><a href="/notes/k8s/components/">集群组件</a></li><li class="note-section-item"><a href="/notes/k8s/api-object-flow/">API 对象与控制器关系</a></li></ul></div><div class="note-chapter"><button type="button" class="note-chapter-title" aria-expanded="false" aria-controls="note-section-list-1"><i class="fas fa-chevron-right chapter-toggle-icon" aria-hidden="true"></i> <span>动手入门</span></button><ul class="note-section-list" id="note-section-list-1" style="display:none"><li class="note-section-item"><a href="/notes/k8s/lab/">本地实验环境</a></li><li class="note-section-item"><a href="/notes/k8s/images/">容器镜像与本地构建</a></li><li class="note-section-item"><a href="/notes/k8s/pod/">Pod 与容器</a></li><li class="note-section-item"><a href="/notes/k8s/pod-lifecycle/">Pod 生命周期与初始化容器</a></li><li class="note-section-item"><a href="/notes/k8s/deployment/">Deployment 与滚动更新</a></li><li class="note-section-item"><a href="/notes/k8s/labels/">标签与选择器</a></li><li class="note-section-item"><a href="/notes/k8s/probes-resources/">探针与资源管理</a></li><li class="note-section-item"><a href="/notes/k8s/qos/">Pod QoS 类别：判定边界、cgroup 与 OOM 分数</a></li><li class="note-section-item"><a href="/notes/k8s/service/">Service 与服务发现</a></li><li class="note-section-item"><a href="/notes/k8s/service-types/">Service 类型与 NodePort</a></li><li class="note-section-item"><a href="/notes/k8s/headless-service/">Headless Service 与 Pod DNS</a></li><li class="note-section-item"><a href="/notes/k8s/ingress/">Ingress 入口</a></li><li class="note-section-item"><a href="/notes/k8s/gateway-api/">Gateway API HTTPRoute 入门</a></li><li class="note-section-item"><a href="/notes/k8s/traefik-middleware/">Traefik Middleware 路由实验</a></li></ul></div><div class="note-chapter"><button type="button" class="note-chapter-title" aria-expanded="false" aria-controls="note-section-list-2"><i class="fas fa-chevron-right chapter-toggle-icon" aria-hidden="true"></i> <span>配置与运维</span></button><ul class="note-section-list" id="note-section-list-2" style="display:none"><li class="note-section-item"><a href="/notes/k8s/configuration/">Namespace、ConfigMap 与 Secret</a></li><li class="note-section-item"><a href="/notes/k8s/secret-practices/">Secret 的安全使用边界</a></li><li class="note-section-item"><a href="/notes/k8s/secret-rotation/">Secret 轮换与应用重新加载</a></li><li class="note-section-item"><a href="/notes/k8s/downward-api/">Downward API 与 Pod 元数据</a></li><li class="note-section-item"><a href="/notes/k8s/emptydir/">emptyDir 临时卷</a></li><li class="note-section-item"><a href="/notes/k8s/resource-policy/">LimitRange 与 ResourceQuota</a></li><li class="note-section-item"><a href="/notes/k8s/jobs/">Job 与 CronJob</a></li><li class="note-section-item"><a href="/notes/k8s/helm/">Helm 入门</a></li><li class="note-section-item"><a href="/notes/k8s/helm-chart/">编写 Helm Chart</a></li><li class="note-section-item"><a href="/notes/k8s/helm-dependencies/">Helm Chart 依赖与锁定</a></li><li class="note-section-item"><a href="/notes/k8s/helm-upgrade/">Helm 升级验证与回滚</a></li><li class="note-section-item"><a href="/notes/k8s/storage/">持久卷与存储声明</a></li><li class="note-section-item"><a href="/notes/k8s/statefulset/">StatefulSet 与有状态服务</a></li><li class="note-section-item"><a href="/notes/k8s/storageclass/">StorageClass 与动态供给</a></li><li class="note-section-item"><a href="/notes/k8s/volume-snapshots/">CSI 卷快照与恢复</a></li><li class="note-section-item"><a href="/notes/k8s/rbac/">ServiceAccount 与 RBAC</a></li><li class="note-section-item"><a href="/notes/k8s/security-context/">容器安全上下文</a></li><li class="note-section-item"><a href="/notes/k8s/pod-security-admission/">Pod Security Admission</a></li><li class="note-section-item"><a href="/notes/k8s/troubleshooting/">常见故障排查</a></li></ul></div><div class="note-chapter"><button type="button" class="note-chapter-title active" aria-expanded="true" aria-controls="note-section-list-3"><i class="fas fa-chevron-down chapter-toggle-icon" aria-hidden="true"></i> <span>进阶实践</span></button><ul class="note-section-list" id="note-section-list-3"><li class="note-section-item active"><a href="/notes/k8s/kubectl/" aria-current="page">kubectl 常用命令</a></li><li class="note-section-item"><a href="/notes/k8s/manifest-batch/">kubectl 批量清单管理</a></li><li class="note-section-item"><a href="/notes/k8s/server-side-apply/">Server-Side Apply 字段所有权</a></li><li class="note-section-item"><a href="/notes/k8s/kubectl-jsonpath/">kubectl JSONPath 查询</a></li><li class="note-section-item"><a href="/notes/k8s/kubectl-debug/">kubectl debug 临时调试容器</a></li><li class="note-section-item"><a href="/notes/k8s/daemonset/">DaemonSet 与节点工作负载</a></li><li class="note-section-item"><a href="/notes/k8s/reconciliation/">控制器调谐循环</a></li><li class="note-section-item"><a href="/notes/k8s/graceful-termination/">Pod 优雅终止与流量排空</a></li><li class="note-section-item"><a href="/notes/k8s/pdb/">PodDisruptionBudget 与维护窗口</a></li><li class="note-section-item"><a href="/notes/k8s/node-maintenance/">节点维护与安全排空</a></li><li class="note-section-item"><a href="/notes/k8s/network-policy/">NetworkPolicy 网络隔离</a></li><li class="note-section-item"><a href="/notes/k8s/cni-network-path/">Pod 网络路径与 CNI 排查</a></li><li class="note-section-item"><a href="/notes/k8s/dns-debugging/">集群 DNS 故障定位</a></li><li class="note-section-item"><a href="/notes/k8s/scheduling/">Pod 调度与节点选择</a></li><li class="note-section-item"><a href="/notes/k8s/pod-affinity/">Pod 亲和与反亲和</a></li><li class="note-section-item"><a href="/notes/k8s/taints-tolerations/">污点与容忍</a></li><li class="note-section-item"><a href="/notes/k8s/topology-spread/">Pod 拓扑分布约束</a></li><li class="note-section-item"><a href="/notes/k8s/hpa/">HPA 水平扩缩容</a></li><li class="note-section-item"><a href="/notes/k8s/hpa-troubleshooting/">HPA 不扩容排查</a></li><li class="note-section-item"><a href="/notes/k8s/kustomize/">Kustomize 环境配置</a></li><li class="note-section-item"><a href="/notes/k8s/crd/">CRD 与自定义资源</a></li><li class="note-section-item"><a href="/notes/k8s/operator-pattern/">Operator 模式与控制器设计</a></li></ul></div><div class="note-chapter"><button type="button" class="note-chapter-title" aria-expanded="false" aria-controls="note-section-list-4"><i class="fas fa-chevron-right chapter-toggle-icon" aria-hidden="true"></i> <span>集群搭建</span></button><ul class="note-section-list" id="note-section-list-4" style="display:none"><li class="note-section-item"><a href="/notes/k8s/install/">kubeadm 安装部署</a></li><li class="note-section-item"><a href="/notes/k8s/high-availability/">kubeadm 高可用拓扑</a></li><li class="note-section-item"><a href="/notes/k8s/kubeadm-upgrade/">kubeadm 升级检查清单</a></li><li class="note-section-item"><a href="/notes/k8s/kubeadm-certs/">kubeadm 证书到期检查</a></li><li class="note-section-item"><a href="/notes/k8s/etcd-snapshots/">etcd 快照与恢复检查清单</a></li><li class="note-section-item"><a href="/notes/k8s/multi-cluster/">kubeconfig 多集群管理</a></li><li class="note-section-item"><a href="/notes/k8s/observability/">OpenTelemetry 可观测性入门</a></li><li class="note-section-item"><a href="/notes/k8s/cka-practice/">CKA 原创练习路线</a></li></ul></div></div></div></div></aside><article class="note-content-col"><div class="panel note-content-card"><div class="note-series-progress"><span>第 37 / 66 节 · 进阶实践</span><progress value="37" max="66" aria-label="Kubernetes 笔记学习进度"></progress></div><div class="card-content article-card-content"><div id="articleContent"><h2 id="kubectl-常用命令"><a href="#kubectl-常用命令" class="headerlink" title="kubectl 常用命令"></a>kubectl 常用命令</h2><p><code>kubectl</code> 是 Kubernetes API 的命令行客户端，每条命令最后都会变成一次或几次 HTTP 请求。这一篇不罗列命令，而是用几个临时 Pod 把常用命令逐个跑一遍，重点看两类事：同一类命令之间到底差在哪；哪些写错了不报错，却给出一个看起来正常的结果。</p><figure class="note-illustration"><a href="/notes/k8s/kubectl/diagram/overview-10b990e4dc4f.svg" target="_blank" rel="noopener" aria-label="查看kubectl 常用命令大图"><img src="/notes/k8s/kubectl/diagram/overview-10b990e4dc4f.svg" alt="kubectl 常用命令：先核对 context 和 namespace，再查看、排查、变更；不少写错的命令不报错，只是结果不对。" loading="lazy" decoding="async"></a><figcaption>图：先核对 context 和 namespace，再查看、排查、变更；不少写错的命令不报错，只是结果不对。</figcaption></figure><p>下文的输出来自一个三节点 kind 集群（Kubernetes v1.31.0，containerd 1.7.18，CNI 为 Calico），客户端是 kubectl v1.30.0，实验放在单独的 <code>notes-lab</code> namespace 里。为便于阅读，节点名简化成 <code>worker</code>、<code>worker2</code>，Pod IP、Cluster IP、API Server 地址分别用 <code>&lt;pod-ip&gt;</code>、<code>&lt;cluster-ip&gt;</code>、<code>&lt;apiserver&gt;</code> 代替。JSONPath、<code>kubectl debug</code>、Server-Side Apply 和标签各有单独的笔记，这里只在用到时链接过去。</p><h2 id="先确认命令会发到哪里"><a href="#先确认命令会发到哪里" class="headerlink" title="先确认命令会发到哪里"></a>先确认命令会发到哪里</h2><p>命令发到哪个集群由 kubeconfig 的 current-context 决定，发到哪个 namespace 由 context 上的 <code>namespace</code> 字段决定，没设就是 <code>default</code>。练习改 context 时不要直接动 <code>~/.kube/config</code>，先导出一份只含当前 context 的副本，用 <code>KUBECONFIG</code> 指过去：</p><pre class="language-bash" data-language="bash"><code class="language-bash">kubectl config view <span class="token parameter variable">--minify</span> <span class="token parameter variable">--flatten</span> <span class="token operator">&gt;</span> /tmp/kubeconfig-lab   <span class="token comment"># --flatten 会把证书一起导出，用完删掉</span>
+<span class="token builtin class-name">export</span> <span class="token assign-left variable">KUBECONFIG</span><span class="token operator">=</span>/tmp/kubeconfig-lab
+kubectl config get-contexts
+kubectl config view <span class="token parameter variable">--minify</span></code></pre><pre class="language-console" data-language="console"><code class="language-console">CURRENT   NAME                      CLUSTER                   AUTHINFO                  NAMESPACE
+*         kind-lab                  kind-lab                  kind-lab                  </code></pre><pre class="language-console" data-language="console"><code class="language-console">apiVersion: v1
+clusters:
+- cluster:
+    certificate-authority-data: DATA+OMITTED
+    server: https://&lt;apiserver&gt;
+  name: kind-lab
+contexts:
+- context:
+    cluster: kind-lab
+    user: kind-lab
+  name: kind-lab
+current-context: kind-lab
+kind: Config
+preferences: {}
+users:
+- name: kind-lab
+  user:
+    client-certificate-data: DATA+OMITTED
+    client-key-data: DATA+OMITTED</code></pre><p><code>--minify</code> 只显示当前 context 用到的那一组 cluster/user，比翻整份 kubeconfig 快得多；不加 <code>--flatten</code> 时证书显示为 <code>DATA+OMITTED</code>，可以放心贴出来。<code>NAMESPACE</code> 一列为空，所以此时 <code>kubectl get pods</code> 查的是 <code>default</code>。给当前 context 设上 namespace 后，不带 <code>-n</code> 的命令就都落到实验 namespace 里，<code>-n</code> 仍然可以临时覆盖（这一段是在实验后半段做的，所以列出的是后文 Deployment 的 Pod）：</p><pre class="language-console" data-language="console"><code class="language-console">$ kubectl config set-context --current --namespace=notes-lab
+Context "kind-lab" modified.
+$ kubectl get pods
+NAME                   READY   STATUS    RESTARTS   AGE
+app-6bb8f765c9-mrt7q   1/1     Running   0          2m23s
+$ kubectl get pods -n default
+No resources found in default namespace.</code></pre><h3 id="错误一：namespace-拼错，get-不报错"><a href="#错误一：namespace-拼错，get-不报错" class="headerlink" title="错误一：namespace 拼错，get 不报错"></a>错误一：namespace 拼错，get 不报错</h3><p>把 namespace 故意拼成 <code>notes-lab-kubetcl</code>（<code>t</code> 和 <code>c</code> 换了位置）：</p><pre class="language-console" data-language="console"><code class="language-console">$ kubectl config set-context --current --namespace=notes-lab-kubetcl; kubectl get pods
+Context "kind-lab" modified.
+No resources found in notes-lab-kubetcl namespace.</code></pre><p><code>set-context</code> 不检查 namespace 是否存在，<code>get</code> 也只说「没有资源」，和一个真的空 namespace 无法区分。加 <code>-v=6</code> 看实际请求：</p><pre class="language-console" data-language="console"><code class="language-console">$ kubectl get pods -v=6 2&gt;&amp;1 | grep round_trippers
+I1013 16:05:22.645741  867892 round_trippers.go:553] GET https://&lt;apiserver&gt;/api/v1/namespaces/notes-lab-kubetcl/pods?limit=500 200 OK in 2 milliseconds</code></pre><p>API Server 对不存在的 namespace 做 list 返回的是 <code>200 OK</code> 和空列表，不是 404。能揭穿它的有两个办法：直接 <code>kubectl get ns &lt;名字&gt;</code>，或者做一次写操作，创建时才会报 namespace 不存在：</p><pre class="language-console" data-language="console"><code class="language-console">$ kubectl run x --image=busybox:1.36 --restart=Never -- sleep 10
+Error from server (NotFound): namespaces "notes-lab-kubetcl" not found</code></pre><p>试完把 context 的 namespace 改回来，后文的命令都显式带 <code>-n notes-lab</code>：</p><pre class="language-bash" data-language="bash"><code class="language-bash">kubectl config set-context <span class="token parameter variable">--current</span> <span class="token parameter variable">--namespace</span><span class="token operator">=</span>notes-lab</code></pre><p>所以「No resources found」时，第一反应应该是核对输出里那个 namespace 名，而不是怀疑对象被删了。<code>-v=6</code> 会把每个请求的方法、URL、状态码和耗时打出来，后文还会多次用到它。</p><h2 id="实验对象"><a href="#实验对象" class="headerlink" title="实验对象"></a>实验对象</h2><p>建三个 Pod：<code>inspect-demo</code> 每 5 秒打印一行带序号和时间的日志，方便区分日志参数；<code>web</code>、<code>web2</code> 是两个 nginx，标签有意设得不一样：</p><pre class="language-bash" data-language="bash"><code class="language-bash">kubectl create namespace notes-lab
+<span class="token keyword">until</span> kubectl <span class="token parameter variable">-n</span> notes-lab get serviceaccount default <span class="token operator">&gt;</span>/dev/null <span class="token operator"><span class="token file-descriptor important">2</span>&gt;</span><span class="token file-descriptor important">&amp;1</span><span class="token punctuation">;</span> <span class="token keyword">do</span> <span class="token function">sleep</span> <span class="token number">1</span><span class="token punctuation">;</span> <span class="token keyword">done</span>
+kubectl <span class="token parameter variable">-n</span> notes-lab run inspect-demo <span class="token parameter variable">--image</span><span class="token operator">=</span>busybox:1.36 <span class="token parameter variable">--restart</span><span class="token operator">=</span>Never <span class="token punctuation">\</span>
+  <span class="token parameter variable">--labels</span><span class="token operator">=</span>app<span class="token operator">=</span>inspect-demo,tier<span class="token operator">=</span>debug <span class="token punctuation">\</span>
+  -- <span class="token function">sh</span> <span class="token parameter variable">-c</span> <span class="token string">'i=0; while true; do echo tick $i $(date +%T); i=$((i+1)); sleep 5; done'</span>
+kubectl <span class="token parameter variable">-n</span> notes-lab run web  <span class="token parameter variable">--image</span><span class="token operator">=</span>nginx:alpine <span class="token parameter variable">--labels</span><span class="token operator">=</span>app<span class="token operator">=</span>web,tier<span class="token operator">=</span>frontend
+kubectl <span class="token parameter variable">-n</span> notes-lab run web2 <span class="token parameter variable">--image</span><span class="token operator">=</span>nginx:alpine <span class="token parameter variable">--labels</span><span class="token operator">=</span>app<span class="token operator">=</span>web,tier<span class="token operator">=</span>frontend,env<span class="token operator">=</span>staging
+kubectl <span class="token parameter variable">-n</span> notes-lab <span class="token function">wait</span> <span class="token parameter variable">--for</span><span class="token operator">=</span>condition<span class="token operator">=</span>Ready pod <span class="token parameter variable">--all</span> <span class="token parameter variable">--timeout</span><span class="token operator">=</span>120s
+kubectl <span class="token parameter variable">-n</span> notes-lab create <span class="token function">service</span> clusterip web <span class="token parameter variable">--tcp</span><span class="token operator">=</span><span class="token number">80</span>:80   <span class="token comment"># 按 app=web 选中 web 和 web2</span></code></pre><p>等 <code>default</code> ServiceAccount 的原因见 <a href="/notes/k8s/pod/">Pod 与容器</a>；整个实验环境的准备见<a href="/notes/k8s/lab/">本地实验环境</a>。</p><h2 id="查看：同一份列表的几种输出"><a href="#查看：同一份列表的几种输出" class="headerlink" title="查看：同一份列表的几种输出"></a>查看：同一份列表的几种输出</h2><pre class="language-console" data-language="console"><code class="language-console">$ kubectl -n notes-lab get pods -o wide
+NAME           READY   STATUS    RESTARTS   AGE   IP          NODE      NOMINATED NODE   READINESS GATES
+inspect-demo   1/1     Running   0          15s   &lt;pod-ip&gt;    worker    &lt;none&gt;           &lt;none&gt;
+web            1/1     Running   0          15s   &lt;pod-ip&gt;    worker    &lt;none&gt;           &lt;none&gt;
+web2           1/1     Running   0          15s   &lt;pod-ip&gt;    worker2   &lt;none&gt;           &lt;none&gt;
+$ kubectl -n notes-lab get pods -o name
+pod/inspect-demo
+pod/web
+pod/web2
+$ kubectl -n notes-lab get pods --show-labels
+NAME           READY   STATUS    RESTARTS   AGE   LABELS
+inspect-demo   1/1     Running   0          15s   app=inspect-demo,tier=debug
+web            1/1     Running   0          15s   app=web,tier=frontend
+web2           1/1     Running   0          15s   app=web,env=staging,tier=frontend
+$ kubectl -n notes-lab get pods -L tier,env
+NAME           READY   STATUS    RESTARTS   AGE   TIER       ENV
+inspect-demo   1/1     Running   0          15s   debug      
+web            1/1     Running   0          15s   frontend   
+web2           1/1     Running   0          15s   frontend   staging</code></pre><ul><li><code>-o wide</code> 多出 IP 和节点，排查「是不是都挤在一个节点上」时最常用。</li><li><code>-o name</code> 输出 <code>类型/名字</code>，正好能喂给下一条命令，比如 <code>kubectl delete $(kubectl get pods -l app=web -o name)</code>。</li><li><code>--show-labels</code> 把所有标签挤在一列；标签一多就不好读，<code>-L</code> 只把关心的几个键各展开成一列，没有这个标签的行留空。</li></ul><p>默认的表格是谁画的？<code>-v=8</code> 能看到请求头（这里拿后文的 Deployment <code>app</code> 做例子）：</p><pre class="language-console" data-language="console"><code class="language-console">$ kubectl -n notes-lab get deploy app -v=8 2&gt;&amp;1 | grep -E "round_trippers" | cut -c1-160 | head -4
+I1013 16:05:30.144016  868374 round_trippers.go:463] GET https://&lt;apiserver&gt;/apis/apps/v1/namespaces/notes-lab/deployments/app
+I1013 16:05:30.144025  868374 round_trippers.go:469] Request Headers:
+I1013 16:05:30.144031  868374 round_trippers.go:473]     Accept: application/json;as=Table;v=v1;g=meta.k8s.io,application/json;as=Table;v=v1beta1;g=meta.k8s.io,
+I1013 16:05:30.144034  868374 round_trippers.go:473]     User-Agent: kubectl/v1.30.0 (linux/amd64) kubernetes/7c48c2b
+$ kubectl -n notes-lab get deploy app -o yaml -v=8 2&gt;&amp;1 | grep -E "Accept:" | cut -c1-160
+I1013 16:05:35.474345  868744 round_trippers.go:473]     Accept: application/json</code></pre><p>默认输出时 kubectl 请求的是 <code>as=Table</code>，列名和每列的值由 API Server 算好返回；<code>-o yaml</code>、<code>-o name</code> 请求的才是完整对象。</p><h2 id="筛选：标签选择器和字段选择器"><a href="#筛选：标签选择器和字段选择器" class="headerlink" title="筛选：标签选择器和字段选择器"></a>筛选：标签选择器和字段选择器</h2><pre class="language-console" data-language="console"><code class="language-console">$ kubectl -n notes-lab get pods -l app=web
+NAME   READY   STATUS    RESTARTS   AGE
+web    1/1     Running   0          15s
+web2   1/1     Running   0          15s
+$ kubectl -n notes-lab get pods -l "app=web,env!=staging"
+NAME   READY   STATUS    RESTARTS   AGE
+web    1/1     Running   0          15s
+$ kubectl -n notes-lab get pods -l "tier in (debug,frontend),!env"
+NAME           READY   STATUS    RESTARTS   AGE
+inspect-demo   1/1     Running   0          15s
+web            1/1     Running   0          15s</code></pre><p>逗号是「且」；<code>!env</code> 表示「没有 env 这个键」，<code>env!=staging</code> 则连没有 env 的对象也算进去。标签的格式限制和集合写法的细节见<a href="/notes/k8s/labels/">标签与选择器</a>。</p><p><code>--field-selector</code> 按对象字段筛，但每种资源只支持服务端事先登记的几个字段，名单因资源而异；Pod 支持哪些字段、不支持时怎么报错，见<a href="/notes/k8s/labels/">标签与选择器</a>里的字段选择器一节。这里只看一下 Service。Service 在这个版本上除了 <code>metadata.name</code>、<code>metadata.namespace</code>，只认 <code>spec.clusterIP</code> 和 <code>spec.type</code>，端口就不行：</p><pre class="language-console" data-language="console"><code class="language-console">$ kubectl -n notes-lab get svc --field-selector spec.type=ClusterIP
+NAME   TYPE        CLUSTER-IP     EXTERNAL-IP   PORT(S)   AGE
+web    ClusterIP   &lt;cluster-ip&gt;   &lt;none&gt;        80/TCP    1s
+$ kubectl -n notes-lab get svc --field-selector spec.ports.port=80
+Error from server (BadRequest): Unable to find "/v1, Resource=services" that match label selector "", field selector "spec.ports.port=80": field label not supported: spec.ports.port</code></pre><p>Pod、Service 这类核心资源遇到不支持的字段报的是 <code>field label not supported</code>（官方文档里 Ingress 的例子报的是另一种措辞 <code>is not a known field selector</code>）。要按镜像、端口这类字段筛，只能拿回列表在客户端过滤，见 <a href="/notes/k8s/kubectl-jsonpath/">kubectl JSONPath</a>。</p><h3 id="错误二：zsh-把方括号当成了通配符"><a href="#错误二：zsh-把方括号当成了通配符" class="headerlink" title="错误二：zsh 把方括号当成了通配符"></a>错误二：zsh 把方括号当成了通配符</h3><p>想试试 Pod 能不能按镜像筛，在 zsh 里直接这么写：</p><pre class="language-console" data-language="console"><code class="language-console">$ kubectl -n notes-lab get pods --field-selector spec.containers[0].image=nginx:alpine
+(eval):1: no matches found: spec.containers[0].image=nginx:alpine</code></pre><p>（这条是在脚本里通过 <code>eval</code> 执行时的输出；在交互式 zsh 里显示为 <code>zsh: no matches found: ...</code>。）</p><p>这条报错不是 kubectl 给的，命令根本没执行：zsh 把 <code>[0]</code> 当作文件名通配，找不到匹配的文件就直接报错（bash 默认会把原样字符串传下去，所以同样的命令在 bash 里能跑）。判断方法很简单，看报错前缀：kubectl 的服务端错误通常以 <code>Error from server</code> 开头，客户端错误通常以 <code>error:</code> 开头，而这里是 shell 自己的格式。加上引号后，才拿到真正的答案：</p><pre class="language-console" data-language="console"><code class="language-console">$ kubectl -n notes-lab get pods --field-selector 'spec.containers[0].image=nginx:alpine'
+Error from server (BadRequest): Unable to find "/v1, Resource=pods" that match label selector "", field selector "spec.containers[0].image=nginx:alpine": field label not supported: spec.containers[0].image</code></pre><p>凡是带 <code>[]</code>、<code>{}</code>、<code>*</code>、<code>?</code> 的参数（JSONPath、<code>--sort-by</code>、字段选择器）都应该加单引号。</p><h2 id="describe-和-get-o-yaml：多出来的是事件"><a href="#describe-和-get-o-yaml：多出来的是事件" class="headerlink" title="describe 和 get -o yaml：多出来的是事件"></a>describe 和 get -o yaml：多出来的是事件</h2><pre class="language-console" data-language="console"><code class="language-console">$ kubectl -n notes-lab describe pod web2
+Name:             web2
+Namespace:        notes-lab
+...
+Containers:
+  web2:
+    Container ID:   containerd://53b5f352a6db89a462811f8b627c01c728827e914203c5278b9a0964551a3863
+    Image:          nginx:alpine
+    Image ID:       docker.io/library/nginx@sha256:4a73073bd557c65b759505da037898b61f1be6cbcc3c2c3aeac22d2a470c1752
+    ...
+    State:          Running
+      Started:      Tue, 13 Oct 2026 16:00:19 +0800
+    Ready:          True
+    Restart Count:  0
+...
+QoS Class:                   BestEffort
+Node-Selectors:              &lt;none&gt;
+Tolerations:                 node.kubernetes.io/not-ready:NoExecute op=Exists for 300s
+                             node.kubernetes.io/unreachable:NoExecute op=Exists for 300s
+Events:
+  Type    Reason     Age   From               Message
+  ----    ------     ----  ----               -------
+  Normal  Scheduled  35s   default-scheduler  Successfully assigned notes-lab/web2 to worker2
+  Normal  Pulled     30s   kubelet            Container image "nginx:alpine" already present on machine
+  Normal  Created    29s   kubelet            Created container web2
+  Normal  Started    29s   kubelet            Started container web2</code></pre><pre class="language-console" data-language="console"><code class="language-console">$ kubectl -n notes-lab get pod web2 -o yaml | wc -l; kubectl -n notes-lab get pod web2 -o yaml | grep -ciE "event|Pulled"
+115
+0</code></pre><p><code>get -o yaml</code> 是对象本身，115 行里一个事件都没有；默认还隐藏了 <code>managedFields</code>，加 <code>--show-managed-fields</code> 会涨到 201 行。<code>describe</code> 则是 kubectl 在客户端拼出来的报告：把对象字段重排成人好读的样子，再额外查一次事件。<code>-v=6</code> 能看到这次额外的查询：</p><pre class="language-console" data-language="console"><code class="language-console">$ kubectl -n notes-lab describe pod web2 -v=6 2&gt;&amp;1 | grep -E "GET https"
+I1013 16:00:54.664572  834702 round_trippers.go:553] GET https://&lt;apiserver&gt;/api/v1/namespaces/notes-lab/pods/web2 200 OK in 2 milliseconds
+I1013 16:00:54.665858  834702 round_trippers.go:553] GET https://&lt;apiserver&gt;/api/v1/namespaces/notes-lab/pods/web2 200 OK in 0 milliseconds
+I1013 16:00:54.667304  834702 round_trippers.go:553] GET https://&lt;apiserver&gt;/api/v1/namespaces/notes-lab/events?fieldSelector=involvedObject.name%3Dweb2%2CinvolvedObject.namespace%3Dnotes-lab%2CinvolvedObject.uid%3Dd3ff9502-8a67-4be5-8260-b80d84032a0d&amp;limit=500 200 OK in 0 milliseconds</code></pre><p>事件按 <code>involvedObject</code> 的名字、namespace 和 <strong>uid</strong> 过滤。所以删掉再重建的同名 Pod，<code>describe</code> 只显示新对象的事件；想看前一个对象留下的事件，要用 <code>kubectl get events --field-selector involvedObject.name=&lt;名字&gt;</code>，它不带 uid 条件。事件有保留期（kube-apiserver 的 <code>--event-ttl</code> 默认 1 小时），<code>describe</code> 里 Events 为空不代表什么都没发生过。</p><p>要写进脚本或拿去对比的，用 <code>get -o yaml/json</code>；要排查「为什么不动」，先看 <code>describe</code> 的 Events 和 <code>Last State</code>，具体例子见 <a href="/notes/k8s/pod/">Pod 与容器</a>。</p><h3 id="describe-会按前缀匹配"><a href="#describe-会按前缀匹配" class="headerlink" title="describe 会按前缀匹配"></a>describe 会按前缀匹配</h3><pre class="language-console" data-language="console"><code class="language-console">$ kubectl -n notes-lab describe pod we | grep -E "^Name:"
+Name:             web
+Name:             web2
+$ kubectl -n notes-lab describe pod web | grep -E "^Name:"
+Name:             web
+$ kubectl -n notes-lab get pod we
+Error from server (NotFound): pods "we" not found</code></pre><p><code>get</code> 要求名字完全一致，<code>describe</code> 在找不到同名对象时会把所有以该字符串开头的对象都描述一遍。名字恰好存在时只给那一个，所以 <code>describe pod web</code> 没有带上 <code>web2</code>。少敲几个字母时这很方便，但在 Pod 名带随机后缀的 Deployment 里，<code>describe pod app</code> 会一次吐出所有副本，读的时候要看清 <code>Name:</code>。</p><h2 id="explain：查字段定义"><a href="#explain：查字段定义" class="headerlink" title="explain：查字段定义"></a>explain：查字段定义</h2><p><code>explain</code> 查的是字段定义，不需要任何对象存在，数据来自 API Server 发布的 OpenAPI：</p><pre class="language-console" data-language="console"><code class="language-console">$ kubectl explain deploy.spec.strategy --recursive
+GROUP:      apps
+KIND:       Deployment
+VERSION:    v1
+
+FIELD: strategy &lt;DeploymentStrategy&gt;
+
+
+DESCRIPTION:
+    The deployment strategy to use to replace existing pods with new ones.
+    DeploymentStrategy describes how to replace existing pods with new ones.
+    
+FIELDS:
+  rollingUpdate	&lt;RollingUpdateDeployment&gt;
+    maxSurge	&lt;IntOrString&gt;
+    maxUnavailable	&lt;IntOrString&gt;
+  type	&lt;string&gt;
+  enum: Recreate, RollingUpdate
+$ kubectl explain pod.spec.container
+KIND:       Pod
+VERSION:    v1
+
+error: field "container" does not exist</code></pre><p>路径里用的是 YAML 字段名 <code>containers</code>（列表不用写下标），不是类型名。不加 <code>--recursive</code> 时会打印字段说明，默认值通常写在说明里，比如 <code>imagePullPolicy</code> 的说明写着标签为 <code>:latest</code> 时默认 <code>Always</code>，否则 <code>IfNotPresent</code>。</p><h2 id="logs：用带时间的日志区分各个参数"><a href="#logs：用带时间的日志区分各个参数" class="headerlink" title="logs：用带时间的日志区分各个参数"></a>logs：用带时间的日志区分各个参数</h2><p><code>inspect-demo</code> 每 5 秒打印一行，下面在 08:01:00（UTC）执行：</p><pre class="language-console" data-language="console"><code class="language-console">$ date -u +%T; kubectl -n notes-lab logs inspect-demo --tail=3
+08:01:00
+tick 5 08:00:47
+tick 6 08:00:52
+tick 7 08:00:57
+$ kubectl -n notes-lab logs inspect-demo --since=12s
+tick 6 08:00:52
+tick 7 08:00:57
+$ kubectl -n notes-lab logs inspect-demo --since=12s --timestamps
+2026-10-13T08:00:52.632790113Z tick 6 08:00:52
+2026-10-13T08:00:57.634189945Z tick 7 08:00:57</code></pre><p><code>--tail</code> 按行数截，<code>--since</code> 按时间截，依据的是容器运行时记录的写入时间，<code>--timestamps</code> 会把这个时间打在每行前面。应用自己不打时间戳时，<code>--timestamps</code> 是判断「这行日志是什么时候写的」唯一的依据。</p><p><code>-f</code> 会一直跟下去，在脚本里一定要配超时：</p><pre class="language-console" data-language="console"><code class="language-console">$ timeout 12 kubectl -n notes-lab logs -f inspect-demo --tail=1; echo "timeout exit=$?"
+tick 7 08:00:57
+tick 8 08:01:02
+tick 9 08:01:07
+timeout exit=124</code></pre><p><code>--tail=1</code> 先补出最后一行，然后新行实时追加；<code>124</code> 是 <code>timeout</code> 杀掉进程时的退出码，不是 kubectl 的错误。容器还没重启过时，<code>--previous</code> 会报 <code>previous terminated container "inspect-demo" in pod "inspect-demo" not found</code>；它和不带参数的 <code>logs</code> 什么时候返回不同的实例，见 <a href="/notes/k8s/pod/">Pod 与容器</a> 里的 CrashLoopBackOff 实验。</p><h3 id="多容器-Pod：-c-和默认容器"><a href="#多容器-Pod：-c-和默认容器" class="headerlink" title="多容器 Pod：-c 和默认容器"></a>多容器 Pod：-c 和默认容器</h3><p>再建一个 Pod，里面一个 nginx（<code>web</code>），一个每 10 秒打印一行的 busybox（<code>sidecar</code>），保存为 <code>two.yaml</code> 后 <code>kubectl -n notes-lab apply -f two.yaml</code>：</p><pre class="language-yaml" data-language="yaml"><code class="language-yaml"><span class="token key atrule">apiVersion</span><span class="token punctuation">:</span> v1
+<span class="token key atrule">kind</span><span class="token punctuation">:</span> Pod
+<span class="token key atrule">metadata</span><span class="token punctuation">:</span>
+  <span class="token key atrule">name</span><span class="token punctuation">:</span> two
+  <span class="token key atrule">labels</span><span class="token punctuation">:</span>
+    <span class="token key atrule">app</span><span class="token punctuation">:</span> two
+<span class="token key atrule">spec</span><span class="token punctuation">:</span>
+  <span class="token key atrule">containers</span><span class="token punctuation">:</span>
+    <span class="token punctuation">-</span> <span class="token key atrule">name</span><span class="token punctuation">:</span> web
+      <span class="token key atrule">image</span><span class="token punctuation">:</span> nginx<span class="token punctuation">:</span>alpine
+    <span class="token punctuation">-</span> <span class="token key atrule">name</span><span class="token punctuation">:</span> sidecar
+      <span class="token key atrule">image</span><span class="token punctuation">:</span> busybox<span class="token punctuation">:</span><span class="token number">1.36</span>
+      <span class="token key atrule">command</span><span class="token punctuation">:</span> <span class="token punctuation">[</span><span class="token string">"sh"</span><span class="token punctuation">,</span> <span class="token string">"-c"</span><span class="token punctuation">,</span> <span class="token string">"while true; do echo sidecar $(date +%T); sleep 10; done"</span><span class="token punctuation">]</span></code></pre><pre class="language-console" data-language="console"><code class="language-console">$ kubectl -n notes-lab logs two --tail=1
+Defaulted container "web" out of: web, sidecar
+2026/10/13 08:01:21 [notice] 1#1: start worker process 63
+$ kubectl -n notes-lab logs two -c sidecar --tail=1
+sidecar 08:01:23
+$ kubectl -n notes-lab logs two --all-containers --tail=1
+2026/10/13 08:01:21 [notice] 1#1: start worker process 63
+sidecar 08:01:23</code></pre><p>不带 <code>-c</code> 时 kubectl 选第一个容器，并在 stderr 打一行 <code>Defaulted container</code>。这行提示很容易被忽略：要找的日志在 sidecar 里，看到的却是 nginx 的，第一反应往往是「怎么没日志」。想换默认容器，可以给 Pod 加注解 <code>kubectl.kubernetes.io/default-container</code>，之后不带 <code>-c</code> 读的就是它，提示也不再出现：</p><pre class="language-console" data-language="console"><code class="language-console">$ kubectl -n notes-lab annotate pod two kubectl.kubernetes.io/default-container=sidecar
+pod/two annotated
+$ kubectl -n notes-lab logs two --tail=1
+sidecar 08:01:23</code></pre><p>实际使用时这个注解应该写在 Deployment 的 Pod 模板里，而不是事后加到某个 Pod 上。按标签一次看多个 Pod 时，用 <code>--prefix</code> 区分每行来自哪里：</p><pre class="language-console" data-language="console"><code class="language-console">$ kubectl -n notes-lab logs -l app=web --tail=1 --prefix
+[pod/web/web] 2026/10/13 08:00:25 [notice] 1#1: start worker process 63
+[pod/web2/web2] 2026/10/13 08:00:22 [notice] 1#1: start worker process 63</code></pre><h2 id="exec：退出码会传回来"><a href="#exec：退出码会传回来" class="headerlink" title="exec：退出码会传回来"></a>exec：退出码会传回来</h2><pre class="language-console" data-language="console"><code class="language-console">$ kubectl -n notes-lab exec inspect-demo -- ps
+PID   USER     TIME  COMMAND
+    1 root      0:00 sh -c i=0; while true; do echo tick $i $(date +%T); i=$((i+1)); sleep 5; done
+   26 root      0:00 ps
+$ kubectl -n notes-lab exec inspect-demo -- sh -c "exit 3"
+command terminated with exit code 3</code></pre><p>这条命令之后 <code>$?</code> 是 3：容器里命令的退出码会原样变成 kubectl 的退出码，脚本可以直接拿 <code>exec</code> 做检查。<code>--</code> 用来分隔 kubectl 自己的参数和要执行的命令，不写的旧格式还能用，但会提示 <code>kubectl exec [POD] [COMMAND] is DEPRECATED</code>。</p><p><code>exec</code> 只能运行镜像里已经有的程序，<code>nginx:alpine</code> 里没有 bash：</p><pre class="language-console" data-language="console"><code class="language-console">$ kubectl -n notes-lab exec web -- bash
+error: Internal error occurred: Internal error occurred: error executing command in container: failed to exec in container: failed to start exec "392299c52d3e7fcc59556ac1ded4533cad8f1209d7b2e00b75e782d22c51825e": OCI runtime exec failed: exec failed: unable to start container process: exec: "bash": executable file not found in $PATH: unknown</code></pre><p>报错里的 <code>executable file not found in $PATH</code> 说明 Pod 和连接都没问题，只是镜像里没有这个程序，换成 <code>sh</code> 即可；连 <code>sh</code> 都没有的镜像，要用临时容器，见 <a href="/notes/k8s/kubectl-debug/">kubectl debug</a>。</p><h2 id="port-forward"><a href="#port-forward" class="headerlink" title="port-forward"></a>port-forward</h2><h3 id="错误三：本地端口被占用，转发却「成功」了"><a href="#错误三：本地端口被占用，转发却「成功」了" class="headerlink" title="错误三：本地端口被占用，转发却「成功」了"></a>错误三：本地端口被占用，转发却「成功」了</h3><p>后台起一个转发，然后用 curl 测试：</p><pre class="language-console" data-language="console"><code class="language-console">$ kubectl -n notes-lab port-forward svc/web 18080:80 &gt; pf.log 2&gt;&amp;1 &amp;
+$ cat pf.log; curl -s -o /dev/null -w "%{http_code}\n" http://127.0.0.1:18080/
+Forwarding from [::1]:18080 -&gt; 80
+404</code></pre><p>nginx 的首页怎么会是 404？线索在 <code>pf.log</code>：正常情况下有 IPv4 和 IPv6 两行 <code>Forwarding from</code>，这里只有 <code>[::1]</code> 一行。查本机监听：</p><pre class="language-console" data-language="console"><code class="language-console">$ ss -ltnp | grep 18080
+LISTEN 0      4096            127.0.0.1:18080      0.0.0.0:*                                              
+LISTEN 0      4096                [::1]:18080         [::]:*    users:(("kubectl",pid=838594,fd=8))       
+$ curl -s -i http://127.0.0.1:18080/ | head -5
+HTTP/1.1 404 Not Found
+Cache-Control: must-revalidate,no-cache,no-store
+Content-Type: text/html;charset=iso-8859-1
+Content-Length: 496
+Server: Jetty(9.4.54.v20240208)</code></pre><p><code>127.0.0.1:18080</code> 早就被本机另一个程序（一个 Jetty 服务）占了。kubectl 默认同时监听 <code>localhost</code> 的 IPv4 和 IPv6，只要有一个绑定成功就不算失败，于是只拿到了 <code>[::1]</code>；curl 访问 <code>127.0.0.1</code> 时打到的是 Jetty。直接访问 <code>http://[::1]:18080/</code> 则返回 200。</p><p>你的机器上多半没有这样一个程序，可以用 Python 先占住一个端口来复现。下面是另起一轮、对一个名为 <code>app</code> 的 nginx Service 补测的，端口换成了 18081：</p><pre class="language-console" data-language="console"><code class="language-console">$ python3 -m http.server 18081 --bind 127.0.0.1 &gt; py.log 2&gt;&amp;1 &amp;
+$ kubectl -n notes-lab port-forward svc/app 18081:80 &gt; pf3.log 2&gt;&amp;1 &amp; sleep 2; cat pf3.log
+Forwarding from [::1]:18081 -&gt; 80
+$ curl -s -i http://127.0.0.1:18081/ | grep -iE "^(HTTP|Server)"
+HTTP/1.0 200 OK
+Server: SimpleHTTP/0.6 Python/3.14.4
+$ curl -s -i "http://[::1]:18081/" | grep -iE "^(HTTP|Server)"
+HTTP/1.1 200 OK
+Server: nginx/1.31.3</code></pre><p>这次两边都返回 200，只看状态码根本发现不了问题，Python 返回的是一个目录列表。可靠的判断依据是响应头里的 <code>Server:</code>，它告诉你到底是谁在回答；再配合 <code>pf.log</code> 里少了的那行 <code>Forwarding from 127.0.0.1</code>。复现完用 <code>kill %1 %2</code>（或按 PID）结束这两个后台进程。</p><p>先结束第一个 port-forward：<code>kill %1</code>，或者用 <code>ps -o pid,cmd -C kubectl</code> 找到它的 PID 再 <code>kill &lt;pid&gt;</code>。然后用 <code>--address 127.0.0.1</code> 只监听 IPv4，冲突会立刻变成报错：</p><pre class="language-console" data-language="console"><code class="language-console">$ timeout 5 kubectl -n notes-lab port-forward --address 127.0.0.1 svc/web 18080:80; echo "exit=$?"
+Unable to listen on port 18080: Listeners failed to create with the following errors: [unable to create listener: Error listen tcp4 127.0.0.1:18080: bind: address already in use]
+error: unable to listen on any of the requested ports: [{18080 80}]
+exit=1</code></pre><p>更省事的是本地端口留空，让系统分配一个空闲端口，从输出里读出来（下文的 36621 是这次分到的端口，换成你自己 <code>pf2.log</code> 里的那个）：</p><pre class="language-console" data-language="console"><code class="language-console">$ kubectl -n notes-lab port-forward svc/web :80 &gt; pf2.log 2&gt;&amp;1 &amp;
+$ cat pf2.log
+Forwarding from 127.0.0.1:36621 -&gt; 80
+Forwarding from [::1]:36621 -&gt; 80
+$ curl -s http://127.0.0.1:36621/ | grep -o '&lt;title&gt;.*&lt;/title&gt;'
+&lt;title&gt;Welcome to nginx!&lt;/title&gt;</code></pre><h3 id="转发到-Service-也只连一个-Pod"><a href="#转发到-Service-也只连一个-Pod" class="headerlink" title="转发到 Service 也只连一个 Pod"></a>转发到 Service 也只连一个 Pod</h3><p>把 <code>web</code>、<code>web2</code> 的首页分别改成各自的主机名，再对比 port-forward 和集群内访问 Service：</p><pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token keyword">for</span> <span class="token for-or-select variable">p</span> <span class="token keyword">in</span> web web2<span class="token punctuation">;</span> <span class="token keyword">do</span> kubectl <span class="token parameter variable">-n</span> notes-lab <span class="token builtin class-name">exec</span> <span class="token variable">$p</span> -- <span class="token function">sh</span> <span class="token parameter variable">-c</span> <span class="token string">'hostname &gt; /usr/share/nginx/html/index.html'</span><span class="token punctuation">;</span> <span class="token keyword">done</span></code></pre><pre class="language-console" data-language="console"><code class="language-console">$ for i in 1 2 3 4 5 6; do curl -s http://127.0.0.1:36621/; done | sort | uniq -c
+      6 web2
+$ kubectl -n notes-lab run curl --image=curlimages/curl:latest --restart=Never --rm -i --quiet -- sh -c "for i in 1 2 3 4 5 6; do curl -s http://web/; done" | sort | uniq -c
+      5 web
+      1 web2</code></pre><p><code>port-forward svc/web</code> 只在启动时借 Service 的选择器挑一个 Pod，之后所有连接都发给它，不经过 kube-proxy，也就没有负载均衡。这个 Pod 一没，转发就断了。删掉 <code>web2</code> 后：</p><pre class="language-console" data-language="console"><code class="language-console">$ kubectl -n notes-lab delete pod web2 --wait=false
+pod "web2" deleted
+$ curl -s -m 3 http://127.0.0.1:36621/; echo "curl exit=$?"
+curl exit=52
+$ cat pf2.log
+...
+Handling connection for 36621
+E1013 16:02:22.761080  841342 portforward.go:413] an error occurred forwarding 36621 -&gt; 80: error forwarding port 80 to pod 05afdb9adb75f9e498ce034e21c7348a18a5b4cc1f0b996c5f29b63465497797, uid : failed to execute portforward in network namespace "/var/run/netns/cni-1d329cf0-8ff2-ec62-7701-5c633fb9d8d3": failed to connect to localhost:80 inside namespace "05afdb9adb75f9e498ce034e21c7348a18a5b4cc1f0b996c5f29b63465497797", IPv4: dial tcp4 127.0.0.1:80: connect: connection refused IPv6 dial tcp6 [::1]:80: connect: connection refused 
+error: lost connection to pod</code></pre><p>报错里的 <code>failed to connect to localhost:80 inside namespace</code> 说明了转发的实际路径：节点上的容器运行时进入 Pod 的网络命名空间，连那里的 <code>localhost:80</code>。Service 后面明明还有一个健康的 <code>web</code>，kubectl 也不会切过去，而是直接退出。所以 port-forward 适合临时调试一个具体的 Pod，验证 Service 的负载均衡要在集群里测。</p><p>后台的 port-forward 用完要按 PID 结束。先用 <code>ps -o pid,cmd -C kubectl</code> 找到它，再 <code>kill &lt;pid&gt;</code>。不要用 <code>pkill -f port-forward</code>，它可能误杀其他项目正在用的转发。</p><h2 id="声明式和命令式"><a href="#声明式和命令式" class="headerlink" title="声明式和命令式"></a>声明式和命令式</h2><p>下面用一个 Deployment 比较 <code>apply</code>、<code>create</code>、<code>replace</code>、<code>edit</code>。<code>app-v1.yaml</code>：</p><pre class="language-yaml" data-language="yaml"><code class="language-yaml"><span class="token key atrule">apiVersion</span><span class="token punctuation">:</span> apps/v1
+<span class="token key atrule">kind</span><span class="token punctuation">:</span> Deployment
+<span class="token key atrule">metadata</span><span class="token punctuation">:</span>
+  <span class="token key atrule">name</span><span class="token punctuation">:</span> app
+  <span class="token key atrule">labels</span><span class="token punctuation">:</span>
+    <span class="token key atrule">app</span><span class="token punctuation">:</span> app
+    <span class="token key atrule">team</span><span class="token punctuation">:</span> a
+<span class="token key atrule">spec</span><span class="token punctuation">:</span>
+  <span class="token key atrule">replicas</span><span class="token punctuation">:</span> <span class="token number">1</span>
+  <span class="token key atrule">selector</span><span class="token punctuation">:</span>
+    <span class="token key atrule">matchLabels</span><span class="token punctuation">:</span>
+      <span class="token key atrule">app</span><span class="token punctuation">:</span> app
+  <span class="token key atrule">template</span><span class="token punctuation">:</span>
+    <span class="token key atrule">metadata</span><span class="token punctuation">:</span>
+      <span class="token key atrule">labels</span><span class="token punctuation">:</span>
+        <span class="token key atrule">app</span><span class="token punctuation">:</span> app
+    <span class="token key atrule">spec</span><span class="token punctuation">:</span>
+      <span class="token key atrule">containers</span><span class="token punctuation">:</span>
+        <span class="token punctuation">-</span> <span class="token key atrule">name</span><span class="token punctuation">:</span> nginx
+          <span class="token key atrule">image</span><span class="token punctuation">:</span> nginx<span class="token punctuation">:</span>alpine
+          <span class="token key atrule">resources</span><span class="token punctuation">:</span>
+            <span class="token key atrule">requests</span><span class="token punctuation">:</span>
+              <span class="token key atrule">cpu</span><span class="token punctuation">:</span> 20m
+              <span class="token key atrule">memory</span><span class="token punctuation">:</span> 32Mi</code></pre><p><code>app-v2.yaml</code> 只删掉 <code>team: a</code> 这一行。不想从头手写清单的话，命令式命令加 <code>--dry-run=client -o yaml</code> 可以生成一个骨架：</p><pre class="language-console" data-language="console"><code class="language-console">$ kubectl -n notes-lab create deployment gen --image=nginx:alpine --replicas=2 --dry-run=client -o yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  creationTimestamp: null
+  labels:
+    app: gen
+  name: gen
+  namespace: notes-lab
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: gen
+  strategy: {}
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        app: gen
+    spec:
+      containers:
+      - image: nginx:alpine
+        name: nginx
+        resources: {}
+status: {}</code></pre><h3 id="diff：提交之前先看服务端会改成什么"><a href="#diff：提交之前先看服务端会改成什么" class="headerlink" title="diff：提交之前先看服务端会改成什么"></a>diff：提交之前先看服务端会改成什么</h3><p>对象还不存在时运行 <code>diff</code>：</p><pre class="language-console" data-language="console"><code class="language-console">$ kubectl -n notes-lab diff -f app-v1.yaml; echo "diff exit=$?"
+diff -u -N /tmp/LIVE-3300763341/apps.v1.Deployment.notes-lab.app /tmp/MERGED-3994308661/apps.v1.Deployment.notes-lab.app
+--- /tmp/LIVE-3300763341/apps.v1.Deployment.notes-lab.app	2026-10-13 16:02:46.741107998 +0800
++++ /tmp/MERGED-3994308661/apps.v1.Deployment.notes-lab.app	2026-10-13 16:02:46.741107998 +0800
+@@ -0,0 +1,45 @@
++apiVersion: apps/v1
++kind: Deployment
++metadata:
++  creationTimestamp: "2026-10-13T08:02:46Z"
++  generation: 1
++  labels:
++    app: app
++    team: a
++  name: app
++  namespace: notes-lab
++  uid: 7d01b773-39af-4ee7-a047-2e96442c4676
++spec:
++  progressDeadlineSeconds: 600
++  replicas: 1
++  revisionHistoryLimit: 10
+...
++      terminationGracePeriodSeconds: 30
++status: {}
+diff exit=1</code></pre><p>清单只有 24 行，合并结果有 45 行：<code>progressDeadlineSeconds</code>、<code>revisionHistoryLimit</code>、<code>strategy</code> 这些都是服务端填的默认值，连 <code>uid</code> 都有。这说明 <code>diff</code> 不是拿本地文件做文本比较，而是把清单交给 API Server 做一次不落盘的试提交，再把结果和线上对象比较。退出码 <code>1</code> 表示有差异，不是出错；真正出错时退出码大于 1。CI 里用 <code>diff</code> 做门禁时要按这个区分。</p><h3 id="create-不能重复执行，apply-可以"><a href="#create-不能重复执行，apply-可以" class="headerlink" title="create 不能重复执行，apply 可以"></a>create 不能重复执行，apply 可以</h3><pre class="language-console" data-language="console"><code class="language-console">$ kubectl -n notes-lab create -f app-v1.yaml
+deployment.apps/app created
+$ kubectl -n notes-lab create -f app-v1.yaml
+Error from server (AlreadyExists): error when creating "app-v1.yaml": deployments.apps "app" already exists</code></pre><p><code>create</code> 的语义是「新建」，对象已存在就失败，所以重复执行的脚本里不能用它。现在对这个由 <code>create</code> 建出来的对象执行 <code>apply</code>：</p><pre class="language-console" data-language="console"><code class="language-console">$ kubectl -n notes-lab apply -f app-v1.yaml
+Warning: resource deployments/app is missing the kubectl.kubernetes.io/last-applied-configuration annotation which is required by kubectl apply. kubectl apply should only be used on resources created declaratively by either kubectl create --save-config or kubectl apply. The missing annotation will be patched automatically.
+deployment.apps/app configured</code></pre><p><code>apply</code> 依赖注解 <code>kubectl.kubernetes.io/last-applied-configuration</code>，<code>create</code> 建的对象没有这个注解（此前它只有控制器加的 <code>deployment.kubernetes.io/revision</code>），所以 <code>apply</code> 警告一句后自动补上。补上的内容就是这次提交的清单本身：</p><pre class="language-console" data-language="console"><code class="language-console">$ kubectl -n notes-lab get deploy app -o jsonpath='{.metadata.annotations.kubectl\.kubernetes\.io/last-applied-configuration}' | python3 -m json.tool
+{
+    "apiVersion": "apps/v1",
+    "kind": "Deployment",
+    "metadata": {
+        "annotations": {},
+        "labels": {
+            "app": "app",
+            "team": "a"
+        },
+        "name": "app",
+        "namespace": "notes-lab"
+    },
+    "spec": {
+        "replicas": 1,
+...</code></pre><h3 id="apply-只删「上次是我写的」字段"><a href="#apply-只删「上次是我写的」字段" class="headerlink" title="apply 只删「上次是我写的」字段"></a>apply 只删「上次是我写的」字段</h3><p>先用命令式命令加一个标签 <code>owner=manual</code>，再 apply 删掉了 <code>team</code> 的 v2：</p><pre class="language-console" data-language="console"><code class="language-console">$ kubectl -n notes-lab label deploy app owner=manual
+deployment.apps/app labeled
+$ kubectl -n notes-lab get deploy app --show-labels
+NAME   READY   UP-TO-DATE   AVAILABLE   AGE   LABELS
+app    1/1     1            1           5s    app=app,owner=manual,team=a
+$ kubectl -n notes-lab diff -f app-v2.yaml; echo "diff exit=$?"
+...
+@@ -10,7 +10,6 @@
+   labels:
+     app: app
+     owner: manual
+-    team: a
+   name: app
+   namespace: notes-lab
+   resourceVersion: "11139016"
+diff exit=1
+$ kubectl -n notes-lab apply -f app-v2.yaml
+deployment.apps/app configured
+$ kubectl -n notes-lab get deploy app --show-labels
+NAME   READY   UP-TO-DATE   AVAILABLE   AGE   LABELS
+app    1/1     1            1           5s    app=app,owner=manual</code></pre><p>v2 里既没有 <code>team</code> 也没有 <code>owner</code>，结果 <code>team</code> 被删了，<code>owner</code> 留着。区别就在 last-applied 注解：<code>team</code> 在上一次 apply 的清单里，从清单里消失就表示「我不要它了」；<code>owner</code> 从来不在注解里，<code>apply</code> 认为它归别人管，不碰。</p><figure class="note-illustration" data-note-visual="kubectl-section"><a href="/notes/k8s/kubectl/diagram/section-73c0f5915f18.svg" target="_blank" rel="noopener" aria-label="查看从清单删掉的字段删不删大图"><img src="/notes/k8s/kubectl/diagram/section-73c0f5915f18.svg" alt="从清单删掉的字段删不删：先 create 后 apply 没有注解，清单里删掉的字段会残留。" loading="lazy" decoding="async"></a><figcaption>图：先 create 后 apply 没有注解，清单里删掉的字段会残留。</figcaption></figure><p>反过来，如果对象是 <code>create</code> 出来的，第一次 <code>apply</code> 之前没有注解可比，从清单里删掉的字段就不会被清理。用 ConfigMap 验证一下，<code>cm-v1.yaml</code> 有 <code>a</code>、<code>b</code> 两个键，<code>cm-v2.yaml</code> 只有 <code>a</code>：</p><pre class="language-yaml" data-language="yaml"><code class="language-yaml"><span class="token comment"># cm-v1.yaml</span>
+<span class="token key atrule">apiVersion</span><span class="token punctuation">:</span> v1
+<span class="token key atrule">kind</span><span class="token punctuation">:</span> ConfigMap
+<span class="token key atrule">metadata</span><span class="token punctuation">:</span>
+  <span class="token key atrule">name</span><span class="token punctuation">:</span> cfg
+<span class="token key atrule">data</span><span class="token punctuation">:</span>
+  <span class="token key atrule">a</span><span class="token punctuation">:</span> <span class="token string">"1"</span>
+  <span class="token key atrule">b</span><span class="token punctuation">:</span> <span class="token string">"2"</span>
+<span class="token punctuation">---</span>
+<span class="token comment"># cm-v2.yaml：同上，去掉 b 这一行</span></code></pre><pre class="language-console" data-language="console"><code class="language-console">$ kubectl -n notes-lab create -f cm-v1.yaml
+configmap/cfg created
+$ kubectl -n notes-lab apply -f cm-v2.yaml 2&gt;&amp;1 | tail -1
+configmap/cfg configured
+$ kubectl -n notes-lab get cm cfg -o jsonpath='{.data}{"\n"}'
+{"a":"1","b":"2"}
+$ kubectl -n notes-lab delete cm cfg; kubectl -n notes-lab apply -f cm-v1.yaml; kubectl -n notes-lab apply -f cm-v2.yaml; kubectl -n notes-lab get cm cfg -o jsonpath='{.data}{"\n"}'
+configmap "cfg" deleted
+configmap/cfg created
+configmap/cfg configured
+{"a":"1"}</code></pre><p>同样两份文件，先 <code>create</code> 再 <code>apply</code>，<code>b</code> 留了下来，而且单靠从清单里删掉已经清不掉了，因为新的注解里也没有 <code>b</code>；全程用 <code>apply</code>，<code>b</code> 被正常删除。要清掉残留的 <code>b</code>，可以先把它写回清单 apply 一次，让它进入注解，再从清单里删掉 apply；或者直接改线上对象：</p><pre class="language-console" data-language="console"><code class="language-console">$ kubectl -n notes-lab apply -f cm-v1.yaml; kubectl -n notes-lab apply -f cm-v2.yaml; kubectl -n notes-lab get cm cfg -o jsonpath='{.data}{"\n"}'
+configmap/cfg configured
+configmap/cfg configured
+{"a":"1"}
+$ kubectl -n notes-lab patch cm cfg --type=json -p '[{"op":"remove","path":"/data/b"}]'
+configmap/cfg patched</code></pre><p>（后一条是在另一轮「先 create 再 apply」之后执行的，执行后 <code>.data</code> 同样只剩 <code>{"a":"1"}</code>；用 <code>edit</code> 删掉这一行效果相同。）这就是官方文档说不支持混用 <code>apply</code> 和 <code>create</code>/<code>replace</code> 的原因。确实需要先用 <code>create</code> 的话，加 <code>--save-config</code> 让它也写上这个注解。</p><h3 id="edit-的改动会被下一次-apply-改回去"><a href="#edit-的改动会被下一次-apply-改回去" class="headerlink" title="edit 的改动会被下一次 apply 改回去"></a>edit 的改动会被下一次 apply 改回去</h3><p><code>edit</code> 会打开编辑器修改线上对象，下面用 <code>sed</code> 代替编辑器，把副本数改成 2：</p><pre class="language-console" data-language="console"><code class="language-console">$ KUBE_EDITOR="sed -i 's/^  replicas: 1/  replicas: 2/'" kubectl -n notes-lab edit deploy app
+deployment.apps/app edited
+$ kubectl -n notes-lab get deploy app -o jsonpath='spec.replicas={.spec.replicas}{"\n"}'; kubectl -n notes-lab get deploy app -o jsonpath='{.metadata.annotations.kubectl\.kubernetes\.io/last-applied-configuration}' | grep -o '"replicas":[0-9]'
+spec.replicas=2
+"replicas":1
+$ kubectl -n notes-lab diff -f app-v2.yaml | grep -E "^[-+] "
+-  generation: 4
++  generation: 5
+-  replicas: 2
++  replicas: 1
+$ kubectl -n notes-lab apply -f app-v2.yaml
+deployment.apps/app configured
+$ kubectl -n notes-lab get deploy app -o jsonpath='spec.replicas={.spec.replicas}{"\n"}'
+spec.replicas=1</code></pre><p><code>edit</code> 只改线上对象，不更新 last-applied 注解，也不会改你的 YAML 文件。下一次 <code>apply</code> 发现清单里写着 <code>replicas: 1</code>，和线上的 2 不同，就改回去。和上面 <code>owner</code> 标签的区别在于：<code>replicas</code> 出现在清单里，归清单管；<code>owner</code> 不在清单里，所以保留。线上应急用 <code>edit</code> 或 <code>scale</code> 改了某个字段，事后一定要同步回 YAML，否则下一次发布会悄悄撤销。退出编辑器时没有改动，会提示 <code>Edit cancelled, no changes made.</code>。</p><h3 id="replace：整个对象换掉"><a href="#replace：整个对象换掉" class="headerlink" title="replace：整个对象换掉"></a>replace：整个对象换掉</h3><pre class="language-console" data-language="console"><code class="language-console">$ kubectl -n notes-lab replace -f app-v1.yaml
+deployment.apps/app replaced
+$ kubectl -n notes-lab get deploy app --show-labels; kubectl -n notes-lab get deploy app -o jsonpath="{.metadata.annotations}"; echo
+NAME   READY   UP-TO-DATE   AVAILABLE   AGE   LABELS
+app    1/1     1            1           26s   app=app,team=a
+{"deployment.kubernetes.io/revision":"1"}</code></pre><p><code>replace</code> 之前对象上有 <code>owner=manual</code> 和 last-applied 注解，之后两样都没了：<code>replace</code> 用文件内容整个替换对象，文件里没有的字段统统消失，不管是谁写的。<code>deployment.kubernetes.io/revision</code> 还在，是因为 Deployment 控制器在同一秒把它写了回去，<code>managedFields</code> 里能看到：</p><pre class="language-console" data-language="console"><code class="language-console">$ kubectl -n notes-lab get deploy app --show-managed-fields -o jsonpath='{range .metadata.managedFields[*]}{.manager} {.operation} {.time} {.fieldsV1.f:metadata}{"\n"}{end}'
+kubectl-create Update 2026-10-13T08:02:52Z {"f:labels":{".":{},"f:app":{}}}
+kubectl-client-side-apply Update 2026-10-13T08:03:13Z 
+kube-controller-manager Update 2026-10-13T08:03:18Z {"f:annotations":{".":{},"f:deployment.kubernetes.io/revision":{}}}
+kubectl-replace Update 2026-10-13T08:03:18Z {"f:labels":{"f:team":{}}}</code></pre><p><code>replace</code> 和 <code>create</code> 相反，对象不存在时失败：</p><pre class="language-console" data-language="console"><code class="language-console">$ sed "s/name: app$/name: nosuch/" app-v1.yaml | kubectl -n notes-lab replace -f -
+Error from server (NotFound): error when replacing "STDIN": deployments.apps "nosuch" not found</code></pre><p>四个命令的差别归纳起来：</p><table><thead><tr><th>命令</th><th>对象不存在</th><th>对象已存在</th><th>清单里删掉的字段</th><th>不在清单里、别人写的字段</th></tr></thead><tbody><tr><td><code>create</code></td><td>创建</td><td><code>AlreadyExists</code></td><td>—</td><td>—</td></tr><tr><td><code>apply</code></td><td>创建</td><td>合并更新</td><td>在 last-applied 里才删</td><td>保留</td></tr><tr><td><code>replace</code></td><td><code>NotFound</code></td><td>整个替换</td><td>删</td><td>删</td></tr><tr><td><code>edit</code></td><td><code>NotFound</code></td><td>改线上对象</td><td>不涉及清单</td><td>保留</td></tr></tbody></table><p><code>apply</code> 的请求也可以用 <code>-v=6</code> 看：先 GET 线上对象，在本地算出补丁，有差异才发 PATCH；没有差异时只有一次 GET，输出 <code>unchanged</code>：</p><pre class="language-console" data-language="console"><code class="language-console">$ kubectl -n notes-lab apply -f app-v2.yaml -v=6 2&gt;&amp;1 | grep -E "round_trippers|configured" | grep -v openapi
+I1013 16:06:01.940654  871155 round_trippers.go:553] GET https://&lt;apiserver&gt;/apis/apps/v1/namespaces/notes-lab/deployments/app 200 OK in 1 milliseconds
+I1013 16:06:01.958830  871155 round_trippers.go:553] PATCH https://&lt;apiserver&gt;/apis/apps/v1/namespaces/notes-lab/deployments/app?fieldManager=kubectl-client-side-apply&amp;fieldValidation=Strict 200 OK in 2 milliseconds
+deployment.apps/app configured
+$ kubectl -n notes-lab apply -f app-v2.yaml -v=6 2&gt;&amp;1 | grep -E "round_trippers|unchanged" | grep -v openapi
+I1013 16:06:02.003351  871210 round_trippers.go:553] GET https://&lt;apiserver&gt;/apis/apps/v1/namespaces/notes-lab/deployments/app 200 OK in 1 milliseconds
+deployment.apps/app unchanged</code></pre><p>这种在客户端算合并的方式就是 Client-Side Apply。由 API Server 记录字段归属、检测冲突的 Server-Side Apply 见 <a href="/notes/k8s/server-side-apply/">Server-Side Apply</a>。</p><h2 id="–dry-run-client-和-–dry-run-server"><a href="#–dry-run-client-和-–dry-run-server" class="headerlink" title="–dry-run=client 和 –dry-run=server"></a>–dry-run=client 和 –dry-run=server</h2><p><code>--dry-run=client</code> 只在本地组装对象，<code>--dry-run=server</code> 把请求完整地交给 API Server 走一遍校验和准入，只是最后不写入 etcd。同一个错误，两种 dry-run 给出不同的结论。</p><p><strong>校验错误</strong>：<code>bad-sel.yaml</code> 由 <code>app-v1.yaml</code> 改两处得到，名字换成 <code>bad-sel</code>，<code>selector</code> 写成 <code>app: app-typo</code>，和模板标签 <code>app: app</code> 对不上：</p><pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token function">sed</span> <span class="token parameter variable">-e</span> <span class="token string">'s/name: app$/name: bad-sel/'</span> <span class="token parameter variable">-e</span> <span class="token string">'s/^      app: app$/      app: app-typo/'</span> app-v1.yaml <span class="token operator">&gt;</span> bad-sel.yaml</code></pre><pre class="language-console" data-language="console"><code class="language-console">$ kubectl -n notes-lab apply -f bad-sel.yaml --dry-run=client
+deployment.apps/bad-sel created (dry run)
+$ kubectl -n notes-lab apply -f bad-sel.yaml --dry-run=server
+The Deployment "bad-sel" is invalid: spec.template.metadata.labels: Invalid value: map[string]string{"app":"app"}: `selector` does not match template `labels`</code></pre><p><strong>准入拒绝</strong>：在 namespace 里 <code>apply</code> 一个 LimitRange，限制单个容器 CPU limit 不超过 200m：</p><pre class="language-yaml" data-language="yaml"><code class="language-yaml"><span class="token key atrule">apiVersion</span><span class="token punctuation">:</span> v1
+<span class="token key atrule">kind</span><span class="token punctuation">:</span> LimitRange
+<span class="token key atrule">metadata</span><span class="token punctuation">:</span>
+  <span class="token key atrule">name</span><span class="token punctuation">:</span> cpu<span class="token punctuation">-</span>cap
+<span class="token key atrule">spec</span><span class="token punctuation">:</span>
+  <span class="token key atrule">limits</span><span class="token punctuation">:</span>
+    <span class="token punctuation">-</span> <span class="token key atrule">type</span><span class="token punctuation">:</span> Container
+      <span class="token key atrule">max</span><span class="token punctuation">:</span>
+        <span class="token key atrule">cpu</span><span class="token punctuation">:</span> 200m</code></pre><p>再提交一个 limit 为 500m 的 Pod：</p><pre class="language-console" data-language="console"><code class="language-console">$ kubectl -n notes-lab run big --image=busybox:1.36 --restart=Never --overrides='{"spec":{"containers":[{"name":"big","image":"busybox:1.36","args":["sleep","60"],"resources":{"limits":{"cpu":"500m"}}}]}}' --dry-run=client
+pod/big created (dry run)
+$ kubectl -n notes-lab run big --image=busybox:1.36 --restart=Never --overrides='{"spec":{"containers":[{"name":"big","image":"busybox:1.36","args":["sleep","60"],"resources":{"limits":{"cpu":"500m"}}}]}}' --dry-run=server
+Error from server (Forbidden): pods "big" is forbidden: maximum cpu usage per Container is 200m, but limit is 500m</code></pre><p><strong>字段名拼错</strong>：<code>typo.yaml</code> 是把 <code>app-v1.yaml</code> 里的 <code>replicas</code> 写成 <code>replica</code>（<code>sed 's/^ replicas: 1/ replica: 1/' app-v1.yaml &gt; typo.yaml</code>），client 模式同样放行，server 模式才报 <code>strict decoding error: unknown field "spec.replica"</code>（这条报错还把整个补丁打了出来，很长，这里只摘关键部分）。</p><p>client 模式为什么连字段名都不查？<code>-v=6</code> 能看出来：</p><pre class="language-console" data-language="console"><code class="language-console">$ kubectl -n notes-lab apply -f bad-sel.yaml --dry-run=client -v=6 2&gt;&amp;1 | grep -E "round_trippers|dry run"
+I1013 16:05:04.930967  865471 round_trippers.go:553] GET https://&lt;apiserver&gt;/openapi/v3?timeout=32s 200 OK in 2 milliseconds
+I1013 16:05:04.932592  865471 round_trippers.go:553] GET https://&lt;apiserver&gt;/openapi/v3/apis/apps/v1?hash=0258D87672EC79003DA06605195D9D2D70342F500793A566484BF222B209BB3226067464C2433E2F9EAAFDCA22DB0BC49C7F7B39154CA67E29A40FA7CE1CEE65&amp;timeout=32s 200 OK in 1 milliseconds
+I1013 16:05:04.945565  865471 round_trippers.go:553] GET https://&lt;apiserver&gt;/apis/apps/v1/namespaces/notes-lab/deployments/bad-sel 404 Not Found in 1 milliseconds
+I1013 16:05:04.946495  865471 round_trippers.go:553] GET https://&lt;apiserver&gt;/api/v1/namespaces/notes-lab 200 OK in 0 milliseconds
+deployment.apps/bad-sel created (dry run)
+$ kubectl -n notes-lab apply -f bad-sel.yaml --dry-run=server -v=6 2&gt;&amp;1 | grep -E "round_trippers"
+...
+I1013 16:05:04.992570  865505 round_trippers.go:553] POST https://&lt;apiserver&gt;/apis/apps/v1/namespaces/notes-lab/deployments?dryRun=All&amp;fieldManager=kubectl-client-side-apply&amp;fieldValidation=Strict 422 Unprocessable Entity in 1 milliseconds</code></pre><p>client 模式也会访问 API Server（读 OpenAPI、查对象是否存在），但从不发出写请求；server 模式多了一个带 <code>dryRun=All</code> 的 POST。字段校验靠的是 <code>fieldValidation=Strict</code> 这个参数，由服务端执行，没有这个 POST 就没人查。所以 <code>--dry-run=client</code> 只适合配合 <code>-o yaml</code> 生成清单，要确认「这份清单能不能提交成功」，用 <code>--dry-run=server</code> 或 <code>kubectl diff</code>。</p><p>做完把 LimitRange 删掉：</p><pre class="language-bash" data-language="bash"><code class="language-bash">kubectl <span class="token parameter variable">-n</span> notes-lab delete limitrange cpu-cap</code></pre><p>不删的话会影响之后创建的 Pod。它只写了 <code>max</code>，但另起一轮补测时读回来发现，服务端把 <code>default</code> 和 <code>defaultRequest</code> 也都填成了 200m，没声明资源的容器会被注入这两个值：</p><pre class="language-console" data-language="console"><code class="language-console">$ kubectl -n notes-lab get limitrange cpu-cap -o jsonpath='{.spec.limits[0]}{"\n"}'
+{"default":{"cpu":"200m"},"defaultRequest":{"cpu":"200m"},"max":{"cpu":"200m"},"type":"Container"}
+$ kubectl -n notes-lab run lr-test --image=busybox:1.36 --restart=Never --dry-run=server -o jsonpath="{.spec.containers[0].resources}{\"\n\"}" -- sleep 10
+{"limits":{"cpu":"200m"},"requests":{"cpu":"200m"}}</code></pre><h2 id="delete：deleted-不等于已经没了"><a href="#delete：deleted-不等于已经没了" class="headerlink" title="delete：deleted 不等于已经没了"></a>delete：deleted 不等于已经没了</h2><p>先把前面用完的 <code>web</code> 和 <code>two</code> 删掉，再用同一条命令建两个 Pod <code>d1</code>、<code>d2</code> 用于后面的对比：</p><pre class="language-bash" data-language="bash"><code class="language-bash">kubectl <span class="token parameter variable">-n</span> notes-lab delete pod web two <span class="token parameter variable">--wait</span><span class="token operator">=</span>false
+<span class="token keyword">for</span> <span class="token for-or-select variable">p</span> <span class="token keyword">in</span> d1 d2<span class="token punctuation">;</span> <span class="token keyword">do</span> kubectl <span class="token parameter variable">-n</span> notes-lab run <span class="token variable">$p</span> <span class="token parameter variable">--image</span><span class="token operator">=</span>busybox:1.36 <span class="token parameter variable">--restart</span><span class="token operator">=</span>Never -- <span class="token function">sh</span> <span class="token parameter variable">-c</span> <span class="token string">'while true; do sleep 1; done'</span><span class="token punctuation">;</span> <span class="token keyword">done</span></code></pre><p><code>inspect-demo</code> 的主进程是一个 <code>sh</code> 循环，先默认删除它：</p><pre class="language-console" data-language="console"><code class="language-console">$ date +%T; time kubectl -n notes-lab delete pod inspect-demo; date +%T
+16:03:38
+pod "inspect-demo" deleted
+  0.05s user 0.01s system 0% cpu 32.576 total
+16:04:11</code></pre><p>用了 32.6 秒。默认宽限期是 30 秒，kubelet 先发 SIGTERM，期限到了再 SIGKILL。这里几乎等满了 30 秒，推测是因为作为 PID 1 的 <code>sh</code> 没有给 SIGTERM 设处理函数，内核不会替 PID 1 执行默认的终止动作，只能等 SIGKILL（这次没有在容器里单独验证信号处理）。优雅退出的细节见 <a href="/notes/k8s/graceful-termination/">优雅终止</a>。</p><p><code>--wait=false</code> 立即返回，同样打印 <code>deleted</code>，但对象其实还在：</p><pre class="language-console" data-language="console"><code class="language-console">$ time kubectl -n notes-lab delete pod d1 --wait=false; kubectl -n notes-lab get pod d1
+pod "d1" deleted
+  0.04s user 0.01s system 173% cpu 0.028 total
+NAME   READY   STATUS        RESTARTS   AGE
+d1     1/1     Terminating   0          44s
+$ kubectl -n notes-lab get pod d1 -o jsonpath='{.metadata.deletionTimestamp} {.metadata.deletionGracePeriodSeconds}{"\n"}'
+2026-10-13T08:04:45Z 30</code></pre><p><code>deleted</code> 的意思是「删除请求已被接受」。对象被打上 <code>deletionTimestamp</code>，状态显示为 <code>Terminating</code>，要等 kubelet 停掉容器后才真正消失。脚本如果紧接着要用同名对象重建，必须用默认的 <code>--wait=true</code>，或者 <code>kubectl wait --for=delete</code>。</p><p><code>--grace-period=1</code> 把宽限期缩短到 1 秒，但整条命令仍然用了 4.8 秒，推测多出来的几秒是 kubelet 停容器、回报状态，以及 API Server 最终删除对象的时间（没有逐段计时）：</p><pre class="language-console" data-language="console"><code class="language-console">$ time kubectl -n notes-lab delete pod d2 --grace-period=1
+pod "d2" deleted
+  0.04s user 0.02s system 1% cpu 4.810 total</code></pre><p><code>--now</code> 等同于 <code>--grace-period=1</code>。<code>--grace-period=0 --force</code> 会跳过等待直接从 API 删除对象，节点上的容器可能还在运行，只在节点已经失联、Pod 卡在 Terminating 时考虑。</p><h2 id="–sort-by：自然排序，拼错字段要看对象个数"><a href="#–sort-by：自然排序，拼错字段要看对象个数" class="headerlink" title="–sort-by：自然排序，拼错字段要看对象个数"></a>–sort-by：自然排序，拼错字段要看对象个数</h2><p>这一节在上面的 delete 之后执行：此时 <code>inspect-demo</code>、<code>d1</code>、<code>d2</code>、<code>web</code>、<code>two</code>、<code>web2</code> 都已删除，namespace 里只剩 Deployment <code>app</code> 的 1 个 Pod（<code>web</code>、<code>two</code> 在 delete 一节开头删掉，<code>web2</code> 在 port-forward 一节删掉）。如果你的 namespace 里还有别的 Pod，给下面的 <code>get</code> 都加上 <code>-l app=app</code>，只看这一组。</p><p>字段写错时，默认表格输出会打印 <code>No resources found</code>、退出码 0，换成 <code>-o name</code> 才报出真正的错误，原因和源码位置见 <a href="/notes/k8s/kubectl-jsonpath/">kubectl JSONPath</a>。这里补充一个那篇没有覆盖的情况：列表里只有一个对象时，默认表格输出完全不受拼错的排序字段影响。下面把 <code>podIP</code> 写成 <code>podIp</code>，Deployment 先是 1 个副本，再扩到 3 个：</p><pre class="language-console" data-language="console"><code class="language-console">$ kubectl -n notes-lab get pods --sort-by=.status.podIp
+NAME                   READY   STATUS    RESTARTS   AGE
+app-6bb8f765c9-mrt7q   1/1     Running   0          2m56s
+$ kubectl -n notes-lab scale deploy app --replicas=3; kubectl -n notes-lab rollout status deploy app --timeout=60s
+deployment.apps/app scaled
+Waiting for deployment "app" rollout to finish: 1 of 3 updated replicas are available...
+Waiting for deployment "app" rollout to finish: 2 of 3 updated replicas are available...
+deployment "app" successfully rolled out
+$ kubectl -n notes-lab get pods --sort-by=.status.podIp; echo "exit=$?"
+No resources found in notes-lab namespace.
+exit=0</code></pre><p>kubectl v1.30 的 <code>SortingPrinter.PrintObj</code> 对默认表格和 <code>-o wide</code> 拿到的 Table，只在 <code>len(table.Rows) &gt; 1</code> 时才调用 <code>NewTableSorter</code> 去解析排序字段，一行时直接原样打印，字段写没写对根本不检查。<code>-o name</code>、<code>-o json</code>、<code>-o jsonpath</code> 拿到的是对象列表，走的是 <code>SortObjects</code>，只有一个对象也会报错。下面是另起一轮、只有 1 个副本时补测的：</p><pre class="language-console" data-language="console"><code class="language-console">$ kubectl -n notes-lab get pods -l app=app --sort-by=.status.podIp -o name
+error: couldn't find any field with path "{.status.podIp}" in the list of objects
+$ kubectl -n notes-lab get pods -l app=app --sort-by=.status.podIp -o jsonpath='{.items[*].metadata.name}'
+error: couldn't find any field with path "{.status.podIp}" in the list of objects</code></pre><p>所以一条带 <code>--sort-by</code> 的表格命令在测试环境只有一个副本时能跑通，到了多副本的环境就变成「No resources found」。写进脚本之前，先用 <code>-o name</code> 或 <code>-o jsonpath</code> 跑一次，确认排序字段是对的。</p><p>字段写对时：</p><pre class="language-console" data-language="console"><code class="language-console">$ kubectl -n notes-lab get pods --sort-by=.status.podIP -o custom-columns=NAME:.metadata.name,IP:.status.podIP
+NAME                   IP
+app-6bb8f765c9-85g8n   &lt;pod-net&gt;.107.7
+app-6bb8f765c9-7g7fq   &lt;pod-net&gt;.107.46
+app-6bb8f765c9-mrt7q   &lt;pod-net&gt;.209.201</code></pre><p>（IP 前两段用 <code>&lt;pod-net&gt;</code> 代替。）注意 <code>.7</code> 排在 <code>.46</code> 前面：逐字符比较的话 <code>4</code> 小于 <code>7</code>，结果会相反。kubectl 对字符串用的是 <code>sortorder.NaturalLess</code>，即自然排序，字符串里的连续数字按数值比较。</p><h2 id="清理"><a href="#清理" class="headerlink" title="清理"></a>清理</h2><pre class="language-bash" data-language="bash"><code class="language-bash">kubectl delete namespace notes-lab <span class="token parameter variable">--wait</span>
+kubectl get namespace notes-lab
+<span class="token comment"># Error from server (NotFound): namespaces "notes-lab" not found</span>
+<span class="token function">rm</span> /tmp/kubeconfig-lab <span class="token operator">&amp;&amp;</span> <span class="token builtin class-name">unset</span> KUBECONFIG</code></pre><p>删除 namespace 会连同里面的 Pod、Deployment、Service、LimitRange 一起删掉。那份 kubeconfig 副本是用 <code>--flatten</code> 导出的，里面有客户端证书和私钥，用完一定要删。</p><p>回头看，这次碰到的几个坑有一个共同点：命令没有报错，退出码是 0，只是结果不对。namespace 拼错时是空列表，排序字段拼错时也是空列表，本地端口被占时转发到了别的程序，先 <code>create</code> 后 <code>apply</code> 时被删的字段留了下来。遇到「看起来正常但不对」的结果，<code>-v=6</code> 看实际请求、换成 <code>-o name</code> / <code>-o json</code> 看有没有被吞掉的错误，比反复重跑同一条命令有用。整体排查思路见<a href="/notes/k8s/troubleshooting/">故障排查</a>。</p><p>参考：<a target="_blank" rel="noopener" href="https://kubernetes.io/docs/reference/kubectl/quick-reference/">kubectl Quick Reference</a>、<a target="_blank" rel="noopener" href="https://kubernetes.io/docs/tasks/manage-kubernetes-objects/declarative-config/">Declarative Management of Kubernetes Objects Using Configuration Files</a>、<a target="_blank" rel="noopener" href="https://kubernetes.io/docs/concepts/overview/working-with-objects/field-selectors/">Field Selectors</a>、<a target="_blank" rel="noopener" href="https://kubernetes.io/docs/concepts/configuration/organize-cluster-access-kubeconfig/">Organizing Cluster Access Using kubeconfig Files</a>、<a target="_blank" rel="noopener" href="https://kubernetes.io/docs/tasks/access-application-cluster/port-forward-access-application-cluster/">Use Port Forwarding to Access Applications in a Cluster</a>。</p></div></div></div><div class="note-prev-next" role="navigation" aria-label="笔记篇章导航"><a href="/notes/k8s/troubleshooting/" class="note-nav-link note-nav-prev" aria-label="上一篇：常见故障排查"><span class="note-nav-label"><i class="fas fa-arrow-left" aria-hidden="true"></i> 上一篇 <span class="note-nav-index">第 36 篇</span></span> <span class="note-nav-title">常见故障排查</span></a> <a href="/notes/k8s/manifest-batch/" class="note-nav-link note-nav-next" aria-label="下一篇：kubectl 批量清单管理"><span class="note-nav-label">下一篇<i class="fas fa-arrow-right" aria-hidden="true"></i> <span class="note-nav-index">第 38 篇</span></span> <span class="note-nav-title">kubectl 批量清单管理</span></a></div></article><aside id="note-toc-col" class="note-toc-col" aria-label="本文目录"><div class="panel note-toc-panel"><div class="note-toc-heading"><span><i class="fas fa-list-ul" aria-hidden="true"></i> 本文目录</span> <button type="button" class="note-toc-close" aria-label="关闭本文目录"><i class="fas fa-times" aria-hidden="true"></i></button></div><nav id="note-toc-links" class="note-toc-links" aria-label="文章内跳转"></nav><div class="note-toc-progress">已阅读 <span id="note-read-percent">0%</span></div></div></aside></div></section></main><div class="note-reader-dock" aria-label="阅读目录"><button type="button" id="note-sidebar-toggle" aria-controls="note-sidebar-col" aria-expanded="false"><i class="fas fa-layer-group" aria-hidden="true"></i><span>系列章节</span></button> <button type="button" id="note-toc-toggle" aria-controls="note-toc-col" aria-expanded="false"><i class="fas fa-list-ul" aria-hidden="true"></i><span>本文目录</span></button></div><div id="note-sidebar-overlay" class="note-sidebar-overlay" aria-hidden="true"></div><script src="/libs/codeBlock/codeBlockFuction.js"></script><script src="/libs/codeBlock/codeLang.js"></script><script src="/libs/codeBlock/codeCopy.js"></script><script src="/libs/codeBlock/codeShrink.js"></script><script src="/js/note-reader.js?v=cdccb3ba"></script><div class="progress-bar"></div><footer class="dp-footer page-footer"><div class="dp-wrap dp-foot-grid"><div class="l">&copy; <span id="year">2023-2026</span> <b>翼舞成梦</b> · costalong.com — 用 <a href="https://hexo.io/" target="_blank" rel="noopener">Hexo</a> 构建，记录工程实践与学习笔记。</div><div class="dp-foot-links"><a href="/advertise/">广告合作</a> <a href="/privacy/">隐私政策</a> <a href="/atom.xml">RSS</a> <a href="/archives/">归档</a> <a href="/about/">关于</a> <a href="https://github.com/costa92" target="_blank" rel="noopener">GitHub</a> <a href="/sitemap.xml">sitemap</a></div></div><div class="dp-wrap" style="margin-top:16px;display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;font-size:12.5px;color:var(--text-mut)"><div class="footer-social"><a href="https://github.com/costa92" class="tooltipped" aria-label="访问我的GitHub" target="_blank" rel="noopener" data-tooltip="访问我的GitHub" data-position="top" data-delay="50"><i class="fab fa-github"></i></a><a href="mailto:costa9293@gmail.com" class="tooltipped" aria-label="邮件联系我" target="_blank" rel="noopener" data-tooltip="邮件联系我" data-position="top" data-delay="50"><i class="fas fa-envelope-open"></i></a><a href="tencent://AddContact/?fromId=50&fromSubId=1&subcmd=all&uin=944310536" class="tooltipped" aria-label="QQ联系我" target="_blank" rel="noopener" data-tooltip="QQ联系我: 944310536" data-position="top" data-delay="50"><i class="fab fa-qq"></i></a><a href="/atom.xml" class="tooltipped" aria-label="RSS 订阅" target="_blank" rel="noopener" data-tooltip="RSS 订阅" data-position="top" data-delay="50"><i class="fas fa-rss"></i></a></div><div class="footer-stats" style="font-family:var(--font-mono)"><span id="busuanzi_container_site_pv"><i class="far fa-eye"></i> &nbsp;<span id="busuanzi_value_site_pv"></span></span> <span id="busuanzi_container_site_uv">&nbsp;&middot;&nbsp;<i class="fas fa-users"></i>&nbsp;<span id="busuanzi_value_site_uv"></span></span> &nbsp;&middot;&nbsp;<a href="https://beian.miit.gov.cn/#/Integrated/index" target="_blank" rel="noopener">湘ICP备15006875号</a></div></div></footer><div id="searchModal" class="modal" role="dialog" aria-modal="true" aria-labelledby="searchTitle"><div class="modal-content"><div class="search-header"><label for="searchInput" id="searchTitle" class="title"><i class="fas fa-search" aria-hidden="true"></i> &nbsp;&nbsp;搜索</label> <input type="search" id="searchInput" name="s" placeholder="请输入搜索的关键字" class="search-input" aria-controls="searchResult"></div><div id="searchStatus" class="search-status" role="status" aria-live="polite"></div><div id="searchResult"></div></div></div><script>$(function(){"use strict";var n=document.getElementById("searchInput"),l=document.getElementById("searchResult"),t=document.getElementById("searchStatus"),a=null,c=!1;function o(e){t.textContent=e}function e(){l.replaceChildren();var e=n.value.trim().toLocaleLowerCase();if(e)if(a){var r=e.split(/[\s\-]+/).filter(Boolean),t=a.filter(function(t){return r.every(function(e){return t.searchText.includes(e)})}).slice(0,20);if(t.length){o("找到 "+t.length+" 条相关内容"+(20===t.length?"（最多显示 20 条）":""));var i=document.createElement("ul");i.className="search-result-list",t.forEach(function(e){var t=document.createElement("li"),n=document.createElement("a");if(n.className="search-result-title",n.href=e.url,n.textContent=e.title,t.appendChild(n),e.content){var l=e.content.toLocaleLowerCase().indexOf(r[0]),a=Math.max(0,l-35),c=document.createElement("p");c.className="search-result",c.textContent=(a?"…":"")+e.content.slice(a,a+130)+(a+130<e.content.length?"…":""),t.appendChild(c)}i.appendChild(t)}),l.appendChild(i)}else o("没有找到相关内容，请换个关键词试试。")}else o(c?"正在加载搜索索引…":"搜索索引暂时不可用，请稍后重试。");else o("")}function r(){a||c||(c=!0,e(),$.ajax({url:"/search.xml",dataType:"xml"}).done(function(e){a=$("entry",e).map(function(){var e,t=$("title",this).text().trim(),n=(e=$("content",this).text(),String(e||"").replace(/<[^>]*>/g," ").replace(/\s+/g," ").trim()),l=$("url",this).text().trim();return t&&l?{title:t,content:n,url:"/"===l.charAt(0)?l:"/"+l,searchText:(t+" "+n).toLocaleLowerCase()}:null}).get()}).fail(function(){a=null}).always(function(){c=!1,e()}))}n.addEventListener("input",function(){r(),e()}),n.addEventListener("focus",r),$('a[href="#searchModal"], .search-btn').on("click",r)})</script><div class="stars-con"><div id="stars"></div><div id="stars2"></div><div id="stars3"></div></div><script>function switchNightMode(){$('<div class="Cuteen_DarkSky"><div class="Cuteen_DarkPlanet"></div></div>').appendTo($("body")),setTimeout(function(){$("body").hasClass("DarkMode")?($("body").removeClass("DarkMode"),localStorage.setItem("isDark","0"),$("#sum-moon-icon").removeClass("fa-sun").addClass("fa-moon")):($("body").addClass("DarkMode"),localStorage.setItem("isDark","1"),$("#sum-moon-icon").addClass("fa-sun").removeClass("fa-moon")),setTimeout(function(){$(".Cuteen_DarkSky").fadeOut(1e3,function(){$(this).remove()})},2e3)})}</script><div id="backTop" class="top-scroll"><button type="button" class="btn-floating btn-large waves-effect waves-light" aria-label="回到顶部"><i class="fas fa-arrow-up" aria-hidden="true"></i></button></div><script src="/libs/materialize/materialize.min.js" defer></script><script src="/libs/masonry/masonry.pkgd.min.js" defer></script><script src="/libs/aos/aos.js"></script><script src="/libs/lightGallery/js/lightgallery-all.min.js" defer></script><script src="/libs/scrollprogress/scrollProgress.min.js"></script><script src="/js/matery.js?v=3f7ec091" defer></script><script src="/js/responsive-tables.js?v=6ebf2b5e"></script><script src="/js/infinite-scroll.js?v=b6f5ebe2" defer></script><script>!function(){var t=document.createElement("script");t.src="https://zz.bdstatic.com/linksubmit/push.js";var e=document.getElementsByTagName("script")[0];e.parentNode.insertBefore(t,e)}()</script><script src="/js/fireworks.js" async></script><script>!function(){if(!new URLSearchParams(location.search).has("style-audit-preview")){var e=document.createElement("script");e.src="https://events.vercount.one/js",document.head.appendChild(e)}}()</script><script color="110,80,255" pointcolor="80,140,255" opacity="0.28" zindex="-1" count="80" src="/libs/background/canvas-nest.js"></script><script src="/libs/instantpage/instantpage.js" type="module"></script><!--/email_off--></body></html>

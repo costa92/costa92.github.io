@@ -1,0 +1,491 @@
+<!DOCTYPE HTML><html lang="zh-CN"><head><meta charset="utf-8"><meta name="keywords" content="Helm Chart 依赖与锁定, costalong, 翼舞成梦, 后端开发, Go语言, Kubernetes, K8s, Linux, AI, 学习笔记"><meta name="description" content="用两个本地子 Chart 和一个临时 HTTP 仓库实测 Helm 4.3 的依赖管理：dependency list 的几种状态、update 与 build 的分工、Chart.lock 锁不住 file:// 子 Chart 的内容、过期的锁文件为什么 template 和 lint 都不管；再测 condition 与 tags 的优先级、alias、global、import-values、父子 schema 的交互和同名模板覆盖，最后把伞形 Chart 装进集群看实际生成的对象。"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="renderer" content="webkit|ie-stand|ie-comp"><meta name="mobile-web-app-capable" content="yes"><meta name="format-detection" content="telephone=no"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><meta name="referrer" content="strict-origin-when-cross-origin"><meta name="google-adsense-account" content="ca-pub-8990123471955885"><title>Helm Chart 依赖与锁定 | 翼舞成梦</title><meta property="og:site_name" content="翼舞成梦"><meta property="og:locale" content="zh_CN"><meta property="og:type" content="website"><meta property="og:title" content="Helm Chart 依赖与锁定 | 翼舞成梦"><meta property="og:description" content="用两个本地子 Chart 和一个临时 HTTP 仓库实测 Helm 4.3 的依赖管理：dependency list 的几种状态、update 与 build 的分工、Chart.lock 锁不住 file:// 子 Chart 的内容、过期的锁文件为什么 template 和 lint 都不管；再测 condition 与 tags 的优先级、alias、global、import-values、父子 schema 的交互和同名模板覆盖，最后把伞形 Chart 装进集群看实际生成的对象。"><meta property="og:url" content="https://costalong.com/notes/k8s/helm-dependencies/"><meta property="og:image" content="https://costalong.com/medias/logo.webp"><meta name="twitter:card" content="summary"><link rel="canonical" href="https://costalong.com/notes/k8s/helm-dependencies/"><link rel="alternate" type="application/atom+xml" title="翼舞成梦" href="https://costalong.com/atom.xml"><link rel="alternate" type="application/json" title="翼舞成梦" href="https://costalong.com/feed.json"><link rel="icon" type="image/png" href="/favicon.png"><link rel="stylesheet" href="/css/fonts.css?v=864fc7ac"><link rel="preload" href="/libs/awesome/webfonts/fa-solid-900.woff2" as="font" type="font/woff2" crossorigin><link rel="stylesheet" href="/libs/awesome/css/all.min.css"><link rel="stylesheet" href="/libs/materialize/materialize.min.css"><link rel="stylesheet" href="/libs/aos/aos.css"><link rel="stylesheet" href="/libs/animate/animate.min.css" media="print" onload='this.media="all"'><link rel="stylesheet" href="/libs/lightGallery/css/lightgallery.min.css" media="print" onload='this.media="all"'><link rel="stylesheet" href="/css/matery.css"><link rel="stylesheet" href="/css/my.css"><link rel="stylesheet" href="/css/dark.css" media="none" onload='"all"!=media&&(media="all")'><link rel="stylesheet" href="/css/infinite-scroll.css"><link rel="stylesheet" href="/css/sidebar.css"><link rel="stylesheet" href="/css/navbar.css"><link rel="stylesheet" href="/libs/tocbot/tocbot.css"><link rel="stylesheet" href="/css/post.css"><link rel="stylesheet" href="/css/reward.css" media="print" onload='this.media="all"'><link rel="stylesheet" href="/css/obsidian.css?v=fee1bba1"><link rel="stylesheet" href="/css/darkpremium.css?v=c801dadc"><link rel="stylesheet" href="/css/post-darkpremium.css?v=c09ea248"><script>!function(o){var t=[];o.$=o.jQuery=function(n){if("function"!=typeof n)throw new Error("jQuery 尚未加载：请写在 $(function () {...}) 里");t.push(n)},document.addEventListener("DOMContentLoaded",function(){o.jQuery.fn&&t.forEach(function(n){o.jQuery(n)})})}(window)</script><script src="/libs/jquery/jquery-3.6.0.min.js" defer></script><script>new MutationObserver(function(t){t.forEach(function(t){"attributes"===t.type&&"aria-hidden"===t.attributeName&&"true"===document.body.getAttribute("aria-hidden")&&document.body.removeAttribute("aria-hidden")})}).observe(document.documentElement,{attributes:!0,subtree:!0,attributeFilter:["aria-hidden"]}),window.addEventListener("DOMContentLoaded",function(){"true"===document.body.getAttribute("aria-hidden")&&document.body.removeAttribute("aria-hidden")})</script><meta name="generator" content="Hexo 8.1.2"><style>.github-emoji{position:relative;display:inline-block;width:1.2em;min-height:1.2em;overflow:hidden;vertical-align:top;color:transparent}.github-emoji>span{position:relative;z-index:10}.github-emoji .fancybox,.github-emoji img{margin:0!important;padding:0!important;border:none!important;outline:0!important;text-decoration:none!important;user-select:none!important;cursor:auto!important}.github-emoji img{height:1.2em!important;width:1.2em!important;position:absolute!important;left:50%!important;top:50%!important;transform:translate(-50%,-50%)!important;user-select:none!important;cursor:auto!important}.github-emoji-fallback{color:inherit}.github-emoji-fallback img{opacity:0!important}</style></head><body><!--email_off--> <a class="skip-link" href="#content-start">跳到正文</a><header class="dp-nav"><div class="dp-wrap"><div class="dp-nav-inner"><a class="dp-brand" href="/"><span class="mark"><img src="/medias/logo.webp" alt="" width="22" height="22"></span><span><span class="name">翼舞成梦</span><br><span class="dom">costalong.com</span></span></a><div class="dp-nav-links" role="navigation" aria-label="主导航"><a href="/">首页</a> <a href="/archives/">归档</a> <a href="/moments/">Moments</a> <a href="/about/">关于</a> <a href="/explore/">探索</a> <a href="/galleries/">相册</a> <a href="/notes/" class="active" aria-current="page">笔记</a> <a href="/contact/">留言板</a> <a href="/friends/">友情链接</a></div><div class="dp-nav-actions"><a href="#searchModal" class="icon-btn modal-trigger" title="搜索" aria-label="搜索"><i class="fas fa-search" aria-hidden="true"></i></a><a class="dp-nav-cta" href="/atom.xml"><i class="fas fa-rss" style="margin-right:6px" aria-hidden="true"></i> 订阅更新</a> <button type="button" data-target="mobile-nav" class="icon-btn dp-burger sidenav-trigger button-collapse" aria-label="打开菜单" aria-expanded="false" aria-controls="mobile-nav"><i class="fas fa-bars" aria-hidden="true"></i></button></div></div></div><div id="mobile-nav" class="side-nav sidenav"><div class="mobile-head bg-color"><img src="/medias/logo.webp" class="logo-img circle responsive-img" alt="网站头像"><div class="logo-name">翼舞成梦</div><div class="logo-desc">翼舞成梦的个人博客，专注于后端开发、K8s 容器化技术、Linux 运维以及人工智能学习笔记分享。</div></div><ul class="menu-list mobile-menu-list"><li class="m-nav-item"><a href="/" class="waves-effect waves-light"><i class="fa-fw fas fa-home"></i> 首页</a></li><li class="m-nav-item"><a href="/archives/" class="waves-effect waves-light"><i class="fa-fw fas fa-archive"></i> 归档</a></li><li class="m-nav-item"><a href="/moments/" class="waves-effect waves-light"><i class="fa-fw fas fa-bolt"></i> Moments</a></li><li class="m-nav-item"><button type="button" class="m-nav-toggle" aria-expanded="false" aria-controls="mobile-submenu-3"><i class="fa-fw fas fa-compass" aria-hidden="true"></i> Discover<span class="m-icon" aria-hidden="true"><i class="fas fa-chevron-right"></i></span></button><ul id="mobile-submenu-3"><li><a href="/categories/" class="m-sub-link"><i class="fa m-sub-icon fas fa-bookmark"></i> <span>分类</span></a></li><li><a href="/tags/" class="m-sub-link"><i class="fa m-sub-icon fas fa-tags"></i> <span>标签</span></a></li></ul></li><li class="m-nav-item"><a href="/about/" class="waves-effect waves-light"><i class="fa-fw fas fa-user-circle"></i> 关于</a></li><li class="m-nav-item"><a href="/explore/" class="waves-effect waves-light"><i class="fa-fw fas fa-compass"></i> 探索</a></li><li class="m-nav-item"><a href="/galleries/" class="waves-effect waves-light"><i class="fa-fw fas fa-image"></i> 相册</a></li><li class="m-nav-item"><a href="/notes/" class="waves-effect waves-light"><i class="fa-fw fas fa-book-reader"></i> 笔记</a></li><li class="m-nav-item"><a href="/contact/" class="waves-effect waves-light"><i class="fa-fw fas fa-comments"></i> 留言板</a></li><li class="m-nav-item"><a href="/friends/" class="waves-effect waves-light"><i class="fa-fw fas fa-address-book"></i> 友情链接</a></li></ul></div></header><div id="content-start" tabindex="-1"></div><link rel="stylesheet" href="/css/note.css"><link rel="stylesheet" href="/css/note-reader.css?v=dae76c7e"><div class="dp-bg-field"><div class="glow v"></div><div class="glow c"></div><div class="glow i"></div></div><main class="content dp dp-note note-has-series"><section class="dp-page-hero dp-wrap"><span class="eyebrow"><span class="dot"></span> NOTES · Kubernetes</span><h1><span class="grad">Helm Chart 依赖与锁定</span></h1><div class="meta"><a href="/notes/"><i class="fas fa-book-reader"></i> 笔记</a> <span>Kubernetes</span> <span><b>配置与运维</b></span></div></section><section class="sec dp-wrap"><div class="note-layout"><aside id="note-sidebar-col" class="note-sidebar-col" aria-label="系列章节"><div class="panel note-sidebar-panel"><div class="note-sidebar-widget"><div class="note-sidebar-header"><i class="fas fa-dharmachakra"></i> <a href="/notes/k8s/concepts/">Kubernetes</a> <button type="button" class="note-sidebar-close hide-on-large-only" aria-label="关闭笔记目录"><i class="fas fa-times" aria-hidden="true"></i></button></div><div class="note-sidebar-body"><div class="note-chapter"><button type="button" class="note-chapter-title" aria-expanded="false" aria-controls="note-section-list-0"><i class="fas fa-chevron-right chapter-toggle-icon" aria-hidden="true"></i> <span>基础概念</span></button><ul class="note-section-list" id="note-section-list-0" style="display:none"><li class="note-section-item"><a href="/notes/k8s/concepts/">概念和术语</a></li><li class="note-section-item"><a href="/notes/k8s/components/">集群组件</a></li><li class="note-section-item"><a href="/notes/k8s/api-object-flow/">API 对象与控制器关系</a></li></ul></div><div class="note-chapter"><button type="button" class="note-chapter-title" aria-expanded="false" aria-controls="note-section-list-1"><i class="fas fa-chevron-right chapter-toggle-icon" aria-hidden="true"></i> <span>动手入门</span></button><ul class="note-section-list" id="note-section-list-1" style="display:none"><li class="note-section-item"><a href="/notes/k8s/lab/">本地实验环境</a></li><li class="note-section-item"><a href="/notes/k8s/images/">容器镜像与本地构建</a></li><li class="note-section-item"><a href="/notes/k8s/pod/">Pod 与容器</a></li><li class="note-section-item"><a href="/notes/k8s/pod-lifecycle/">Pod 生命周期与初始化容器</a></li><li class="note-section-item"><a href="/notes/k8s/deployment/">Deployment 与滚动更新</a></li><li class="note-section-item"><a href="/notes/k8s/labels/">标签与选择器</a></li><li class="note-section-item"><a href="/notes/k8s/probes-resources/">探针与资源管理</a></li><li class="note-section-item"><a href="/notes/k8s/qos/">Pod QoS 类别：判定边界、cgroup 与 OOM 分数</a></li><li class="note-section-item"><a href="/notes/k8s/service/">Service 与服务发现</a></li><li class="note-section-item"><a href="/notes/k8s/service-types/">Service 类型与 NodePort</a></li><li class="note-section-item"><a href="/notes/k8s/headless-service/">Headless Service 与 Pod DNS</a></li><li class="note-section-item"><a href="/notes/k8s/ingress/">Ingress 入口</a></li><li class="note-section-item"><a href="/notes/k8s/gateway-api/">Gateway API HTTPRoute 入门</a></li><li class="note-section-item"><a href="/notes/k8s/traefik-middleware/">Traefik Middleware 路由实验</a></li></ul></div><div class="note-chapter"><button type="button" class="note-chapter-title active" aria-expanded="true" aria-controls="note-section-list-2"><i class="fas fa-chevron-down chapter-toggle-icon" aria-hidden="true"></i> <span>配置与运维</span></button><ul class="note-section-list" id="note-section-list-2"><li class="note-section-item"><a href="/notes/k8s/configuration/">Namespace、ConfigMap 与 Secret</a></li><li class="note-section-item"><a href="/notes/k8s/secret-practices/">Secret 的安全使用边界</a></li><li class="note-section-item"><a href="/notes/k8s/secret-rotation/">Secret 轮换与应用重新加载</a></li><li class="note-section-item"><a href="/notes/k8s/downward-api/">Downward API 与 Pod 元数据</a></li><li class="note-section-item"><a href="/notes/k8s/emptydir/">emptyDir 临时卷</a></li><li class="note-section-item"><a href="/notes/k8s/resource-policy/">LimitRange 与 ResourceQuota</a></li><li class="note-section-item"><a href="/notes/k8s/jobs/">Job 与 CronJob</a></li><li class="note-section-item"><a href="/notes/k8s/helm/">Helm 入门</a></li><li class="note-section-item"><a href="/notes/k8s/helm-chart/">编写 Helm Chart</a></li><li class="note-section-item active"><a href="/notes/k8s/helm-dependencies/" aria-current="page">Helm Chart 依赖与锁定</a></li><li class="note-section-item"><a href="/notes/k8s/helm-upgrade/">Helm 升级验证与回滚</a></li><li class="note-section-item"><a href="/notes/k8s/storage/">持久卷与存储声明</a></li><li class="note-section-item"><a href="/notes/k8s/statefulset/">StatefulSet 与有状态服务</a></li><li class="note-section-item"><a href="/notes/k8s/storageclass/">StorageClass 与动态供给</a></li><li class="note-section-item"><a href="/notes/k8s/volume-snapshots/">CSI 卷快照与恢复</a></li><li class="note-section-item"><a href="/notes/k8s/rbac/">ServiceAccount 与 RBAC</a></li><li class="note-section-item"><a href="/notes/k8s/security-context/">容器安全上下文</a></li><li class="note-section-item"><a href="/notes/k8s/pod-security-admission/">Pod Security Admission</a></li><li class="note-section-item"><a href="/notes/k8s/troubleshooting/">常见故障排查</a></li></ul></div><div class="note-chapter"><button type="button" class="note-chapter-title" aria-expanded="false" aria-controls="note-section-list-3"><i class="fas fa-chevron-right chapter-toggle-icon" aria-hidden="true"></i> <span>进阶实践</span></button><ul class="note-section-list" id="note-section-list-3" style="display:none"><li class="note-section-item"><a href="/notes/k8s/kubectl/">kubectl 常用命令</a></li><li class="note-section-item"><a href="/notes/k8s/manifest-batch/">kubectl 批量清单管理</a></li><li class="note-section-item"><a href="/notes/k8s/server-side-apply/">Server-Side Apply 字段所有权</a></li><li class="note-section-item"><a href="/notes/k8s/kubectl-jsonpath/">kubectl JSONPath 查询</a></li><li class="note-section-item"><a href="/notes/k8s/kubectl-debug/">kubectl debug 临时调试容器</a></li><li class="note-section-item"><a href="/notes/k8s/daemonset/">DaemonSet 与节点工作负载</a></li><li class="note-section-item"><a href="/notes/k8s/reconciliation/">控制器调谐循环</a></li><li class="note-section-item"><a href="/notes/k8s/graceful-termination/">Pod 优雅终止与流量排空</a></li><li class="note-section-item"><a href="/notes/k8s/pdb/">PodDisruptionBudget 与维护窗口</a></li><li class="note-section-item"><a href="/notes/k8s/node-maintenance/">节点维护与安全排空</a></li><li class="note-section-item"><a href="/notes/k8s/network-policy/">NetworkPolicy 网络隔离</a></li><li class="note-section-item"><a href="/notes/k8s/cni-network-path/">Pod 网络路径与 CNI 排查</a></li><li class="note-section-item"><a href="/notes/k8s/dns-debugging/">集群 DNS 故障定位</a></li><li class="note-section-item"><a href="/notes/k8s/scheduling/">Pod 调度与节点选择</a></li><li class="note-section-item"><a href="/notes/k8s/pod-affinity/">Pod 亲和与反亲和</a></li><li class="note-section-item"><a href="/notes/k8s/taints-tolerations/">污点与容忍</a></li><li class="note-section-item"><a href="/notes/k8s/topology-spread/">Pod 拓扑分布约束</a></li><li class="note-section-item"><a href="/notes/k8s/hpa/">HPA 水平扩缩容</a></li><li class="note-section-item"><a href="/notes/k8s/hpa-troubleshooting/">HPA 不扩容排查</a></li><li class="note-section-item"><a href="/notes/k8s/kustomize/">Kustomize 环境配置</a></li><li class="note-section-item"><a href="/notes/k8s/crd/">CRD 与自定义资源</a></li><li class="note-section-item"><a href="/notes/k8s/operator-pattern/">Operator 模式与控制器设计</a></li></ul></div><div class="note-chapter"><button type="button" class="note-chapter-title" aria-expanded="false" aria-controls="note-section-list-4"><i class="fas fa-chevron-right chapter-toggle-icon" aria-hidden="true"></i> <span>集群搭建</span></button><ul class="note-section-list" id="note-section-list-4" style="display:none"><li class="note-section-item"><a href="/notes/k8s/install/">kubeadm 安装部署</a></li><li class="note-section-item"><a href="/notes/k8s/high-availability/">kubeadm 高可用拓扑</a></li><li class="note-section-item"><a href="/notes/k8s/kubeadm-upgrade/">kubeadm 升级检查清单</a></li><li class="note-section-item"><a href="/notes/k8s/kubeadm-certs/">kubeadm 证书到期检查</a></li><li class="note-section-item"><a href="/notes/k8s/etcd-snapshots/">etcd 快照与恢复检查清单</a></li><li class="note-section-item"><a href="/notes/k8s/multi-cluster/">kubeconfig 多集群管理</a></li><li class="note-section-item"><a href="/notes/k8s/observability/">OpenTelemetry 可观测性入门</a></li><li class="note-section-item"><a href="/notes/k8s/cka-practice/">CKA 原创练习路线</a></li></ul></div></div></div></div></aside><article class="note-content-col"><div class="panel note-content-card"><div class="note-series-progress"><span>第 27 / 66 节 · 配置与运维</span><progress value="27" max="66" aria-label="Kubernetes 笔记学习进度"></progress></div><div class="card-content article-card-content"><div id="articleContent"><h2 id="父-Chart-如何管理子-Chart"><a href="#父-Chart-如何管理子-Chart" class="headerlink" title="父 Chart 如何管理子 Chart"></a>父 Chart 如何管理子 Chart</h2><p><a href="/notes/k8s/helm-chart/">编写 Helm Chart</a>写了一个 Nginx Chart <code>web-chart</code>。这一篇把它当成子 Chart，再配一个只渲染 ConfigMap 的小 Chart <code>cache</code>，由父 Chart <code>shop</code> 在 <code>Chart.yaml</code> 里声明依赖。这种只负责把几个子 Chart 组合起来的父 Chart，通常叫伞形 Chart（umbrella chart）。</p><figure class="note-illustration"><a href="/notes/k8s/helm-dependencies/diagram/overview-1117511fb7ee.svg" target="_blank" rel="noopener" aria-label="查看Helm Chart 依赖与锁定大图"><img src="/notes/k8s/helm-dependencies/diagram/overview-1117511fb7ee.svg" alt="Helm Chart 依赖与锁定：update 写 Chart.lock 并把子 Chart 打包进 charts/；template、lint、install 只读 charts/，不检查锁文件。" loading="lazy" decoding="async"></a><figcaption>图：update 写 Chart.lock 并把子 Chart 打包进 charts/；template、lint、install 只读 charts/，不检查锁文件。</figcaption></figure><p>下文的输出来自 Helm v4.3.0，大部分实验只在本地渲染；最后一节装进一个三节点 kind 集群（Kubernetes v1.31.0），放在单独的 <code>notes-lab</code> namespace 里（<code>kubectl create namespace notes-lab</code>），节点名简化为 <code>worker</code>、<code>worker2</code>，Pod 和 Service 的 IP 用占位符代替。Release 的安装、升级和 values 优先级见 <a href="/notes/k8s/helm/">Helm 入门</a>，这里不再重复。</p><h2 id="目录和依赖声明"><a href="#目录和依赖声明" class="headerlink" title="目录和依赖声明"></a>目录和依赖声明</h2><pre class="language-text" data-language="text"><code class="language-text">lab/
+├── web-chart/          # 上一篇的 Chart，原样复制
+├── cache/
+│   ├── Chart.yaml
+│   ├── values.yaml
+│   └── templates/configmap.yaml
+└── shop/
+    ├── Chart.yaml
+    ├── values.yaml
+    └── templates/</code></pre><p><code>cache/Chart.yaml</code> 的 <code>version</code> 一开始是 <code>0.1.0</code>，模板只有一个 ConfigMap：</p><pre class="language-gotemplate" data-language="gotemplate"><code class="language-gotemplate">apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Release.Name }}-{{ .Chart.Name }}
+data:
+  maxMemory: {{ .Values.maxMemory | quote }}</code></pre><p><code>shop/Chart.yaml</code> 的第一版：</p><pre class="language-yaml" data-language="yaml"><code class="language-yaml"><span class="token key atrule">apiVersion</span><span class="token punctuation">:</span> v2
+<span class="token key atrule">name</span><span class="token punctuation">:</span> shop
+<span class="token key atrule">description</span><span class="token punctuation">:</span> 伞形 Chart：web + cache
+<span class="token key atrule">type</span><span class="token punctuation">:</span> application
+<span class="token key atrule">version</span><span class="token punctuation">:</span> 0.1.0
+<span class="token key atrule">dependencies</span><span class="token punctuation">:</span>
+  <span class="token punctuation">-</span> <span class="token key atrule">name</span><span class="token punctuation">:</span> web<span class="token punctuation">-</span>chart
+    <span class="token key atrule">version</span><span class="token punctuation">:</span> <span class="token string">"~0.1.0"</span>
+    <span class="token key atrule">repository</span><span class="token punctuation">:</span> file<span class="token punctuation">:</span>//../web<span class="token punctuation">-</span>chart
+  <span class="token punctuation">-</span> <span class="token key atrule">name</span><span class="token punctuation">:</span> cache
+    <span class="token key atrule">version</span><span class="token punctuation">:</span> <span class="token string">"~0.1.0"</span>
+    <span class="token key atrule">repository</span><span class="token punctuation">:</span> file<span class="token punctuation">:</span>//../cache</code></pre><p><code>repository: file://</code> 后面是相对于父 Chart 目录的路径。<code>name</code> 必须和子 Chart 自己 <code>Chart.yaml</code> 里的 <code>name</code> 一致。</p><h2 id="dependency-list、update、build"><a href="#dependency-list、update、build" class="headerlink" title="dependency list、update、build"></a>dependency list、update、build</h2><p>刚写完依赖时，<code>charts/</code> 目录还不存在：</p><pre class="language-console" data-language="console"><code class="language-console">$ helm dependency list ./shop
+NAME     	VERSION	REPOSITORY         	STATUS 
+web-chart	~0.1.0 	file://../web-chart	missing
+cache    	~0.1.0 	file://../cache    	missing
+
+$ helm template demo ./shop
+Error: an error occurred while checking for chart dependencies. You may need to run 'helm dependency build' to fetch missing dependencies: found in Chart.yaml, but missing in charts/ directory: web-chart, cache</code></pre><p><code>helm install</code> 报同样的错误，只是前面多了 <code>INSTALLATION FAILED:</code>。Helm 渲染时只看 <code>charts/</code> 目录，不会自己顺着 <code>repository</code> 去取。</p><figure class="note-illustration" data-note-visual="helm-dependencies-section"><a href="/notes/k8s/helm-dependencies/diagram/section-fd83aefc8691.svg" target="_blank" rel="noopener" aria-label="查看update 与 build 的分工大图"><img src="/notes/k8s/helm-dependencies/diagram/section-fd83aefc8691.svg" alt="update 与 build 的分工：升级依赖时在本地 update，CI 里用 build。" loading="lazy" decoding="async"></a><figcaption>图：升级依赖时在本地 update，CI 里用 build。</figcaption></figure><pre class="language-console" data-language="console"><code class="language-console">$ helm dependency update ./shop
+Saving 2 charts
+Deleting outdated charts
+$ ls -l shop/charts
+total 8
+-rw-rw-r-- 1 user user  425 Oct 12 16:43 cache-0.1.0.tgz
+-rw-rw-r-- 1 user user 1824 Oct 12 16:43 web-chart-0.1.0.tgz
+$ cat shop/Chart.lock
+dependencies:
+- name: web-chart
+  repository: file://../web-chart
+  version: 0.1.0
+- name: cache
+  repository: file://../cache
+  version: 0.1.0
+digest: sha256:1fd8264c94b31c463807a37421e8211f82b1c430a8559b93eff5069cccc50f51
+generated: "2026-10-12T16:43:37.351040054+08:00"
+$ helm dependency list ./shop
+NAME     	VERSION	REPOSITORY         	STATUS
+web-chart	~0.1.0 	file://../web-chart	ok    
+cache    	~0.1.0 	file://../cache    	ok</code></pre><p><code>update</code> 做了两件事：按 <code>version</code> 约束解析出具体版本，写进 <code>Chart.lock</code>；再把子 Chart 打成 <code>.tgz</code> 放进 <code>charts/</code>。即使是 <code>file://</code> 依赖，<code>charts/</code> 里放的也是打包后的副本，而不是指向源目录的链接。渲染结果里子 Chart 的模板路径是 <code>shop/charts/&lt;子 Chart&gt;/templates/...</code>：</p><pre class="language-console" data-language="console"><code class="language-console">$ helm template demo ./shop | grep -E "^# Source|^kind|^  name:"
+# Source: shop/charts/cache/templates/configmap.yaml
+kind: ConfigMap
+  name: demo-cache
+# Source: shop/charts/web-chart/templates/service.yaml
+kind: Service
+  name: demo-web-chart
+# Source: shop/charts/web-chart/templates/deployment.yaml
+kind: Deployment
+  name: demo-web-chart</code></pre><p><code>build</code> 则是「按 <code>Chart.lock</code> 重建 <code>charts/</code>」，不重新解析版本。两者的差别在后面几节会一一看到。</p><h2 id="Chart-lock-锁住了什么"><a href="#Chart-lock-锁住了什么" class="headerlink" title="Chart.lock 锁住了什么"></a>Chart.lock 锁住了什么</h2><h3 id="锁的是版本号，不是内容"><a href="#锁的是版本号，不是内容" class="headerlink" title="锁的是版本号，不是内容"></a>锁的是版本号，不是内容</h3><p>把 <code>cache/values.yaml</code> 里的 <code>maxMemory: 64mb</code> 改成 <code>128mb</code>，子 Chart 的 <code>version</code> 不变，然后跑 <code>build</code>：</p><pre class="language-console" data-language="console"><code class="language-console">$ sha256sum shop/charts/*.tgz; grep digest shop/Chart.lock
+7ba94a56e1135e51860857136417a534a343173fbc2b303bf6f1346acddb9c85  shop/charts/cache-0.1.0.tgz
+f8ea425dbdea21b69c41843192272727015faa74137fee9257c6c9914ca27c57  shop/charts/web-chart-0.1.0.tgz
+digest: sha256:1fd8264c94b31c463807a37421e8211f82b1c430a8559b93eff5069cccc50f51
+$ helm dependency build ./shop
+Saving 2 charts
+Deleting outdated charts
+$ sha256sum shop/charts/*.tgz; grep -E "digest|generated" shop/Chart.lock
+6535875b6e127fb4d2d9db8614d3a09a75248d619fca4eae780fa2231ce21dea  shop/charts/cache-0.1.0.tgz
+f8ea425dbdea21b69c41843192272727015faa74137fee9257c6c9914ca27c57  shop/charts/web-chart-0.1.0.tgz
+digest: sha256:1fd8264c94b31c463807a37421e8211f82b1c430a8559b93eff5069cccc50f51
+generated: "2026-10-12T16:43:37.351040054+08:00"
+$ helm template demo ./shop --show-only charts/cache/templates/configmap.yaml
+...
+data:
+  maxMemory: "128mb"</code></pre><p><code>build</code> 从源目录重新打包，<code>cache</code> 的 tgz 变了，渲染出 <code>128mb</code>；<code>Chart.lock</code> 一个字都没变。没改过的 <code>web-chart</code> 重新打出来的 tgz 哈希和之前完全相同。锁文件里只有名字、仓库和版本号，没有任何子 Chart 内容的校验和，远程仓库的依赖也一样：同一个版本号在仓库里被重新发布成别的内容，锁文件同样察觉不到。<code>file://</code> 只是最容易踩到的情形，同一份 <code>Chart.lock</code> 在两个人手上可以打出内容不同的包，取决于各自的 <code>../cache</code> 目录是什么状态。想让锁文件真正起作用，子 Chart 每次改动都要升 <code>version</code>。</p><h3 id="子-Chart-升了版本，约束没跟上"><a href="#子-Chart-升了版本，约束没跟上" class="headerlink" title="子 Chart 升了版本，约束没跟上"></a>子 Chart 升了版本，约束没跟上</h3><p>把 <code>cache</code> 的 <code>version</code> 升到 <code>0.2.0</code>，父 Chart 的约束还是 <code>~0.1.0</code>：</p><pre class="language-console" data-language="console"><code class="language-console">$ helm dependency list ./shop
+NAME     	VERSION	REPOSITORY         	STATUS
+web-chart	~0.1.0 	file://../web-chart	ok    
+cache    	~0.1.0 	file://../cache    	ok    
+
+$ helm dependency build ./shop
+Saving 2 charts
+Save error occurred:  can't get a valid version for dependency cache
+Error: can't get a valid version for dependency cache
+$ helm dependency update ./shop
+Error: can't get a valid version for 1 subchart(s): "cache" (repository "file://../cache", version "~0.1.0"). Make sure a matching chart version exists in the repo, or change the version constraint in Chart.yaml
+$ ls shop/charts
+cache-0.1.0.tgz
+web-chart-0.1.0.tgz</code></pre><p><code>list</code> 只比较 <code>charts/</code> 里的包和约束，所以仍然是 <code>ok</code>。<code>build</code>、<code>update</code> 都失败（<code>build</code> 退出码为 1），<code>charts/</code> 里留着旧的 <code>cache-0.1.0.tgz</code>。<code>file://</code> 目录里只有一个版本，约束对不上就没有别的候选。</p><h3 id="改了-Chart-yaml，没跑-update"><a href="#改了-Chart-yaml，没跑-update" class="headerlink" title="改了 Chart.yaml，没跑 update"></a>改了 Chart.yaml，没跑 update</h3><p>再把父 Chart 中 <code>cache</code> 的约束改成 <code>~0.2.0</code>，不跑 <code>update</code>，<code>Chart.lock</code> 还是旧的：</p><pre class="language-console" data-language="console"><code class="language-console">$ helm dependency list ./shop
+NAME     	VERSION	REPOSITORY         	STATUS       
+web-chart	~0.1.0 	file://../web-chart	ok           
+cache    	~0.2.0 	file://../cache    	wrong version
+
+$ helm template demo ./shop --show-only charts/cache/templates/configmap.yaml
+---
+# Source: shop/charts/cache/templates/configmap.yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: demo-cache
+data:
+  maxMemory: "128mb"
+
+$ helm lint ./shop
+==&gt; Linting ./shop
+[INFO] Chart.yaml: icon is recommended
+
+1 chart(s) linted, 0 chart(s) failed
+$ helm install demo ./shop -n notes-lab --dry-run=client | head -8
+NAME: demo
+LAST DEPLOYED: Mon Oct 12 16:44:10 2026
+NAMESPACE: notes-lab
+STATUS: pending-install
+REVISION: 1
+DESCRIPTION: Dry run complete
+TEST SUITE: None
+HOOKS:</code></pre><p><code>list</code> 标出了 <code>wrong version</code>，但 <code>template</code>、<code>lint</code>、<code>install --dry-run</code> 全部照常，用的是 <code>charts/</code> 里那份版本不符的 <code>0.1.0</code>。渲染和安装只检查 <code>charts/</code> 里「有没有」这个子 Chart，不检查版本是否满足约束。只有 <code>build</code> 会拒绝：</p><pre class="language-console" data-language="console"><code class="language-console">$ helm dependency build ./shop
+Error: the lock file (Chart.lock) is out of sync with the dependencies file (Chart.yaml). Please update the dependencies with 'helm dependency update'</code></pre><p><code>update</code> 之后锁文件和 <code>charts/</code> 才一起换成 <code>0.2.0</code>，<code>digest</code> 也变了：</p><pre class="language-console" data-language="console"><code class="language-console">$ helm dependency update ./shop
+Saving 2 charts
+Deleting outdated charts
+$ ls shop/charts; cat shop/Chart.lock
+cache-0.2.0.tgz
+web-chart-0.1.0.tgz
+dependencies:
+- name: web-chart
+  repository: file://../web-chart
+  version: 0.1.0
+- name: cache
+  repository: file://../cache
+  version: 0.2.0
+digest: sha256:613cdee3e121d521d1062ef584c3d8a94d4d966347c2e9f04c58d0b7cfc5f59a
+generated: "2026-10-12T16:44:10.595324158+08:00"</code></pre><p><code>digest</code> 用来判断锁文件是否过期。Helm 源码里它由 <code>resolver.HashReq</code> 计算：把 <code>Chart.yaml</code> 里依赖的全部字段和锁文件里的依赖列表一起序列化后取 sha256。所以不只是版本约束，依赖声明里任何一个字段变了都会让锁文件过期。在锁文件已同步（<code>build</code> 正常）的 <code>shop</code> 上，用一个小脚本每次只改 <code>Chart.yaml</code> 的一个字段，跑 <code>build</code>，再还原并确认 <code>build</code> 恢复正常：</p><pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token builtin class-name">echo</span> <span class="token string">"baseline: <span class="token variable"><span class="token variable">$(</span>helm dependency build ./shop <span class="token operator"><span class="token file-descriptor important">2</span>&gt;</span><span class="token file-descriptor important">&amp;1</span> <span class="token operator">|</span> <span class="token function">tail</span> <span class="token parameter variable">-1</span><span class="token variable">)</span></span>"</span>
+<span class="token function-name function">try</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">{</span> <span class="token builtin class-name">echo</span> <span class="token string">"--- <span class="token variable">$1</span>"</span><span class="token punctuation">;</span> <span class="token function">sed</span> <span class="token parameter variable">-i</span> <span class="token string">"<span class="token variable">$2</span>"</span> shop/Chart.yaml<span class="token punctuation">;</span> <span class="token function">diff</span> shop-Chart.yaml.orig shop/Chart.yaml <span class="token operator">|</span> <span class="token function">grep</span> <span class="token string">'^&gt;'</span><span class="token punctuation">;</span> helm dependency build ./shop <span class="token operator"><span class="token file-descriptor important">2</span>&gt;</span><span class="token file-descriptor important">&amp;1</span> <span class="token operator">|</span> <span class="token function">tail</span> -1<span class="token punctuation">;</span> <span class="token function">cp</span> shop-Chart.yaml.orig shop/Chart.yaml<span class="token punctuation">;</span> <span class="token builtin class-name">echo</span> <span class="token string">"restore: <span class="token variable"><span class="token variable">$(</span>helm dependency build ./shop <span class="token operator"><span class="token file-descriptor important">2</span>&gt;</span><span class="token file-descriptor important">&amp;1</span> <span class="token operator">|</span> <span class="token function">tail</span> <span class="token parameter variable">-1</span><span class="token variable">)</span></span>"</span><span class="token punctuation">;</span> <span class="token punctuation">}</span>
+try repository <span class="token string">'s#repository: file://../cache#repository: file://../cache/#'</span>
+try condition <span class="token string">'s/condition: cache.enabled/condition: cache.on/'</span>
+try tags <span class="token string">'s/tags: \[backend\]/tags: [backend, db]/'</span>
+try <span class="token builtin class-name">alias</span> <span class="token string">'s/alias: admin/alias: admin2/'</span>
+try import-values <span class="token string">'s/parent: imported/parent: imported2/'</span></code></pre><pre class="language-console" data-language="console"><code class="language-console">baseline: Deleting outdated charts
+--- repository
+&gt;     repository: file://../cache/
+Error: the lock file (Chart.lock) is out of sync with the dependencies file (Chart.yaml). Please update the dependencies with 'helm dependency update'
+restore: Deleting outdated charts
+--- condition
+&gt;     condition: cache.on
+Error: the lock file (Chart.lock) is out of sync with the dependencies file (Chart.yaml). Please update the dependencies with 'helm dependency update'
+restore: Deleting outdated charts
+--- tags
+&gt;     tags: [backend, db]
+Error: the lock file (Chart.lock) is out of sync with the dependencies file (Chart.yaml). Please update the dependencies with 'helm dependency update'
+restore: Deleting outdated charts
+--- alias
+&gt;     alias: admin2
+Error: the lock file (Chart.lock) is out of sync with the dependencies file (Chart.yaml). Please update the dependencies with 'helm dependency update'
+restore: Deleting outdated charts
+--- import-values
+&gt;         parent: imported2
+Error: the lock file (Chart.lock) is out of sync with the dependencies file (Chart.yaml). Please update the dependencies with 'helm dependency update'
+restore: Deleting outdated charts</code></pre><p>（这里用的是后文加了 alias、condition、tags、import-values 的 <code>shop</code>；<code>Deleting outdated charts</code> 是 <code>build</code> 成功时的最后一行。）<code>repository</code> 末尾多一个 <code>/</code>、只改 condition、tags、alias 或 import-values，都不影响解析出的版本，但锁文件一律过期，要重新 <code>update</code>。另一个方向，手工改锁文件里的版本号、不动 <code>Chart.yaml</code>，<code>build</code> 同样报 <code>out of sync</code>（见后文远程仓库一节）。另外，<code>update</code> 解析结果不变时不会重写锁文件，连跑两次 <code>generated</code> 时间都没动，所以锁文件出现在 diff 里就说明解析结果真的变了。</p><h3 id="charts-里的其他东西"><a href="#charts-里的其他东西" class="headerlink" title="charts/ 里的其他东西"></a>charts/ 里的其他东西</h3><p><code>charts/</code> 目录里放解包后的目录也可以：</p><pre class="language-console" data-language="console"><code class="language-console">$ ls -F shop/charts
+cache/
+web-chart-0.1.0.tgz
+$ helm dependency list ./shop
+NAME     	VERSION	REPOSITORY         	STATUS  
+web-chart	~0.1.0 	file://../web-chart	ok      
+cache    	~0.2.0 	file://../cache    	unpacked</code></pre><p>渲染结果与打包时相同。更需要留意的是没在 <code>Chart.yaml</code> 里声明的 Chart：复制一份 <code>cache</code> 改名为 <code>extra</code> 放进 <code>charts/</code>：</p><pre class="language-console" data-language="console"><code class="language-console">$ helm dependency list ./shop
+NAME     	VERSION	REPOSITORY         	STATUS  
+web-chart	~0.1.0 	file://../web-chart	ok      
+cache    	~0.2.0 	file://../cache    	unpacked
+
+WARNING: "shop/charts/extra" is not in Chart.yaml.
+$ helm template demo ./shop | grep -E "^# Source|  name:"
+# Source: shop/charts/cache/templates/configmap.yaml
+  name: demo-cache
+# Source: shop/charts/extra/templates/configmap.yaml
+  name: demo-extra
+# Source: shop/charts/web-chart/templates/service.yaml
+  name: demo-web-chart
+# Source: shop/charts/web-chart/templates/deployment.yaml
+  name: demo-web-chart</code></pre><p>只有 <code>list</code> 给了一条警告，<code>template</code> 一声不吭地把 <code>extra</code> 也渲染了。<code>charts/</code> 下的东西都会被当成子 Chart，而 <code>update</code>/<code>build</code> 只清理它认识的旧包（<code>Deleting outdated charts</code>），所以本地残留的目录可能随着 <code>helm package</code> 一起进了发布包。<code>.gitignore</code> 掉 <code>charts/*.tgz</code> 只防得住打包文件，防不住这种残留目录；可靠的做法是 CI 从干净的克隆重新 <code>build</code> 再打包。</p><h2 id="版本范围"><a href="#版本范围" class="headerlink" title="版本范围"></a>版本范围</h2><p><code>file://</code> 只有一个版本，看不出范围怎么选。在本机起一个临时的 Chart 仓库，把 <code>cache</code> 打成五个版本（每个版本的 <code>maxMemory</code> 改成 <code>v&lt;版本号&gt;</code>，方便事后认出是哪个包）：</p><pre class="language-bash" data-language="bash"><code class="language-bash"><span class="token function">mkdir</span> <span class="token parameter variable">-p</span> repo pkgsrc
+<span class="token keyword">for</span> <span class="token for-or-select variable">v</span> <span class="token keyword">in</span> <span class="token number">0.1</span>.0 <span class="token number">0.1</span>.5 <span class="token number">0.2</span>.0 <span class="token number">0.3</span>.0-rc.1 <span class="token number">1.0</span>.0<span class="token punctuation">;</span> <span class="token keyword">do</span>
+  <span class="token function">rm</span> <span class="token parameter variable">-rf</span> pkgsrc/cache<span class="token punctuation">;</span> <span class="token function">cp</span> <span class="token parameter variable">-r</span> cache pkgsrc/cache
+  <span class="token function">sed</span> <span class="token parameter variable">-i</span> <span class="token string">"s/^version: .*/version: <span class="token variable">$v</span>/"</span> pkgsrc/cache/Chart.yaml
+  <span class="token function">sed</span> <span class="token parameter variable">-i</span> <span class="token string">"s/^maxMemory: .*/maxMemory: v<span class="token variable">$v</span>/"</span> pkgsrc/cache/values.yaml
+  helm package pkgsrc/cache <span class="token parameter variable">-d</span> repo <span class="token operator">&gt;</span>/dev/null
+<span class="token keyword">done</span>
+helm repo index repo <span class="token parameter variable">--url</span> http://127.0.0.1:8879
+
+<span class="token comment"># 另开一个终端，在 repo 目录里起 HTTP 服务</span>
+<span class="token builtin class-name">cd</span> repo <span class="token operator">&amp;&amp;</span> python3 <span class="token parameter variable">-m</span> http.server <span class="token number">8879</span> <span class="token parameter variable">--bind</span> <span class="token number">127.0</span>.0.1</code></pre><p>再写一个只依赖 <code>cache</code> 的 Chart <code>ranges</code>（<code>values.yaml</code> 为 <code>{}</code>），<code>ranges/Chart.yaml</code>：</p><pre class="language-yaml" data-language="yaml"><code class="language-yaml"><span class="token key atrule">apiVersion</span><span class="token punctuation">:</span> v2
+<span class="token key atrule">name</span><span class="token punctuation">:</span> ranges
+<span class="token key atrule">version</span><span class="token punctuation">:</span> 0.1.0
+<span class="token key atrule">dependencies</span><span class="token punctuation">:</span>
+  <span class="token punctuation">-</span> <span class="token key atrule">name</span><span class="token punctuation">:</span> cache
+    <span class="token key atrule">version</span><span class="token punctuation">:</span> <span class="token string">"~0.1.0"</span>
+    <span class="token key atrule">repository</span><span class="token punctuation">:</span> http<span class="token punctuation">:</span>//127.0.0.1<span class="token punctuation">:</span><span class="token number">8879</span></code></pre><p>逐个修改约束并 <code>update</code>，<code>Chart.lock</code> 里解析出的版本：</p><table><thead><tr><th>约束</th><th>解析结果</th></tr></thead><tbody><tr><td><code>~0.1.0</code></td><td>0.1.5</td></tr><tr><td><code>^0.1.0</code></td><td>0.1.5</td></tr><tr><td><code>0.1.x</code></td><td>0.1.5</td></tr><tr><td><code>^0.2</code></td><td>0.2.0</td></tr><tr><td><code>&gt;=0.2.0</code></td><td>1.0.0</td></tr><tr><td><code>&gt;=0.2.0 &lt;1.0.0</code></td><td>0.2.0</td></tr><tr><td><code>&gt;=0.3.0-0 &lt;1.0.0</code></td><td>0.3.0-rc.1</td></tr><tr><td><code>*</code></td><td>1.0.0</td></tr><tr><td><code>~1.2.0</code></td><td>报错</td></tr></tbody></table><p>几个容易想错的地方：</p><ul><li><code>^0.1.0</code> 没有选 <code>0.2.0</code>。Helm 文档说 <code>^1.2.3</code> 等价于 <code>&gt;=1.2.3 &lt;2.0.0</code>，但主版本为 0 时，<code>^</code> 只允许补丁版本变化，效果和 <code>~</code> 一样。</li><li><code>&gt;=0.2.0 &lt;1.0.0</code> 跳过了 <code>0.3.0-rc.1</code>，预发布版本默认不参与匹配；约束里自己带上预发布标记（<code>&gt;=0.3.0-0</code>）才会被选中。</li><li><code>&gt;=0.2.0</code> 和 <code>*</code> 会一路跟到 <code>1.0.0</code>，跨主版本也照升不误。</li></ul><pre class="language-console" data-language="console"><code class="language-console">$ helm dependency update ./ranges
+Error: can't get a valid version for 1 subchart(s): "cache" (repository "http://127.0.0.1:8879", version "~1.2.0"). Make sure a matching chart version exists in the repo, or change the version constraint in Chart.yaml</code></pre><h3 id="仓库发布了新版本：build-不动，update-跟进"><a href="#仓库发布了新版本：build-不动，update-跟进" class="headerlink" title="仓库发布了新版本：build 不动，update 跟进"></a>仓库发布了新版本：build 不动，update 跟进</h3><p>约束 <code>~0.1.0</code>，锁在 <code>0.1.5</code>。这时用同样的方法再打一个 <code>0.1.6</code> 放进 <code>repo/</code>、重新 <code>helm repo index</code>，删掉 <code>charts/</code> 后先跑 <code>build</code>：</p><pre class="language-console" data-language="console"><code class="language-console">$ rm -rf ranges/charts; helm dependency build ./ranges; ls ranges/charts
+Error: no repository definition for http://127.0.0.1:8879. Please add the missing repos via 'helm repo add'
+ls: cannot access 'ranges/charts': No such file or directory</code></pre><p>这是没想到的一点：同一个直接写 URL 的仓库，<code>update</code> 能用（输出里是 <code>Getting updates for unmanaged Helm repositories...</code>），<code>build</code> 却要求先 <code>helm repo add</code>。加上之后：</p><pre class="language-console" data-language="console"><code class="language-console">$ helm repo add labrepo http://127.0.0.1:8879
+"labrepo" has been added to your repositories
+$ rm -rf ranges/charts; helm dependency build ./ranges; ls ranges/charts; tar xzOf ranges/charts/cache-0.1.5.tgz cache/values.yaml
+...
+Saving 1 charts
+Downloading cache from repo http://127.0.0.1:8879
+Deleting outdated charts
+cache-0.1.5.tgz
+maxMemory: v0.1.5
+$ helm dependency update ./ranges; ls ranges/charts; grep -A3 "^dependencies" ranges/Chart.lock
+...
+Saving 1 charts
+Downloading cache from repo http://127.0.0.1:8879
+Deleting outdated charts
+cache-0.1.6.tgz
+dependencies:
+- name: cache
+  repository: http://127.0.0.1:8879
+  version: 0.1.6</code></pre><p><code>build</code> 严格按锁文件取回 <code>0.1.5</code>，<code>update</code> 在约束范围内取了最新的 <code>0.1.6</code> 并改写锁文件。想退回 <code>0.1.5</code>，手工改锁文件是不行的：</p><pre class="language-console" data-language="console"><code class="language-console">$ sed -i "s/  version: 0.1.6/  version: 0.1.5/" ranges/Chart.lock; grep -E "version|digest" ranges/Chart.lock
+  version: 0.1.5
+digest: sha256:5421517fd22e032b8886cfafa256b8a5f1ae6a9835b92d6f5c7303eaaff9d4b9
+$ helm dependency build ./ranges; ls ranges/charts
+Error: the lock file (Chart.lock) is out of sync with the dependencies file (Chart.yaml). Please update the dependencies with 'helm dependency update'
+cache-0.1.6.tgz</code></pre><p>要固定在某个版本，就把 <code>Chart.yaml</code> 里的约束写成那个版本再 <code>update</code>。CI 里用 <code>build</code>，升级依赖时在本地跑 <code>update</code> 并审阅 <code>Chart.lock</code> 的 diff，就是这个分工。</p><h2 id="condition-和-tags"><a href="#condition-和-tags" class="headerlink" title="condition 和 tags"></a>condition 和 tags</h2><p>把 <code>shop</code> 改成三个依赖：<code>web-chart</code> 用 <code>alias</code> 装两份（<code>web</code> 和 <code>admin</code>，下一节细说），都打上 <code>frontend</code> 标签；<code>cache</code> 打上 <code>backend</code> 标签。每个依赖同时有 <code>condition</code>：</p><pre class="language-yaml" data-language="yaml"><code class="language-yaml"><span class="token key atrule">dependencies</span><span class="token punctuation">:</span>
+  <span class="token punctuation">-</span> <span class="token key atrule">name</span><span class="token punctuation">:</span> web<span class="token punctuation">-</span>chart
+    <span class="token key atrule">alias</span><span class="token punctuation">:</span> web
+    <span class="token key atrule">version</span><span class="token punctuation">:</span> <span class="token string">"~0.1.0"</span>
+    <span class="token key atrule">repository</span><span class="token punctuation">:</span> file<span class="token punctuation">:</span>//../web<span class="token punctuation">-</span>chart
+    <span class="token key atrule">condition</span><span class="token punctuation">:</span> web.enabled
+    <span class="token key atrule">tags</span><span class="token punctuation">:</span> <span class="token punctuation">[</span>frontend<span class="token punctuation">]</span>
+  <span class="token punctuation">-</span> <span class="token key atrule">name</span><span class="token punctuation">:</span> web<span class="token punctuation">-</span>chart
+    <span class="token key atrule">alias</span><span class="token punctuation">:</span> admin
+    <span class="token key atrule">version</span><span class="token punctuation">:</span> <span class="token string">"~0.1.0"</span>
+    <span class="token key atrule">repository</span><span class="token punctuation">:</span> file<span class="token punctuation">:</span>//../web<span class="token punctuation">-</span>chart
+    <span class="token key atrule">condition</span><span class="token punctuation">:</span> admin.enabled
+    <span class="token key atrule">tags</span><span class="token punctuation">:</span> <span class="token punctuation">[</span>frontend<span class="token punctuation">]</span>
+  <span class="token punctuation">-</span> <span class="token key atrule">name</span><span class="token punctuation">:</span> cache
+    <span class="token key atrule">version</span><span class="token punctuation">:</span> <span class="token string">"~0.2.0"</span>
+    <span class="token key atrule">repository</span><span class="token punctuation">:</span> file<span class="token punctuation">:</span>//../cache
+    <span class="token key atrule">condition</span><span class="token punctuation">:</span> cache.enabled
+    <span class="token key atrule">tags</span><span class="token punctuation">:</span> <span class="token punctuation">[</span>backend<span class="token punctuation">]</span></code></pre><figure class="note-illustration" data-note-visual="helm-dependencies-section-extra"><a href="/notes/k8s/helm-dependencies/diagram/section-extra-8990e2aaaed2.svg" target="_blank" rel="noopener" aria-label="查看子 Chart 是否渲染大图"><img src="/notes/k8s/helm-dependencies/diagram/section-extra-8990e2aaaed2.svg" alt="子 Chart 是否渲染：想让 tags 生效，就别给 enabled 写默认值。" loading="lazy" decoding="async"></a><figcaption>图：想让 tags 生效，就别给 enabled 写默认值。</figcaption></figure><p><code>shop/values.yaml</code>：</p><pre class="language-yaml" data-language="yaml"><code class="language-yaml"><span class="token key atrule">tags</span><span class="token punctuation">:</span>
+  <span class="token key atrule">frontend</span><span class="token punctuation">:</span> <span class="token boolean important">true</span>
+  <span class="token key atrule">backend</span><span class="token punctuation">:</span> <span class="token boolean important">true</span>
+
+<span class="token key atrule">web</span><span class="token punctuation">:</span> <span class="token punctuation">{</span><span class="token punctuation">}</span>
+
+<span class="token key atrule">admin</span><span class="token punctuation">:</span>
+  <span class="token key atrule">enabled</span><span class="token punctuation">:</span> <span class="token boolean important">false</span>
+
+<span class="token key atrule">cache</span><span class="token punctuation">:</span> <span class="token punctuation">{</span><span class="token punctuation">}</span></code></pre><p>注意 <code>web.enabled</code> 和 <code>cache.enabled</code> 在 values 里不存在，只有 <code>admin.enabled: false</code>。用不同参数渲染，看哪些子 Chart 出现在结果里：</p><table><thead><tr><th>参数</th><th>渲染出的子 Chart</th></tr></thead><tbody><tr><td>（默认）</td><td>cache web</td></tr><tr><td><code>--set tags.frontend=false</code></td><td>cache</td></tr><tr><td><code>--set tags.frontend=false --set web.enabled=true</code></td><td>cache web</td></tr><tr><td><code>--set admin.enabled=true</code></td><td>admin cache web</td></tr><tr><td><code>--set tags.backend=false</code></td><td>web</td></tr><tr><td><code>--set tags.backend=false --set cache.enabled=true</code></td><td>cache web</td></tr><tr><td><code>--set cache.enabled=false --set tags.backend=true</code></td><td>web</td></tr></tbody></table><p>规则可以从表里读出来：condition 指向的值存在时，它说了算，tags 被忽略（第 3、6、7 行）；condition 的值不存在时才看 tags（第 2、5 行）。<code>admin</code> 默认不出现，是因为 <code>admin.enabled: false</code> 盖过了 <code>frontend: true</code>。这和 Helm 文档「Conditions (when set in values) always override tags」一致。</p><p>一个实用的推论：想让 tags 能整体开关一组子 Chart，就不要给 <code>xxx.enabled</code> 写默认值，否则 tags 永远不起作用。这既包括父 Chart 的 <code>values.yaml</code>，也包括子 Chart 自己的 <code>values.yaml</code>：condition 是在合并子 Chart 默认值之后求值的。在 <code>cache</code> 的 <code>values.yaml</code> 里加一行 <code>enabled: true</code> 再试：</p><pre class="language-console" data-language="console"><code class="language-console">$ helm template demo ./shop --set tags.backend=false | grep -E "^# Source" | cut -d/ -f3 | sort -u | tr "\n" " "; echo
+cache parent-view.yaml web </code></pre><p><code>tags.backend=false</code> 没能关掉 <code>cache</code>。（这次是在实验目录的副本上做的，schema 里也放行了 <code>enabled</code>。）</p><h3 id="condition-的值必须是布尔"><a href="#condition-的值必须是布尔" class="headerlink" title="condition 的值必须是布尔"></a>condition 的值必须是布尔</h3><pre class="language-console" data-language="console"><code class="language-console">$ helm template demo ./shop --set web.enabled=yes ...
+level=WARN msg="returned non-bool value" path=web.enabled chart=web
+cache web
+$ helm template demo ./shop --set web.enabled=yes --set tags.frontend=false ...
+level=WARN msg="returned non-bool value" path=web.enabled chart=web
+cache
+$ helm template demo ./shop --set-string web.enabled=false ...
+level=WARN msg="returned non-bool value" path=web.enabled chart=web
+cache web</code></pre><p>（命令后面接的是同一段 <code>grep</code>/<code>cut</code> 管道，省略了。）值不是布尔时，Helm 只打一条警告，然后当作 condition 没设置，转去看 tags。最后一行最容易出事：字符串 <code>"false"</code> 没有关掉 <code>web</code>。values 文件里写成 <code>enabled: "false"</code>（带引号）也一样，同样只有一条警告，<code>web</code> 照样被渲染。</p><h2 id="alias：同一个子-Chart-装两份"><a href="#alias：同一个子-Chart-装两份" class="headerlink" title="alias：同一个子 Chart 装两份"></a>alias：同一个子 Chart 装两份</h2><p>不用 <code>alias</code>，把 <code>web-chart</code> 声明两次：</p><pre class="language-console" data-language="console"><code class="language-console">$ helm dependency update ./shop
+Error: validation: more than one dependency with name or alias "web-chart"</code></pre><p><code>template</code> 和 <code>list</code> 也报同样的错误。加上 <code>alias: web</code> 和 <code>alias: admin</code> 之后：</p><pre class="language-console" data-language="console"><code class="language-console">$ ls shop/charts; cat shop/Chart.lock
+cache-0.2.0.tgz
+web-chart-0.1.0.tgz
+dependencies:
+- name: web-chart
+  repository: file://../web-chart
+  version: 0.1.0
+- name: web-chart
+  repository: file://../web-chart
+  version: 0.1.0
+- name: cache
+  repository: file://../cache
+  version: 0.2.0
+digest: sha256:87bb0e241e2b129c96c0361c1947e03158ce9305e89d215afde823bcff60b4b8
+generated: "2026-10-12T16:45:27.264981132+08:00"
+$ helm template demo ./shop | grep -E "^# Source|^  name:"
+# Source: shop/charts/cache/templates/configmap.yaml
+  name: demo-cache
+# Source: shop/charts/web/templates/service.yaml
+  name: demo-web
+# Source: shop/charts/web/templates/deployment.yaml
+  name: demo-web</code></pre><p><code>charts/</code> 里只有一个 <code>web-chart-0.1.0.tgz</code>，锁文件里出现两条一样的记录，没有 alias 信息。渲染时 alias 取代了子 Chart 的名字：模板路径变成 <code>charts/web/...</code>，<code>.Chart.Name</code> 也变成了 <code>web</code>，所以 <code>web-chart.fullname</code> 拼出来的是 <code>demo-web</code> 而不是 <code>demo-web-chart</code>。两份实例的资源名、标签自然就区分开了；values 也按 alias 分段，分别写在 <code>web:</code> 和 <code>admin:</code> 下面。</p><p>反过来说，如果子 Chart 的模板里把名字写死，而不是从 <code>.Chart.Name</code> 推导，两个 alias 渲染出的资源就会同名，装两份的打算也就落空了。</p><h2 id="父-Chart-向子-Chart-传值，以及-global"><a href="#父-Chart-向子-Chart-传值，以及-global" class="headerlink" title="父 Chart 向子 Chart 传值，以及 global"></a>父 Chart 向子 Chart 传值，以及 global</h2><p>给 <code>cache</code> 的 <code>values.yaml</code> 加上自己的 <code>global</code> 默认值，模板里打印它看到的 values：</p><pre class="language-yaml" data-language="yaml"><code class="language-yaml"><span class="token key atrule">maxMemory</span><span class="token punctuation">:</span> 128mb
+<span class="token key atrule">global</span><span class="token punctuation">:</span>
+  <span class="token key atrule">env</span><span class="token punctuation">:</span> from<span class="token punctuation">-</span>cache<span class="token punctuation">-</span>defaults
+  <span class="token key atrule">region</span><span class="token punctuation">:</span> from<span class="token punctuation">-</span>cache<span class="token punctuation">-</span>defaults</code></pre><pre class="language-gotemplate" data-language="gotemplate"><code class="language-gotemplate">valuesKeys: {{ keys .Values | sortAlpha | join "," | quote }}
+globalEnv: {{ .Values.global.env | quote }}
+globalRegion: {{ .Values.global.region | quote }}
+seesWeb: {{ hasKey .Values "web" | quote }}</code></pre><p>父 Chart 也加一个 ConfigMap <code>parent-view</code>，打印它看到的东西：</p><pre class="language-gotemplate" data-language="gotemplate"><code class="language-gotemplate">valuesKeys: {{ keys .Values | sortAlpha | join "," | quote }}
+webReplicas: {{ .Values.web.replicaCount | quote }}
+webImageRepo: {{ dig "image" "repository" "&lt;unset&gt;" .Values.web | quote }}
+cacheMaxMemory: {{ .Values.cache.maxMemory | quote }}
+globalEnv: {{ .Values.global.env | quote }}
+globalRegion: {{ dig "region" "&lt;unset&gt;" .Values.global | quote }}</code></pre><p>父 Chart 的 <code>values.yaml</code> 改成：</p><pre class="language-yaml" data-language="yaml"><code class="language-yaml"><span class="token key atrule">tags</span><span class="token punctuation">:</span>
+  <span class="token key atrule">frontend</span><span class="token punctuation">:</span> <span class="token boolean important">true</span>
+  <span class="token key atrule">backend</span><span class="token punctuation">:</span> <span class="token boolean important">true</span>
+
+<span class="token key atrule">global</span><span class="token punctuation">:</span>
+  <span class="token key atrule">env</span><span class="token punctuation">:</span> dev
+
+<span class="token key atrule">web</span><span class="token punctuation">:</span>
+  <span class="token key atrule">replicaCount</span><span class="token punctuation">:</span> <span class="token number">2</span>
+  <span class="token key atrule">podLabels</span><span class="token punctuation">:</span>
+    <span class="token key atrule">tier</span><span class="token punctuation">:</span> frontend
+
+<span class="token key atrule">admin</span><span class="token punctuation">:</span>
+  <span class="token key atrule">enabled</span><span class="token punctuation">:</span> <span class="token boolean important">false</span>
+
+<span class="token key atrule">cache</span><span class="token punctuation">:</span> <span class="token punctuation">{</span><span class="token punctuation">}</span></code></pre><p>（<code>cache</code> 的源码改了但版本还是 <code>0.2.0</code>，要先 <code>build</code> 重新打包，这正是前面说的锁文件管不住内容。）</p><pre class="language-console" data-language="console"><code class="language-console">$ helm template demo ./shop --show-only templates/parent-view.yaml --show-only charts/cache/templates/configmap.yaml
+---
+# Source: shop/templates/parent-view.yaml
+...
+data:
+  valuesKeys: "admin,cache,global,tags,web"
+  webReplicas: "2"
+  webImageRepo: "nginx"
+  cacheMaxMemory: "128mb"
+  globalEnv: "dev"
+  globalRegion: "&lt;unset&gt;"
+---
+# Source: shop/charts/cache/templates/configmap.yaml
+...
+data:
+  maxMemory: "128mb"
+  valuesKeys: "global,maxMemory"
+  globalEnv: "dev"
+  globalRegion: "from-cache-defaults"
+  seesWeb: "false"
+$ helm template demo ./shop --show-only charts/web/templates/deployment.yaml | grep -E "replicas|tier|image:"
+  replicas: 2
+        tier: frontend
+          image: "nginx:1.27"</code></pre><p>逐项看：</p><ul><li>父 Chart <code>web:</code> 段里的值进了 <code>web</code> 子 Chart：副本数 2，Pod 多了 <code>tier: frontend</code>。</li><li>子 Chart 只看得到自己那一段（<code>.Values</code> 只有 <code>global</code> 和 <code>maxMemory</code>），看不到父 Chart 的其他值，也看不到兄弟 Chart 的 <code>web</code>。</li><li>父 Chart 却看得到子 Chart 的默认值：<code>webImageRepo</code> 是 <code>nginx</code>，父 Chart 的 values 里从没写过 <code>image</code>；<code>cacheMaxMemory</code> 是子 Chart 自带的 <code>128mb</code>。合并之后，<code>.Values.web</code> 是子 Chart 默认值加父 Chart 覆盖的结果。</li><li><code>global</code> 两个方向的表现不一样：父 Chart 的 <code>global.env: dev</code> 盖过了子 Chart 自己的 <code>from-cache-defaults</code>；子 Chart 才有的 <code>global.region</code> 在子 Chart 里保留，但没有传到父 Chart（<code>&lt;unset&gt;</code>）。</li></ul><h2 id="import-values：子-Chart-把值交给父-Chart"><a href="#import-values：子-Chart-把值交给父-Chart" class="headerlink" title="import-values：子 Chart 把值交给父 Chart"></a>import-values：子 Chart 把值交给父 Chart</h2><p>方向反过来，子 Chart 也能把值「导出」给父 Chart。<code>cache/values.yaml</code> 加一段 <code>exports</code>：</p><pre class="language-yaml" data-language="yaml"><code class="language-yaml"><span class="token key atrule">exports</span><span class="token punctuation">:</span>
+  <span class="token key atrule">connection</span><span class="token punctuation">:</span>
+    <span class="token key atrule">cacheHost</span><span class="token punctuation">:</span> cache<span class="token punctuation">-</span>from<span class="token punctuation">-</span>child
+    <span class="token key atrule">cachePort</span><span class="token punctuation">:</span> <span class="token number">6379</span></code></pre><p>父 Chart 的依赖里用两种写法导入：</p><pre class="language-yaml" data-language="yaml"><code class="language-yaml"><span class="token key atrule">import-values</span><span class="token punctuation">:</span>
+  <span class="token punctuation">-</span> connection
+  <span class="token punctuation">-</span> <span class="token key atrule">child</span><span class="token punctuation">:</span> exports.connection
+    <span class="token key atrule">parent</span><span class="token punctuation">:</span> imported</code></pre><p>第一次写的时候把 <code>child</code> 指向了一个标量 <code>maxMemory</code>，只得到一条警告，值没有导入：</p><pre class="language-console" data-language="console"><code class="language-console">level=WARN msg="ImportValues missing table from chart" chart=cache error="\"maxMemory\" is not a table"</code></pre><p><code>child</code> 必须指向一个 map。改正后：</p><pre class="language-console" data-language="console"><code class="language-console">$ helm template demo ./shop --show-only templates/parent-view.yaml
+...
+data:
+  valuesKeys: "admin,cache,cacheHost,cachePort,global,imported,tags,web"
+  webReplicas: "2"
+  webImageRepo: "nginx"
+  cacheMaxMemory: "128mb"
+  globalEnv: "dev"
+  globalRegion: "&lt;unset&gt;"
+  cacheHost: "cache-from-child"
+  cachePort: "6379"
+  imported: "{\"cacheHost\":\"cache-from-child\",\"cachePort\":6379}"
+  childHelperInParent: "app.kubernetes.io/name: shop;app.kubernetes.io/instance: demo"</code></pre><p>（最后一行来自后文「同名模板」一节加的调用，这里先不管。）</p><p>简写 <code>- connection</code> 会到子 Chart 的 <code>exports</code> 下找 <code>connection</code>，把里面的键直接铺到父 Chart 的顶层；<code>child</code>/<code>parent</code> 写法则把子 Chart 任意路径下的 map 放到父 Chart 指定的键下。</p><p>和父 Chart 自己的值冲突时，父 Chart 赢。Helm 文档 import-values 一节的 <code>myimports</code> 示例写的是相反的结果：父 Chart 的 <code>myint: 0</code>、<code>mybool: false</code> 被子 Chart 的 <code>999</code>、<code>true</code> 覆盖。照抄那个示例（父 Chart <code>values.yaml</code> 里 <code>myimports</code> 有 <code>myint: 0</code>、<code>mybool: false</code>、<code>mystring</code>，子 Chart 的 <code>default.data</code> 是 <code>myint: 999</code>、<code>mybool: true</code>），用一个 ConfigMap 打印 <code>.Values.myimports</code>：</p><pre class="language-console" data-language="console"><code class="language-console">$ helm dependency update ./docex/parent &amp;&amp; helm template x ./docex/parent
+...
+data:
+  myimports: "{\"mybool\":false,\"myint\":0,\"mystring\":\"helm rocks!\"}"</code></pre><p>Helm 4.3 上父 Chart 的值保留了下来，与文档示例不符，这里以实测为准。回到 <code>shop</code>：<code>shop/values.yaml</code> 顶层加一行 <code>cacheHost: from-parent-values</code>：</p><pre class="language-console" data-language="console"><code class="language-console">$ helm template demo ./shop --show-only templates/parent-view.yaml | grep cacheHost
+...
+  cacheHost: "from-parent-values"
+$ helm template demo ./shop --set cacheHost=from-set --show-only templates/parent-view.yaml | grep cacheHost
+...
+  cacheHost: "from-set"</code></pre><p>这一节最意外的结果是：用户去覆盖子 Chart 的导出值，导入的结果并不跟着变。删掉上面那行之后：</p><pre class="language-console" data-language="console"><code class="language-console">$ helm template demo ./shop --set cache.exports.connection.cacheHost=from-set-child --show-only templates/parent-view.yaml | grep -E "^  (cacheHost|imported):"
+  cacheHost: "cache-from-child"
+  imported: "{\"cacheHost\":\"cache-from-child\",\"cachePort\":6379}"
+$ cat override-exports.yaml; helm template demo ./shop -f override-exports.yaml --show-only templates/parent-view.yaml | grep -E "^  (cacheHost|imported):"
+cache:
+  exports:
+    connection:
+      cacheHost: from-file-child
+  cacheHost: "cache-from-child"
+  imported: "{\"cacheHost\":\"cache-from-child\",\"cachePort\":6379}"</code></pre><p><code>--set</code> 和 <code>-f</code> 都一样：导入用的是子 Chart 包里自带的默认值。这次实测的结论是，<code>import-values</code> 适合导出子 Chart 的固定信息（端口、约定的名字）；会随部署变化的值，直接在父 Chart 里定义，再传给子 Chart。</p><h2 id="父子-schema-怎么配合"><a href="#父子-schema-怎么配合" class="headerlink" title="父子 schema 怎么配合"></a>父子 schema 怎么配合</h2><h3 id="子-Chart-的-schema-校验父-Chart-传下去的值"><a href="#子-Chart-的-schema-校验父-Chart-传下去的值" class="headerlink" title="子 Chart 的 schema 校验父 Chart 传下去的值"></a>子 Chart 的 schema 校验父 Chart 传下去的值</h3><p><code>web-chart</code> 带着上一篇的 <code>values.schema.json</code>（<code>image.tag</code> 必须是字符串，<code>replicaCount</code> 最大 5）。通过父 Chart 传入错误的值：</p><pre class="language-console" data-language="console"><code class="language-console">$ cat bad-child.yaml; helm template demo ./shop -f bad-child.yaml
+web:
+  image:
+    tag: 1.20
+admin:
+  enabled: true
+  replicaCount: 9
+Error: values don't meet the specifications of the schema(s) in the following chart(s):
+web:
+- at '/image/tag': got number, want string
+admin:
+- at '/replicaCount': maximum: got 9, want 5</code></pre><p>同一份 schema 对两个 alias 分别校验，报错按 alias 分组，路径是相对子 Chart 的（<code>/image/tag</code>，而不是 <code>/web/image/tag</code>）。父 Chart 绕不过子 Chart 的限制。但被禁用的子 Chart 不校验：</p><pre class="language-console" data-language="console"><code class="language-console">$ helm template demo ./shop --set admin.enabled=false --set admin.replicaCount=9 | grep -E "^# Source" | cut -d/ -f3 | sort -u | tr "\n" " "; echo
+cache parent-view.yaml web </code></pre><h3 id="父-schema-顶层-additionalProperties-false"><a href="#父-schema-顶层-additionalProperties-false" class="headerlink" title="父 schema 顶层 additionalProperties: false"></a>父 schema 顶层 additionalProperties: false</h3><p>上一篇留了一个没验证的推测：父 Chart 的 schema 在顶层写 <code>"additionalProperties": false</code>，会拒绝子 Chart 的那一段 values。给 <code>shop</code> 加一个只声明 <code>tags</code> 的 schema：</p><pre class="language-console" data-language="console"><code class="language-console">$ cat shop/values.schema.json; helm template demo ./shop
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "tags": { "type": "object" }
+  }
+}
+Error: values don't meet the specifications of the schema(s) in the following chart(s):
+shop:
+- at '': additional properties 'global', 'cachePort', 'imported', 'cacheHost', 'web', 'admin', 'cache' not allowed</code></pre><p>推测成立，而且范围比预想的大：被拒的不只是子 Chart 段（<code>web</code>、<code>admin</code>、<code>cache</code>）和 <code>global</code>，还有 <code>import-values</code> 导入进来的 <code>cacheHost</code>、<code>cachePort</code>、<code>imported</code>。父 Chart 的 schema 校验的是合并、导入之后的完整 values。把这些键都声明进 <code>properties</code> 后渲染通过，拼错的键照样能拦住：</p><pre class="language-console" data-language="console"><code class="language-console">$ helm template demo ./shop --set webb.replicaCount=3
+Error: values don't meet the specifications of the schema(s) in the following chart(s):
+shop:
+- at '': additional properties 'webb' not allowed</code></pre><h3 id="template-和-lint-看到的-values-不一样"><a href="#template-和-lint-看到的-values-不一样" class="headerlink" title="template 和 lint 看到的 values 不一样"></a>template 和 lint 看到的 values 不一样</h3><p>在父 schema 里给 <code>web</code> 加 <code>"required": ["image"]</code>。<code>image</code> 只在子 Chart 的默认值里，父 Chart 的 <code>values.yaml</code> 没写。<code>helm template</code> 通过了（印证上面「父 schema 看到的是合并后的 values」），<code>helm lint</code> 却失败：</p><pre class="language-console" data-language="console"><code class="language-console">$ helm lint ./shop
+==&gt; Linting ./shop
+[INFO] Chart.yaml: icon is recommended
+[ERROR] values.yaml: - at '/web': missing property 'image'
+
+
+Error: 1 chart(s) linted, 1 chart(s) failed</code></pre><p>报错位置写的是 <code>values.yaml</code>：lint 这一项只拿父 Chart 自己的 <code>values.yaml</code> 对父 schema，不合并子 Chart 的默认值。父 schema 里对子 Chart 段的 <code>required</code>，lint 和真正渲染的结论可能相反；子 Chart 段的约束最好留给子 Chart 自己的 schema。</p><h3 id="严格的子-Chart-schema-会拒绝-enabled-和-global"><a href="#严格的子-Chart-schema-会拒绝-enabled-和-global" class="headerlink" title="严格的子 Chart schema 会拒绝 enabled 和 global"></a>严格的子 Chart schema 会拒绝 enabled 和 global</h3><p>反过来，给 <code>cache</code> 写一个顶层 <code>"additionalProperties": false</code> 的 schema，声明 <code>maxMemory</code>、<code>exports</code>、<code>global</code>。单独渲染 <code>cache</code> 通过，放进 <code>shop</code> 也通过，直到有人用 condition 去开它：</p><pre class="language-console" data-language="console"><code class="language-console">$ helm template demo ./shop --set cache.enabled=true
+Error: values don't meet the specifications of the schema(s) in the following chart(s):
+cache:
+- at '': additional properties 'enabled' not allowed</code></pre><p>condition 的键 <code>cache.enabled</code> 在父 Chart 的 <code>cache:</code> 段里，于是也进了子 Chart 的 values。再在副本上把 <code>cache</code> 默认值里的 <code>global</code>、父 Chart <code>values.yaml</code> 里的 <code>global</code> 都删掉，schema 里也不声明 <code>global</code>（<code>cache</code> 的 <code>values.yaml</code> 用的是原版，前面 tags 一节加的 <code>enabled: true</code> 不在里面，渲染时也没有传 <code>cache.enabled</code>）：</p><pre class="language-console" data-language="console"><code class="language-console">$ grep -c global rr/shop/values.yaml rr/cache/values.yaml rr/cache/values.schema.json; helm dependency build ./rr/shop &gt;/dev/null; helm template demo ./rr/shop
+rr/cache/values.schema.json:0
+rr/shop/values.yaml:0
+rr/cache/values.yaml:0
+Error: values don't meet the specifications of the schema(s) in the following chart(s):
+cache:
+- at '': additional properties 'global' not allowed
+$ helm template t ./rr/cache
+...
+  valuesKeys: "exports,maxMemory"</code></pre><p>（<code>rr/</code> 是实验目录的副本，两个模板里引用 <code>global</code> 的行也删掉了。）三个文件里都没有 <code>global</code>，作为子 Chart 渲染时它仍然出现在 values 里：Helm 总会给子 Chart 注入 <code>global</code>，哪怕是空的。单独渲染 <code>cache</code> 时就没有这个键。所以一个可能被当作子 Chart 使用的 Chart，顶层禁止额外键时至少要放行 <code>global</code> 和它自己的开关键（常见的 <code>enabled</code>）。</p><h2 id="同名模板：父-Chart-悄悄改掉子-Chart-的名字"><a href="#同名模板：父-Chart-悄悄改掉子-Chart-的名字" class="headerlink" title="同名模板：父 Chart 悄悄改掉子 Chart 的名字"></a>同名模板：父 Chart 悄悄改掉子 Chart 的名字</h2><p>上一篇说过命名模板是全局的。实测一下：在 <code>shop/templates/_helpers.tpl</code> 里定义一个和子 Chart 同名的模板：</p><pre class="language-gotemplate" data-language="gotemplate"><code class="language-gotemplate">{{- define "web-chart.fullname" -}}
+from-parent-{{ .Chart.Name }}
+{{- end -}}</code></pre><p>父 Chart 的 <code>parent-view.yaml</code> 里顺便调用子 Chart 的 <code>web-chart.selectorLabels</code>：</p><pre class="language-console" data-language="console"><code class="language-console">$ helm template demo ./shop --set admin.enabled=true | grep -E "^# Source|^  name:|childHelperInParent"
+# Source: shop/charts/cache/templates/configmap.yaml
+  name: demo-cache
+# Source: shop/templates/parent-view.yaml
+  name: demo-parent-view
+  childHelperInParent: "app.kubernetes.io/name: shop;app.kubernetes.io/instance: demo"
+# Source: shop/charts/admin/templates/service.yaml
+  name: from-parent-admin
+# Source: shop/charts/web/templates/service.yaml
+  name: from-parent-web
+# Source: shop/charts/admin/templates/deployment.yaml
+  name: from-parent-admin
+# Source: shop/charts/web/templates/deployment.yaml
+  name: from-parent-web</code></pre><p>父 Chart 的定义覆盖了子 Chart 自己的，子 Chart 渲染出的 Service、Deployment 名全变了；连跑 10 次结果都一样，不是随机的。<code>helm lint</code> 对重名没有任何提示。另一方面，父 Chart 可以直接 <code>include</code> 子 Chart 的命名模板，但用的是调用方的上下文，所以 <code>.Chart.Name</code> 是 <code>shop</code>。</p><p>再把父 Chart 的这个定义移走，改放在兄弟子 Chart <code>cache</code> 的 <code>_helpers.tpl</code> 里，5 次渲染 <code>web</code> 的 Service 名都是 <code>from-cache-web</code>。兄弟 Chart 之间也会互相覆盖。顺序来自 Helm 源码 <code>pkg/engine/engine.go</code> 的 <code>sortTemplates</code>：模板按路径层级排序后整体倒序（<code>sort.Reverse(byPathLen)</code>），层级深的先解析，同一层按路径字母序倒序，同名 <code>define</code> 以最后解析的为准。父 Chart 的模板路径最浅，最后解析，所以总是赢；<code>charts/cache</code> 和 <code>charts/web</code> 同层，<code>cache</code> 字母序靠前、解析在后，所以也赢了。结论是命名模板一律带上本 Chart 的名字作前缀，不在别的 Chart 里重复定义。</p><h2 id="装进集群"><a href="#装进集群" class="headerlink" title="装进集群"></a>装进集群</h2><p>移走父 Chart 里那个同名定义，把伞形 Chart 装进集群，同时打开 <code>admin</code>：</p><pre class="language-console" data-language="console"><code class="language-console">$ helm install demo ./shop -n notes-lab --set admin.enabled=true --wait --timeout 3m
+NAME: demo
+LAST DEPLOYED: Mon Oct 12 16:47:35 2026
+NAMESPACE: notes-lab
+STATUS: deployed
+REVISION: 1
+DESCRIPTION: Install complete
+TEST SUITE: None
+$ helm list -n notes-lab
+NAME	NAMESPACE	REVISION	UPDATED                              	STATUS  	CHART     	APP VERSION
+demo	notes-lab	1       	2026-10-12 16:47:35.0872537 +0800 +08	deployed	shop-0.1.0	           
+$ kubectl -n notes-lab get secret -l owner=helm
+NAME                         TYPE                 DATA   AGE
+sh.helm.release.v1.demo.v1   helm.sh/release.v1   1      14s</code></pre><p>三个子 Chart 加父 Chart 只有一个 Release、一条 Release 记录，<code>APP VERSION</code> 是空的（<code>shop</code> 没写 <code>appVersion</code>）。安装输出里没有 NOTES：<code>web-chart</code> 的 <code>NOTES.txt</code> 是子 Chart 的，默认不渲染。集群里的对象：</p><pre class="language-console" data-language="console"><code class="language-console">$ kubectl -n notes-lab get deploy,svc,cm,pod -o wide
+NAME                         READY   UP-TO-DATE   AVAILABLE   AGE   CONTAINERS   IMAGES       SELECTOR
+deployment.apps/demo-admin   1/1     1            1           14s   web          nginx:1.27   app.kubernetes.io/instance=demo,app.kubernetes.io/name=admin
+deployment.apps/demo-web     2/2     2            2           14s   web          nginx:1.27   app.kubernetes.io/instance=demo,app.kubernetes.io/name=web
+
+NAME                 TYPE        CLUSTER-IP      EXTERNAL-IP   PORT(S)   AGE   SELECTOR
+service/demo-admin   ClusterIP   &lt;cluster-ip&gt;    &lt;none&gt;        80/TCP    14s   app.kubernetes.io/instance=demo,app.kubernetes.io/name=admin
+service/demo-web     ClusterIP   &lt;cluster-ip&gt;    &lt;none&gt;        80/TCP    14s   app.kubernetes.io/instance=demo,app.kubernetes.io/name=web
+
+NAME                         DATA   AGE
+configmap/demo-cache         5      14s
+configmap/demo-parent-view   10     14s
+configmap/kube-root-ca.crt   1      15s
+
+NAME                              READY   STATUS    RESTARTS   AGE   IP          NODE      NOMINATED NODE   READINESS GATES
+pod/demo-admin-6f6688d7c6-nbrs4   1/1     Running   0          13s   &lt;pod-ip&gt;    worker2   &lt;none&gt;           &lt;none&gt;
+pod/demo-web-654c57d88c-9sfl2     1/1     Running   0          13s   &lt;pod-ip&gt;    worker    &lt;none&gt;           &lt;none&gt;
+pod/demo-web-654c57d88c-cp98q     1/1     Running   0          13s   &lt;pod-ip&gt;    worker2   &lt;none&gt;           &lt;none&gt;
+$ kubectl -n notes-lab get deploy -L app.kubernetes.io/name,helm.sh/chart,app.kubernetes.io/instance
+NAME         READY   UP-TO-DATE   AVAILABLE   AGE   NAME    CHART         INSTANCE
+demo-admin   1/1     1            1           14s   admin   admin-0.1.0   demo
+demo-web     2/2     2            2           14s   web     web-0.1.0     demo</code></pre><p>同一个 <code>web-chart</code> 装出了两套互不干扰的 Deployment 和 Service，selector 靠 <code>app.kubernetes.io/name</code> 区分。alias 连 <code>helm.sh/chart</code> 标签都改了：写的是 <code>admin-0.1.0</code>、<code>web-0.1.0</code>，从标签上已经看不出它们来自 <code>web-chart</code>。按这个标签统计「集群里跑着哪些 Chart」的脚本要留意。下一步升级到修订 2 之后，从集群内访问两个 Service 都返回 200（安装刚完成时那次访问没有拿到输出，不算数）。</p><p><code>demo-cache</code> 里的数据与本地渲染一致（<code>globalEnv: dev</code>、<code>globalRegion: from-cache-defaults</code>）。</p><h3 id="子-Chart-的-NOTES、升级和关闭子-Chart"><a href="#子-Chart-的-NOTES、升级和关闭子-Chart" class="headerlink" title="子 Chart 的 NOTES、升级和关闭子 Chart"></a>子 Chart 的 NOTES、升级和关闭子 Chart</h3><p>升级时加 <code>--render-subchart-notes</code>，两个 alias 的 NOTES 各打印一份：</p><pre class="language-console" data-language="console"><code class="language-console">$ helm upgrade demo ./shop -n notes-lab --render-subchart-notes --wait --timeout 2m
+Release "demo" has been upgraded. Happy Helming!
+...
+REVISION: 2
+DESCRIPTION: Upgrade complete
+TEST SUITE: None
+NOTES:
+demo 已升级（第 2 个修订），镜像 nginx:1.27。
+
+在集群内访问：
+  http://demo-admin.notes-lab.svc:80
+
+demo 已升级（第 2 个修订），镜像 nginx:1.27。
+
+在集群内访问：
+  http://demo-web.notes-lab.svc:80</code></pre><p>这次升级没传任何 <code>--set</code>，<code>admin</code> 却还在：</p><pre class="language-console" data-language="console"><code class="language-console">$ helm get values demo -n notes-lab --revision 2
+USER-SUPPLIED VALUES:
+admin:
+  enabled: true</code></pre><p>升级时一个值都不给，Helm 会沿用上一个修订的用户值（规则见 <a href="/notes/k8s/helm/">Helm 入门</a>里「升级：values 从哪来」）。显式关掉 <code>admin</code>：</p><pre class="language-console" data-language="console"><code class="language-console">$ helm upgrade demo ./shop -n notes-lab --reuse-values --set admin.enabled=false --wait --timeout 2m
+...
+REVISION: 3
+$ kubectl -n notes-lab get deploy,svc,cm
+NAME                       READY   UP-TO-DATE   AVAILABLE   AGE
+deployment.apps/demo-web   2/2     2            2           69s
+
+NAME               TYPE        CLUSTER-IP      EXTERNAL-IP   PORT(S)   AGE
+service/demo-web   ClusterIP   &lt;cluster-ip&gt;    &lt;none&gt;        80/TCP    69s
+...</code></pre><p>被关掉的子 Chart 渲染不出资源，Helm 把它上一个修订创建的 Deployment 和 Service 一起删了。用 condition 关子 Chart 会删掉它渲染出的资源，例外是带 <code>helm.sh/resource-policy: keep</code> 注解的资源，以及 StatefulSet 通过 <code>volumeClaimTemplates</code> 创建的 PVC（它们本来就不在 Release 的清单里）。对数据库这类子 Chart，关之前先确认数据放在哪里。</p><h3 id="CI-里-charts-不存在"><a href="#CI-里-charts-不存在" class="headerlink" title="CI 里 charts/ 不存在"></a>CI 里 charts/ 不存在</h3><p>模拟一次新克隆：<code>charts/</code> 不在仓库里。</p><pre class="language-console" data-language="console"><code class="language-console">$ helm upgrade demo ./shop -n notes-lab --reuse-values
+Error: an error occurred while checking for chart dependencies. You may need to run 'helm dependency build' to fetch missing dependencies: found in Chart.yaml, but missing in charts/ directory: web-chart, web-chart, cache
+$ helm upgrade demo ./shop -n notes-lab --reuse-values --dependency-update --wait --timeout 2m | head -8
+Saving 3 charts
+Deleting outdated charts
+Release "demo" has been upgraded. Happy Helming!
+...
+REVISION: 4</code></pre><p><code>--dependency-update</code>（<code>install</code>、<code>upgrade</code>、<code>template</code> 都有）只在 <code>charts/</code> 缺包时才起作用：源码 <code>pkg/cmd/install.go</code> 里，它在 <code>CheckDependencies</code> 失败后才触发，调用的是 <code>Manager.Update()</code>，也就是 <code>helm dependency update</code> 的逻辑。所以 <code>charts/</code> 齐全时，即使锁文件已经过期，它什么也不做，渲染照旧用 <code>charts/</code> 里的包；<code>charts/</code> 缺包时，它按约束重新解析并改写锁文件。实测：把 <code>cache</code> 的约束改成 <code>&gt;=0.2.0</code> 让锁文件过期、删掉 <code>charts/</code>，再跑 <code>helm template --dependency-update</code>，渲染成功，<code>Chart.lock</code> 被改写成新的 <code>digest</code> 和 <code>generated</code> 时间；而锁文件与 <code>Chart.yaml</code> 不一致时，<code>helm dependency build</code> 会报 <code>out of sync</code> 并停下。</p><p>所以 CI 里要做两件事：<code>Chart.lock</code> 必须提交进仓库，没有锁文件时 <code>build</code> 也会退回到 <code>update</code> 去解析版本；部署前显式跑 <code>helm dependency build</code>，让过期的锁文件直接失败，而不是靠 <code>--dependency-update</code>。</p><h2 id="清理"><a href="#清理" class="headerlink" title="清理"></a>清理</h2><pre class="language-bash" data-language="bash"><code class="language-bash">helm uninstall demo <span class="token parameter variable">-n</span> notes-lab <span class="token parameter variable">--wait</span>
+kubectl delete namespace notes-lab
+helm repo remove labrepo
+<span class="token comment"># 回到起 http.server 的终端按 Ctrl+C 停掉临时仓库</span></code></pre><h2 id="小结"><a href="#小结" class="headerlink" title="小结"></a>小结</h2><ul><li><code>update</code> 按约束解析版本、写 <code>Chart.lock</code>；<code>build</code> 只按锁文件重建 <code>charts/</code>。<code>list</code> 能看出 <code>missing</code>、<code>wrong version</code>、<code>unpacked</code>，但 <code>template</code>、<code>lint</code>、<code>install</code> 只检查 <code>charts/</code> 里有没有，不检查版本对不对。</li><li><code>Chart.lock</code> 的 <code>digest</code> 覆盖 <code>Chart.yaml</code> 依赖声明的全部字段（包括 condition、tags）和锁定结果，任何一边变了 <code>build</code> 都会拒绝；但锁文件里没有任何依赖的内容校验和，子 Chart 改了内容不升版本，锁文件察觉不到，<code>file://</code> 依赖最容易踩到。</li><li><code>^0.x</code> 只允许补丁版本变化；预发布版本要在约束里显式写出才会被选中；<code>build</code> 要求仓库已 <code>helm repo add</code>，<code>update</code> 不要求。</li><li>condition 的值存在时压过 tags，不存在时才看 tags；非布尔值（包括字符串 <code>"false"</code>）只警告并被忽略。</li><li><code>alias</code> 改的是子 Chart 的名字本身：模板路径、<code>.Chart.Name</code>、<code>helm.sh/chart</code> 标签都跟着变。</li><li>子 Chart 只看得到自己那段和 <code>global</code>；父 Chart 看得到子 Chart 合并后的默认值。<code>import-values</code> 导入的是子 Chart 包里的默认值，用户覆盖不跟着走。</li><li>父 schema 顶层 <code>additionalProperties: false</code> 会拒绝子 Chart 段、<code>global</code> 和导入的键；子 schema 顶层这么写，要放行 <code>global</code> 和 <code>enabled</code>。</li><li>同名命名模板会被父 Chart 或兄弟 Chart 静默覆盖，lint 不报。</li></ul><p>参考：<a target="_blank" rel="noopener" href="https://helm.sh/docs/topics/charts/">Charts（Chart Dependencies、Values Files、Schema Files）</a>、<a target="_blank" rel="noopener" href="https://helm.sh/docs/chart_template_guide/subcharts_and_globals/">Subcharts and Global Values</a>、<a target="_blank" rel="noopener" href="https://helm.sh/docs/chart_best_practices/dependencies/">Chart 依赖最佳实践</a>、<a target="_blank" rel="noopener" href="https://helm.sh/docs/helm/helm_dependency/">helm dependency</a>、<a target="_blank" rel="noopener" href="https://kubernetes.io/docs/concepts/overview/working-with-objects/common-labels/">Recommended Labels</a>、<a target="_blank" rel="noopener" href="https://kubernetes.io/docs/concepts/workloads/controllers/deployment/">Deployments</a>。</p></div></div></div><div class="note-prev-next" role="navigation" aria-label="笔记篇章导航"><a href="/notes/k8s/helm-chart/" class="note-nav-link note-nav-prev" aria-label="上一篇：编写 Helm Chart"><span class="note-nav-label"><i class="fas fa-arrow-left" aria-hidden="true"></i> 上一篇 <span class="note-nav-index">第 26 篇</span></span> <span class="note-nav-title">编写 Helm Chart</span></a> <a href="/notes/k8s/helm-upgrade/" class="note-nav-link note-nav-next" aria-label="下一篇：Helm 升级验证与回滚"><span class="note-nav-label">下一篇<i class="fas fa-arrow-right" aria-hidden="true"></i> <span class="note-nav-index">第 28 篇</span></span> <span class="note-nav-title">Helm 升级验证与回滚</span></a></div></article><aside id="note-toc-col" class="note-toc-col" aria-label="本文目录"><div class="panel note-toc-panel"><div class="note-toc-heading"><span><i class="fas fa-list-ul" aria-hidden="true"></i> 本文目录</span> <button type="button" class="note-toc-close" aria-label="关闭本文目录"><i class="fas fa-times" aria-hidden="true"></i></button></div><nav id="note-toc-links" class="note-toc-links" aria-label="文章内跳转"></nav><div class="note-toc-progress">已阅读 <span id="note-read-percent">0%</span></div></div></aside></div></section></main><div class="note-reader-dock" aria-label="阅读目录"><button type="button" id="note-sidebar-toggle" aria-controls="note-sidebar-col" aria-expanded="false"><i class="fas fa-layer-group" aria-hidden="true"></i><span>系列章节</span></button> <button type="button" id="note-toc-toggle" aria-controls="note-toc-col" aria-expanded="false"><i class="fas fa-list-ul" aria-hidden="true"></i><span>本文目录</span></button></div><div id="note-sidebar-overlay" class="note-sidebar-overlay" aria-hidden="true"></div><script src="/libs/codeBlock/codeBlockFuction.js"></script><script src="/libs/codeBlock/codeLang.js"></script><script src="/libs/codeBlock/codeCopy.js"></script><script src="/libs/codeBlock/codeShrink.js"></script><script src="/js/note-reader.js?v=cdccb3ba"></script><div class="progress-bar"></div><footer class="dp-footer page-footer"><div class="dp-wrap dp-foot-grid"><div class="l">&copy; <span id="year">2023-2026</span> <b>翼舞成梦</b> · costalong.com — 用 <a href="https://hexo.io/" target="_blank" rel="noopener">Hexo</a> 构建，记录工程实践与学习笔记。</div><div class="dp-foot-links"><a href="/advertise/">广告合作</a> <a href="/privacy/">隐私政策</a> <a href="/atom.xml">RSS</a> <a href="/archives/">归档</a> <a href="/about/">关于</a> <a href="https://github.com/costa92" target="_blank" rel="noopener">GitHub</a> <a href="/sitemap.xml">sitemap</a></div></div><div class="dp-wrap" style="margin-top:16px;display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;font-size:12.5px;color:var(--text-mut)"><div class="footer-social"><a href="https://github.com/costa92" class="tooltipped" aria-label="访问我的GitHub" target="_blank" rel="noopener" data-tooltip="访问我的GitHub" data-position="top" data-delay="50"><i class="fab fa-github"></i></a><a href="mailto:costa9293@gmail.com" class="tooltipped" aria-label="邮件联系我" target="_blank" rel="noopener" data-tooltip="邮件联系我" data-position="top" data-delay="50"><i class="fas fa-envelope-open"></i></a><a href="tencent://AddContact/?fromId=50&fromSubId=1&subcmd=all&uin=944310536" class="tooltipped" aria-label="QQ联系我" target="_blank" rel="noopener" data-tooltip="QQ联系我: 944310536" data-position="top" data-delay="50"><i class="fab fa-qq"></i></a><a href="/atom.xml" class="tooltipped" aria-label="RSS 订阅" target="_blank" rel="noopener" data-tooltip="RSS 订阅" data-position="top" data-delay="50"><i class="fas fa-rss"></i></a></div><div class="footer-stats" style="font-family:var(--font-mono)"><span id="busuanzi_container_site_pv"><i class="far fa-eye"></i> &nbsp;<span id="busuanzi_value_site_pv"></span></span> <span id="busuanzi_container_site_uv">&nbsp;&middot;&nbsp;<i class="fas fa-users"></i>&nbsp;<span id="busuanzi_value_site_uv"></span></span> &nbsp;&middot;&nbsp;<a href="https://beian.miit.gov.cn/#/Integrated/index" target="_blank" rel="noopener">湘ICP备15006875号</a></div></div></footer><div id="searchModal" class="modal" role="dialog" aria-modal="true" aria-labelledby="searchTitle"><div class="modal-content"><div class="search-header"><label for="searchInput" id="searchTitle" class="title"><i class="fas fa-search" aria-hidden="true"></i> &nbsp;&nbsp;搜索</label> <input type="search" id="searchInput" name="s" placeholder="请输入搜索的关键字" class="search-input" aria-controls="searchResult"></div><div id="searchStatus" class="search-status" role="status" aria-live="polite"></div><div id="searchResult"></div></div></div><script>$(function(){"use strict";var n=document.getElementById("searchInput"),l=document.getElementById("searchResult"),t=document.getElementById("searchStatus"),a=null,c=!1;function o(e){t.textContent=e}function e(){l.replaceChildren();var e=n.value.trim().toLocaleLowerCase();if(e)if(a){var r=e.split(/[\s\-]+/).filter(Boolean),t=a.filter(function(t){return r.every(function(e){return t.searchText.includes(e)})}).slice(0,20);if(t.length){o("找到 "+t.length+" 条相关内容"+(20===t.length?"（最多显示 20 条）":""));var i=document.createElement("ul");i.className="search-result-list",t.forEach(function(e){var t=document.createElement("li"),n=document.createElement("a");if(n.className="search-result-title",n.href=e.url,n.textContent=e.title,t.appendChild(n),e.content){var l=e.content.toLocaleLowerCase().indexOf(r[0]),a=Math.max(0,l-35),c=document.createElement("p");c.className="search-result",c.textContent=(a?"…":"")+e.content.slice(a,a+130)+(a+130<e.content.length?"…":""),t.appendChild(c)}i.appendChild(t)}),l.appendChild(i)}else o("没有找到相关内容，请换个关键词试试。")}else o(c?"正在加载搜索索引…":"搜索索引暂时不可用，请稍后重试。");else o("")}function r(){a||c||(c=!0,e(),$.ajax({url:"/search.xml",dataType:"xml"}).done(function(e){a=$("entry",e).map(function(){var e,t=$("title",this).text().trim(),n=(e=$("content",this).text(),String(e||"").replace(/<[^>]*>/g," ").replace(/\s+/g," ").trim()),l=$("url",this).text().trim();return t&&l?{title:t,content:n,url:"/"===l.charAt(0)?l:"/"+l,searchText:(t+" "+n).toLocaleLowerCase()}:null}).get()}).fail(function(){a=null}).always(function(){c=!1,e()}))}n.addEventListener("input",function(){r(),e()}),n.addEventListener("focus",r),$('a[href="#searchModal"], .search-btn').on("click",r)})</script><div class="stars-con"><div id="stars"></div><div id="stars2"></div><div id="stars3"></div></div><script>function switchNightMode(){$('<div class="Cuteen_DarkSky"><div class="Cuteen_DarkPlanet"></div></div>').appendTo($("body")),setTimeout(function(){$("body").hasClass("DarkMode")?($("body").removeClass("DarkMode"),localStorage.setItem("isDark","0"),$("#sum-moon-icon").removeClass("fa-sun").addClass("fa-moon")):($("body").addClass("DarkMode"),localStorage.setItem("isDark","1"),$("#sum-moon-icon").addClass("fa-sun").removeClass("fa-moon")),setTimeout(function(){$(".Cuteen_DarkSky").fadeOut(1e3,function(){$(this).remove()})},2e3)})}</script><div id="backTop" class="top-scroll"><button type="button" class="btn-floating btn-large waves-effect waves-light" aria-label="回到顶部"><i class="fas fa-arrow-up" aria-hidden="true"></i></button></div><script src="/libs/materialize/materialize.min.js" defer></script><script src="/libs/masonry/masonry.pkgd.min.js" defer></script><script src="/libs/aos/aos.js"></script><script src="/libs/lightGallery/js/lightgallery-all.min.js" defer></script><script src="/libs/scrollprogress/scrollProgress.min.js"></script><script src="/js/matery.js?v=3f7ec091" defer></script><script src="/js/responsive-tables.js?v=6ebf2b5e"></script><script src="/js/infinite-scroll.js?v=b6f5ebe2" defer></script><script>!function(){var t=document.createElement("script");t.src="https://zz.bdstatic.com/linksubmit/push.js";var e=document.getElementsByTagName("script")[0];e.parentNode.insertBefore(t,e)}()</script><script src="/js/fireworks.js" async></script><script>!function(){if(!new URLSearchParams(location.search).has("style-audit-preview")){var e=document.createElement("script");e.src="https://events.vercount.one/js",document.head.appendChild(e)}}()</script><script color="110,80,255" pointcolor="80,140,255" opacity="0.28" zindex="-1" count="80" src="/libs/background/canvas-nest.js"></script><script src="/libs/instantpage/instantpage.js" type="module"></script><!--/email_off--></body></html>
