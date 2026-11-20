@@ -1,0 +1,1963 @@
+<!DOCTYPE HTML>
+<html lang="zh-CN">
+
+
+<head>
+    <meta charset="utf-8">
+    <meta name="keywords" content="Claude Code 无头调用的 token 账：首轮 45k 从哪来, costalong, 翼舞成梦, 后端开发, Go语言, Kubernetes, K8s, Linux, AI, 学习笔记">
+    <meta name="description" content="我平时的配置下，一句 Reply OK 的首轮上下文有 45096 token，收紧到只剩必需部分是 3035；决定费用的主要是缓存写入：同样 1.1 万 token 的上下文，命中缓存花 $0.0023，改一行 CLAUDE.md 再跑要 $0.072。">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    
+    
+    
+    <meta name="renderer" content="webkit|ie-stand|ie-comp">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="format-detection" content="telephone=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    
+    <meta name="referrer" content="strict-origin-when-cross-origin">
+    
+    <meta name="google-adsense-account" content="ca-pub-8990123471955885">
+    
+    
+    
+    <script>
+      // 预览保留广告位布局，但不请求广告展示。
+      // AdSense 约 220KB，不放在首屏关键路径上：广告位接近视口，或页面 load 后空闲时再加载。
+      (function () {
+        if (new URLSearchParams(location.search).has('style-audit-preview')) return;
+        var requested = false;
+        function loadAdsense() {
+          if (requested) return;
+          requested = true;
+          var adsenseScript = document.createElement('script');
+          adsenseScript.async = true;
+          adsenseScript.src = 'https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8990123471955885';
+          adsenseScript.crossOrigin = 'anonymous';
+          document.head.appendChild(adsenseScript);
+        }
+        document.addEventListener('DOMContentLoaded', function () {
+          if (!('IntersectionObserver' in window)) return loadAdsense();
+          var io = new IntersectionObserver(function (entries) {
+            if (entries.some(function (e) { return e.isIntersecting; })) { io.disconnect(); loadAdsense(); }
+          }, { rootMargin: '200px 0px' });
+          document.querySelectorAll('ins.adsbygoogle').forEach(function (slot) { io.observe(slot); });
+        });
+        window.addEventListener('load', function () {
+          var idle = window.requestIdleCallback || function (fn) { setTimeout(fn, 2000); };
+          idle(loadAdsense, { timeout: 4000 });
+        });
+      })();
+    </script>
+    
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+
+
+    <title>Claude Code 无头调用的 token 账：首轮 45k 从哪来 | 翼舞成梦</title>
+    <meta property="og:site_name" content="翼舞成梦">
+    <meta property="og:locale" content="zh_CN">
+    <meta property="og:type" content="article">
+    <meta property="og:title" content="Claude Code 无头调用的 token 账：首轮 45k 从哪来">
+    <meta property="og:description" content="我平时的配置下，一句 Reply OK 的首轮上下文有 45096 token，收紧到只剩必需部分是 3035；决定费用的主要是缓存写入：同样 1.1 万 token 的上下文，命中缓存花 $0.0023，改一行 CLAUDE.md 再跑要 $0.072。">
+    <meta property="og:url" content="https://costalong.com/2026/11/20/claude-code-token-budget/">
+    <meta property="og:image" content="https://cdn.jsdelivr.net/gh/costa92/article-images@b4fd1d0d8ff31689d87f5f55e1788f00181bd90f/clawdbot/claude-code-token-budget-cover.webp">
+    <meta name="twitter:card" content="summary_large_image">
+    <script type="application/ld+json">[{"@context":"https://schema.org","@type":"BlogPosting","headline":"Claude Code 无头调用的 token 账：首轮 45k 从哪来","description":"我平时的配置下，一句 Reply OK 的首轮上下文有 45096 token，收紧到只剩必需部分是 3035；决定费用的主要是缓存写入：同样 1.1 万 token 的上下文，命中缓存花 $0.0023，改一行 CLAUDE.md 再跑要 $0.072。","image":"https://cdn.jsdelivr.net/gh/costa92/article-images@b4fd1d0d8ff31689d87f5f55e1788f00181bd90f/clawdbot/claude-code-token-budget-cover.webp","url":"https://costalong.com/2026/11/20/claude-code-token-budget/","datePublished":"2026-11-20T06:40:00.000Z","dateModified":"2026-11-20T06:40:00.000Z","author":{"@type":"Person","name":"costalong"},"publisher":{"@type":"Person","name":"costalong"}},{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"翼舞成梦","item":"https://costalong.com"},{"@type":"ListItem","position":2,"name":"Coding-Agent","item":"https://costalong.com/categories/Coding-Agent/"},{"@type":"ListItem","position":3,"name":"Claude Code 无头调用的 token 账：首轮 45k 从哪来","item":"https://costalong.com/2026/11/20/claude-code-token-budget/"}]}]</script>
+    <link rel="canonical" href="https://costalong.com/2026/11/20/claude-code-token-budget/">
+    <link rel="alternate" type="application/atom+xml" title="翼舞成梦" href="https://costalong.com/atom.xml">
+    <link rel="alternate" type="application/json" title="翼舞成梦" href="https://costalong.com/feed.json">
+    <link rel="icon" type="image/png" href="/favicon.png">
+    
+
+
+    <!-- bg-cover style     -->
+
+
+
+<!-- 西文字体 base64 内嵌在 fonts.css 里阻塞加载（scripts/font_css.js），省掉字体的网络往返。
+     预加载曾输掉和 CSS 的竞速，字体晚到后被重新匹配换上，标签胶囊折行（CLS 0.2）。 -->
+<link rel="stylesheet" href="/css/fonts.css?v=864fc7ac">
+
+<script>document.fonts&&['13px "JetBrains Mono"','13px Sora'].forEach(function(f){document.fonts.load(f)})</script>
+
+<!-- 导航等首屏图标都用 solid；字体由 CSS 引用，预加载让它与 CSS 并行下载 -->
+<link rel="preload" href="/libs/awesome/webfonts/fa-solid-900.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" type="text/css" href="/libs/awesome/css/all.min.css">
+<link rel="stylesheet" type="text/css" href="/libs/materialize/materialize.min.css">
+
+<link rel="stylesheet" type="text/css" href="/libs/aos/aos.css">
+<link rel="stylesheet" type="text/css" href="/libs/animate/animate.min.css" media="print" onload="this.media='all'">
+<link rel="stylesheet" type="text/css" href="/libs/lightGallery/css/lightgallery.min.css" media="print" onload="this.media='all'">
+
+<!-- matery + my：scripts/css_bundle.js 合并，层叠顺序同原先分开加载 -->
+<link rel="stylesheet" type="text/css" href="/css/bundle-base.css?v=4d25fa02">
+<link rel="stylesheet" type="text/css" href="/css/dark.css" media="none" onload="if(media!='all')media='all'">
+<!-- infinite-scroll + sidebar + navbar -->
+<link rel="stylesheet" type="text/css" href="/css/bundle-chrome.css?v=2ebb2af9">
+
+
+
+
+    <link rel="stylesheet" href="/libs/tocbot/tocbot.css">
+    <link rel="stylesheet" href="/css/post.css">
+
+
+
+
+    
+        <link rel="stylesheet" type="text/css" href="/css/reward.css" media="print" onload="this.media='all'">
+    
+
+
+<!-- obsidian（重设计覆盖层）→ darkpremium（结构层）→ post-darkpremium（文章页布局，head 内阻塞以免 FOUC），
+     必须最后加载以覆盖以上所有样式 -->
+<link rel="stylesheet" type="text/css" href="/css/bundle-skin.css?v=69fd764e">
+
+    
+    
+
+    <script>
+        // jQuery 以 defer 加载，不再阻塞首屏。就绪前内联的 $(fn) 先排队，
+        // DOMContentLoaded 时（所有 defer 脚本已执行）再交给真正的 jQuery。
+        (function (w) {
+            var queue = [];
+            w.$ = w.jQuery = function (fn) {
+                if (typeof fn !== 'function') throw new Error('jQuery 尚未加载：请写在 $(function () {...}) 里');
+                queue.push(fn);
+            };
+            document.addEventListener('DOMContentLoaded', function () {
+                if (!w.jQuery.fn) return;
+                queue.forEach(function (fn) { w.jQuery(fn); });
+            });
+        })(window);
+    </script>
+    <script src="/libs/jquery/jquery-3.6.0.min.js" defer></script>
+    <script>
+        // 防御性脚本：禁止 body 被设为 aria-hidden="true"
+        (function() {
+            var observer = new MutationObserver(function(mutations) {
+                mutations.forEach(function(mutation) {
+                    if (mutation.type === 'attributes' && mutation.attributeName === 'aria-hidden') {
+                        if (document.body.getAttribute('aria-hidden') === 'true') {
+                            document.body.removeAttribute('aria-hidden');
+                        }
+                    }
+                });
+            });
+            observer.observe(document.documentElement, { attributes: true, subtree: true, attributeFilter: ['aria-hidden'] });
+            
+            // 初始清理
+            window.addEventListener('DOMContentLoaded', function() {
+                if (document.body.getAttribute('aria-hidden') === 'true') {
+                    document.body.removeAttribute('aria-hidden');
+                }
+            });
+        })();
+    </script>
+<meta name="generator" content="Hexo 8.1.2">
+<style>.github-emoji { position: relative; display: inline-block; width: 1.2em; min-height: 1.2em; overflow: hidden; vertical-align: top; color: transparent; }  .github-emoji > span { position: relative; z-index: 10; }  .github-emoji img, .github-emoji .fancybox { margin: 0 !important; padding: 0 !important; border: none !important; outline: none !important; text-decoration: none !important; user-select: none !important; cursor: auto !important; }  .github-emoji img { height: 1.2em !important; width: 1.2em !important; position: absolute !important; left: 50% !important; top: 50% !important; transform: translate(-50%, -50%) !important; user-select: none !important; cursor: auto !important; } .github-emoji-fallback { color: inherit; } .github-emoji-fallback img { opacity: 0 !important; }</style>
+</head>
+
+
+<body><!--email_off-->
+    <a class="skip-link" href="#content-start">跳到正文</a>
+    
+<header class="dp-nav">
+    <div class="dp-wrap">
+        <div class="dp-nav-inner">
+            <a class="dp-brand" href="/">
+                <span class="mark">
+                    
+                    <img src="/medias/logo.webp" alt="" width="22" height="22">
+                    
+                </span>
+                <span>
+                    <span class="name">翼舞成梦</span><br>
+                    <span class="dom">costalong.com</span>
+                </span>
+            </a>
+
+            <div class="dp-nav-links" role="navigation" aria-label="主导航">
+                
+                <a href="/" class="">首页</a>
+                
+                <a href="/archives/" class="">归档</a>
+                
+                <a href="/about/" class="">关于</a>
+                
+                <a href="/explore/" class="">探索</a>
+                
+                <a href="/notes/" class="">笔记</a>
+                
+                <a href="/contact/" class="">留言板</a>
+                
+            </div>
+
+            <div class="dp-nav-actions">
+                <a href="#searchModal" class="icon-btn modal-trigger" title="搜索" aria-label="搜索"><i class="fas fa-search" aria-hidden="true"></i></a>
+                <a class="dp-nav-cta" href="/atom.xml"><i class="fas fa-rss" style="margin-right:6px" aria-hidden="true"></i>订阅更新</a>
+                <button type="button" data-target="mobile-nav" class="icon-btn dp-burger sidenav-trigger button-collapse" aria-label="打开菜单" aria-expanded="false" aria-controls="mobile-nav"><i class="fas fa-bars" aria-hidden="true"></i></button>
+            </div>
+        </div>
+    </div>
+    
+<div id="mobile-nav" class="side-nav sidenav">
+
+    <div class="mobile-head bg-color">
+        
+        <img src="/medias/logo.webp" class="logo-img circle responsive-img" alt="网站头像">
+        
+        <div class="logo-name">翼舞成梦</div>
+        <div class="logo-desc">
+            
+            翼舞成梦的个人博客，专注于后端开发、K8s 容器化技术、Linux 运维以及人工智能学习笔记分享。
+            
+        </div>
+    </div>
+
+    <ul class="menu-list mobile-menu-list">
+        
+        <li class="m-nav-item">
+	  
+		<a href="/" class="waves-effect waves-light">
+			
+			    <i class="fa-fw fas fa-home"></i>
+			
+			首页
+		</a>
+          
+        </li>
+        
+        <li class="m-nav-item">
+	  
+		<a href="/archives/" class="waves-effect waves-light">
+			
+			    <i class="fa-fw fas fa-archive"></i>
+			
+			归档
+		</a>
+          
+        </li>
+        
+        <li class="m-nav-item">
+	  
+		<button type="button" class="m-nav-toggle" aria-expanded="false" aria-controls="mobile-submenu-3">
+			
+				<i class="fa-fw fas fa-compass" aria-hidden="true"></i>
+			
+			Discover
+			<span class="m-icon" aria-hidden="true"><i class="fas fa-chevron-right"></i></span>
+		</button>
+            <ul id="mobile-submenu-3"  style="background:  ;" >
+              
+                <li>
+
+                  <a href="/categories/" class="m-sub-link">
+                    
+                    <i class="fa m-sub-icon fas fa-bookmark"></i>
+                    
+                    <span>分类</span>
+                  </a>
+                </li>
+              
+                <li>
+
+                  <a href="/tags/" class="m-sub-link">
+                    
+                    <i class="fa m-sub-icon fas fa-tags"></i>
+                    
+                    <span>标签</span>
+                  </a>
+                </li>
+              
+                <li>
+
+                  <a href="/galleries" class="m-sub-link">
+                    
+                    <i class="fa m-sub-icon fas fa-image"></i>
+                    
+                    <span>相册</span>
+                  </a>
+                </li>
+              
+            </ul>
+          
+        </li>
+        
+        <li class="m-nav-item">
+	  
+		<a href="/about/" class="waves-effect waves-light">
+			
+			    <i class="fa-fw fas fa-user-circle"></i>
+			
+			关于
+		</a>
+          
+        </li>
+        
+        <li class="m-nav-item">
+	  
+		<a href="/explore/" class="waves-effect waves-light">
+			
+			    <i class="fa-fw fas fa-compass"></i>
+			
+			探索
+		</a>
+          
+        </li>
+        
+        <li class="m-nav-item">
+	  
+		<a href="/notes/" class="waves-effect waves-light">
+			
+			    <i class="fa-fw fas fa-book-reader"></i>
+			
+			笔记
+		</a>
+          
+        </li>
+        
+        <li class="m-nav-item">
+	  
+		<a href="/contact/" class="waves-effect waves-light">
+			
+			    <i class="fa-fw fas fa-comments"></i>
+			
+			留言板
+		</a>
+          
+        </li>
+        
+        
+    </ul>
+</div>
+
+</header>
+
+    <div id="content-start" tabindex="-1"></div>
+    
+
+
+
+
+
+<div class="dp-bg-field"><div class="glow v"></div><div class="glow c"></div><div class="glow i"></div></div>
+
+<div class="dp">
+  <header class="dp-page-hero dp-wrap post-dp-hero">
+    <span class="eyebrow">
+      <span class="dot"></span>
+      
+        <i class="fas fa-folder-open"></i>&nbsp;Coding-Agent
+      
+    </span>
+    <h1 id="post-title" class="post-title"><span class="grad">Claude Code 无头调用的 token 账：首轮 45k 从哪来</span></h1>
+    <div class="meta">
+      
+<span><i class="far fa-user"></i>&nbsp;<a href="/about/" rel="author">costalong</a></span>
+<span><i class="far fa-calendar-minus"></i>&nbsp;<time datetime="2026-11-20">2026-11-20</time></span>
+
+
+      
+        <span><i class="fas fa-bookmark"></i>&nbsp;<a href="/categories/Coding-Agent/"><b>Coding-Agent</b></a></span>
+      
+      
+        <span class="hero-tags">
+          
+            <a href="/tags/Claude-Code/"><span class="chip ">Claude Code</span></a>
+          
+            <a href="/tags/MCP/"><span class="chip ">MCP</span></a>
+          
+            <a href="/tags/AI-%E5%B7%A5%E7%A8%8B%E5%AE%9E%E8%B7%B5/"><span class="chip ai">AI 工程实践</span></a>
+          
+        </span>
+      
+    </div>
+  </header>
+</div>
+
+<main class="post-container content">
+
+    
+    <div class="row">
+    <div id="main-content" class="col s12 m12 l9">
+        <!-- 文章内容详情 -->
+<div id="artDetail">
+    <div class="card">
+        <div class="card-content article-info">
+            <div class="row tag-cate">
+                <div class="col s7">
+                    
+                    <div class="article-tag">
+                        
+                            <a href="/tags/Claude-Code/">
+                                <span class="chip bg-color ">Claude Code</span>
+                            </a>
+                        
+                            <a href="/tags/MCP/">
+                                <span class="chip bg-color ">MCP</span>
+                            </a>
+                        
+                            <a href="/tags/AI-%E5%B7%A5%E7%A8%8B%E5%AE%9E%E8%B7%B5/">
+                                <span class="chip bg-color ai">AI 工程实践</span>
+                            </a>
+                        
+                    </div>
+                    
+                </div>
+                <div class="col s5 right-align">
+                    
+                    <div class="post-cate">
+                        <i class="fas fa-bookmark fa-fw icon-category"></i>
+                        
+                            <a href="/categories/Coding-Agent/" class="post-category">
+                                Coding-Agent
+                            </a>
+                        
+                    </div>
+                    
+                </div>
+            </div>
+
+            <div class="post-info">
+                
+
+                
+
+                
+                <div class="info-break-policy post-meta-words">
+                    <i class="far fa-file-word fa-fw"></i><span class="post-meta-label">文章字数:&nbsp;&nbsp;</span>
+                    4.5k
+                </div>
+                
+
+                
+
+                
+                    <div id="busuanzi_container_page_pv" class="info-break-policy post-meta-views">
+                        <i class="far fa-eye fa-fw"></i><span class="post-meta-label">阅读次数:&nbsp;&nbsp;</span>
+                        <span id="busuanzi_value_page_pv"></span>
+                    </div>
+				
+
+                <div id="read_mode" class="info-break-policy post-meta-read-mode" style="display:inline" role="button" tabindex="0" aria-label="切换阅读模式" aria-pressed="false">
+                    <i class="fas fa-expand-arrows-alt" title="【进入/离开】 阅读模式" aria-hidden="true"></i>&nbsp;&nbsp;
+                    <span title="【进入/离开】阅读模式" aria-hidden="true">阅读模式</span>
+                </div>
+            </div>
+        </div>
+        <hr class="clearfix">
+
+        
+        <!-- 是否加载使用自带的 prismjs. -->
+        <link rel="stylesheet" href="/libs/prism/prism.min.css">
+        
+
+        
+
+        <div class="card-content article-card-content">
+            <div id="articleContent">
+                <img fetchpriority="high" decoding="async" src="https://cdn.jsdelivr.net/gh/costa92/article-images@b4fd1d0d8ff31689d87f5f55e1788f00181bd90f/clawdbot/claude-code-token-budget-cover.webp" alt="封面：Claude Code 无头调用的首轮上下文从 45096 token 收紧到 3035，缓存写入是主要开销" width="1600" height="681">
+
+<p>用 <code>claude -p</code> 在脚本里跑小任务时，一个只回答 “OK” 的调用，在我平时的配置下按标价估算要 $0.269。上一篇<a href="/2026/11/20/claude-code-k8s-troubleshooting/">让 Claude Code 排查 K8s 故障</a>里顺手测过一次：在已有 <code>--setting-sources project</code> 的基础上再加 <code>--strict-mcp-config</code>，两轮对话的缓存读写合计从约 25.6k 降到约 10.4k。这次我想把这笔账拆细：一次无头调用的 token 到底花在哪几块上，哪些开关真能省钱，哪些其实没用。</p>
+<p>我在本机前后跑了 54 次 <code>claude -p</code>，按估算价合计花了 $2.70。结论先放这里：我平时的配置下，一句 “Reply with exactly: OK” 的首轮上下文是 45096 token，关掉用户级设置、MCP 和内置工具后只剩 3035。但上下文大小本身不是最贵的部分，贵的是缓存写入：Claude Code 按 1 小时 TTL 写缓存，单价是普通输入的 2 倍，而命中缓存的读取只要输入价的 5%。同一份 1.1 万 token 的上下文，命中时一次 $0.0023，改了 CLAUDE.md 里一行再跑是 $0.072，差 31 倍。</p>
+<h2 id="环境和测量方法"><a href="#环境和测量方法" class="headerlink" title="环境和测量方法"></a>环境和测量方法</h2><table>
+<thead>
+<tr>
+<th>项目</th>
+<th>值</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Claude Code</td>
+<td>2.1.329，默认模型 claude-opus-5-5</td>
+</tr>
+<tr>
+<td>登录方式</td>
+<td>订阅账号 OAuth（<code>apiKeySource: none</code>）</td>
+</tr>
+<tr>
+<td>输出格式</td>
+<td><code>--output-format stream-json --verbose</code></td>
+</tr>
+<tr>
+<td>宿主机</td>
+<td>Ubuntu，命令都在本机执行</td>
+</tr>
+</tbody></table>
+<p>调用时直接执行 claude 二进制，只传 <code>HOME</code>、<code>PATH</code>、<code>LANG</code>、<code>TERM</code>、<code>USER</code> 五个环境变量，避免当前 shell 里的变量混进子进程。</p>
+<p>每次调用的 stream-json 里，<code>assistant</code> 消息带着这一次请求的 <code>usage</code>，最后的 <code>result</code> 消息带 <code>total_cost_usd</code> 和按模型汇总的 <code>modelUsage</code>。我把一次请求的”上下文”定义为三项之和：</p>
+<pre class="language-text" data-language="text"><code class="language-text">context = input_tokens + cache_creation_input_tokens + cache_read_input_tokens</code></pre>
+
+<p><code>total_cost_usd</code> 在订阅登录下是 Claude Code 按标价算出来的估算值，不是真扣款。我用第一次探测调用核对了它的算法，Opus 5.5 的标价是输入 $4、输出 $20 每百万 token，缓存读取 $0.20：</p>
+<pre class="language-text" data-language="text"><code class="language-text">req1: input=2 cache_create=2384 (5m=0,1h=2384) cache_read=649 output=4 context=3035
+result: turns=1 cost=$0.0192898 is_error=False text='OK'</code></pre>
+
+<p>2×4 + 2384×8 + 649×0.2 + 4×20 = 19289.8，单位是百万分之一美元，正好是 $0.0192898。缓存写入按 $8 算，也就是 1 小时 TTL 的 2 倍价（<code>usage.cache_creation</code> 里也写明全部是 <code>ephemeral_1h_input_tokens</code>）。后面所有的费用都可以用这个公式复算。</p>
+<p>为了看清每一块的成本，我写了三个小东西：一个不依赖任何库的 stdio MCP 服务器 <code>tinyops</code>（10 个运维类工具，描述照真实工具的长度写，<code>tools/list</code> 返回 5393 字节）；一个生成 CLAUDE.md 的脚本，内容是一个虚构的 Go 订单服务 orderhub 的约定、目录、错误码和模块说明；还有一个包装脚本，负责跑一次调用、按请求去重 usage、记账。保存原始输出时，我把初始化消息里不属于这次实验的 MCP、技能、插件名字都替换成了计数。</p>
+<h2 id="一句-OK-的首轮上下文：从-3035-到-45096"><a href="#一句-OK-的首轮上下文：从-3035-到-45096" class="headerlink" title="一句 OK 的首轮上下文：从 3035 到 45096"></a>一句 OK 的首轮上下文：从 3035 到 45096</h2><p>先看同一个提示词在不同配置下的首轮上下文。除了最后两行，都加了 <code>--setting-sources project --strict-mcp-config</code>。</p>
+<table>
+<thead>
+<tr>
+<th>配置</th>
+<th>首轮上下文（token）</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>--tools ""</code>，不加载任何内置工具</td>
+<td>3035</td>
+</tr>
+<tr>
+<td><code>--tools Read</code></td>
+<td>4126</td>
+</tr>
+<tr>
+<td><code>--tools "Bash,Read,Edit,Write"</code></td>
+<td>6308</td>
+</tr>
+<tr>
+<td>默认内置工具（24 个）</td>
+<td>18531</td>
+</tr>
+<tr>
+<td>默认内置工具，工作目录换到 home 下</td>
+<td>21806</td>
+</tr>
+<tr>
+<td>不限制设置来源，只加 <code>--strict-mcp-config</code></td>
+<td>39994</td>
+</tr>
+<tr>
+<td>我平时的完整配置</td>
+<td>45096</td>
+</tr>
+</tbody></table>
+<p>我平时的配置是：12 个 MCP 服务器共 81 个工具、18 个插件、254 个技能、77 个 agent、6 个 SessionStart hook。完整配置第一次跑花了 $0.269，紧接着再跑一次全部命中缓存，只要 $0.0091。</p>
+<img loading="lazy" decoding="async" src="https://cdn.jsdelivr.net/gh/costa92/article-images@5c154e19c3c132b7bdcae2f0a8cbeed6812fb6c6/clawdbot/claude-code-token-budget-term-baseline.webp" alt="终端截图：同一句 Reply OK，--tools 空、项目级设置时首轮 3035 token，默认 24 个内置工具 18531，我平时完整配置 45096，命中缓存后 $0.0091" width="1600" height="1158">
+
+<p>把这些差值叠起来，45096 大致分成这几块：</p>
+<ul>
+<li>系统提示词和必需部分：3035。</li>
+<li>24 个内置工具的定义：15496，是单项最大的一块。</li>
+<li>工作目录在 home 下时加载的用户级 CLAUDE.md：3275（下面单独说为什么要强调”在 home 下”）。</li>
+<li>用户级设置带进来的技能、插件、agent 和 hook：18188。</li>
+<li>12 个 MCP 服务器：5102。</li>
+</ul>
+<img loading="lazy" decoding="async" src="https://cdn.jsdelivr.net/gh/costa92/article-images@1dfe4957a4ec69d0b70024e5ec705dd8e255fd41/clawdbot/claude-code-token-budget-composition.webp" alt="首轮上下文构成堆叠条：必需部分 3035，内置工具 15496，用户级 CLAUDE.md 3275，用户级技能插件等 18188，MCP 5102，合计 45096；另一条显示 800 行项目 CLAUDE.md 单独就占 23498" width="1600" height="874">
+
+<p>18188 这块我没有逐项拆。下文测到一个项目级技能只占 58 token，按这个量级估算，254 个技能大约 1.5 万，和这块的大小对得上，但这只是推测。</p>
+<h2 id="内置工具占得最多，按需裁剪最直接"><a href="#内置工具占得最多，按需裁剪最直接" class="headerlink" title="内置工具占得最多，按需裁剪最直接"></a>内置工具占得最多，按需裁剪最直接</h2><p>24 个内置工具一共 15496 token，平均每个 600 多。<code>--tools</code> 只留 <code>Read</code> 时首轮是 4126，留 <code>Bash,Read,Edit,Write</code> 四个是 6308。脚本任务通常只用得到两三个工具，用 <code>--tools</code> 显式列出来，首轮能少一万多 token。</p>
+<p>注意 <code>--tools</code> 和 <code>--allowedTools</code> 不是一回事：<code>--allowedTools</code> 管的是哪些调用不用询问，属于权限；上面这些数字变化都来自 <code>--tools</code>，它决定哪些工具出现在上下文里。</p>
+<h2 id="MCP-工具：有-ToolSearch-时只占一个名字"><a href="#MCP-工具：有-ToolSearch-时只占一个名字" class="headerlink" title="MCP 工具：有 ToolSearch 时只占一个名字"></a>MCP 工具：有 ToolSearch 时只占一个名字</h2><p>MCP 的结果和我预想的不一样。我用 <code>tinyops</code> 分别暴露 1、3、10 个工具：</p>
+<table>
+<thead>
+<tr>
+<th>配置</th>
+<th>10 个 MCP 工具带来的增量</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>--tools ""</code>，MCP 工具全量加载</td>
+<td>+2336</td>
+</tr>
+<tr>
+<td><code>--tools Read</code>，没有 ToolSearch</td>
+<td>+1957</td>
+</tr>
+<tr>
+<td><code>--tools "Read,ToolSearch"</code></td>
+<td>+766</td>
+</tr>
+<tr>
+<td>默认内置工具（含 ToolSearch）</td>
+<td>+151</td>
+</tr>
+</tbody></table>
+<p><code>--tools ""</code> 下 1 个、3 个、10 个工具的首轮分别是 3724、4096、5371。可一旦内置工具里有 <code>ToolSearch</code>，10 个 MCP 工具只多了 151 token：初始化消息里 10 个工具照样列出来，但从 token 数看，完整的定义没有进上下文，我的理解是模型需要时先用 ToolSearch 搜出定义再调用。<code>--tools "Read,ToolSearch"</code> 的 +766 里，推测大部分是 ToolSearch 这个工具自身的定义，我没有单独测不带 MCP 时它占多少。</p>
+<p>这也解释了为什么我平时 81 个 MCP 工具只占 5102 token。反过来有一个坑：如果为了省 token 用 <code>--tools</code> 只留了几个内置工具，又没把 <code>ToolSearch</code> 列进去，MCP 工具会退回全量加载。我的 10 个工具只有 2 千多 token，换成几十个描述很长的工具就不是小数目了。</p>
+<h2 id="CLAUDE-md：每行约-29-token，中文比英文贵-11"><a href="#CLAUDE-md：每行约-29-token，中文比英文贵-11" class="headerlink" title="CLAUDE.md：每行约 29 token，中文比英文贵 11%"></a>CLAUDE.md：每行约 29 token，中文比英文贵 11%</h2><p>CLAUDE.md 这组实验一开始全部白跑了。我把 50、200、800 行的 CLAUDE.md 依次放进工作目录，首轮上下文纹丝不动，都是 3035。问模型”上下文里有没有项目 CLAUDE.md”，回答是 <code>NONE</code>。</p>
+<p>原因在工作目录：我把实验目录放在了会话的临时目录下，路径在 <code>/tmp/claude-&lt;uid&gt;/</code> 里面。上一篇的 K8s 实验也遇到过，把工作目录移到 <code>$HOME/.cache</code> 下面以后才加载。为什么这个目录会被跳过我没有查到文档，推测是 Claude Code 不读它自己临时目录里的 CLAUDE.md。换到 <code>/home/user/.cache/cc-tokens-proj</code> 后，同样的问题模型直接引用出了第三行。</p>
+<p>换目录后又发现第二件事：没放项目 CLAUDE.md 时，首轮也从 3035 变成了 6311。多出来的是我的用户级 <code>~/.claude/CLAUDE.md</code>（连同它引用的文件约 7.6KB）。也就是说 <code>--setting-sources project</code> 只限制 settings 文件，不会挡住用户级 CLAUDE.md；<code>--safe-mode</code> 能挡住，同样条件下首轮是 2344。</p>
+<p>在 home 下的目录里，项目 CLAUDE.md 的边际成本如下（<code>--tools ""</code>，以 6311 为基线）：</p>
+<table>
+<thead>
+<tr>
+<th>文件</th>
+<th>行数</th>
+<th>字符数</th>
+<th>增加的 token</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>中文</td>
+<td>50</td>
+<td>2491</td>
+<td>1424</td>
+</tr>
+<tr>
+<td>中文</td>
+<td>200</td>
+<td>7612</td>
+<td>5007</td>
+</tr>
+<tr>
+<td>中文</td>
+<td>800</td>
+<td>33593</td>
+<td>23498</td>
+</tr>
+<tr>
+<td>中文，模块说明部分</td>
+<td>200</td>
+<td>8546</td>
+<td>6156</td>
+</tr>
+<tr>
+<td>英文，同样的模块说明</td>
+<td>200</td>
+<td>15593</td>
+<td>5526</td>
+</tr>
+</tbody></table>
+<img loading="lazy" decoding="async" src="https://cdn.jsdelivr.net/gh/costa92/article-images@7a33e51f70f4b4c853c1bde8f740893e2e6c8940/clawdbot/claude-code-token-budget-term-claudemd.webp" alt="终端截图：home 目录下 --tools 空时，无项目 CLAUDE.md 首轮 6311，--safe-mode 2344，中文 50/200/800 行分别为 7735、11318、29809，同内容英文 200 行 11837、中文 12467" width="1600" height="1464">
+
+<p>800 行的 CLAUDE.md 每行约 29.4 token，单这一项就比 24 个内置工具还大。按 Opus 5.5 的价格，第一次写缓存要 $0.188，之后每次命中读取约 $0.0047。</p>
+<p>最后两行是同一份内容的中英文版本。中文每个字符约 0.72 token，英文约 0.35 token，中文字符数少一半，token 反而多 11%。11% 不算大，我不会为了它把 CLAUDE.md 改成英文，删掉 200 行用不上的内容效果大得多。</p>
+<h2 id="技能和-agent：只占一行描述"><a href="#技能和-agent：只占一行描述" class="headerlink" title="技能和 agent：只占一行描述"></a>技能和 agent：只占一行描述</h2><p>在 home 下另一个目录里，我加了一个项目级技能 <code>deploy-check</code>（SKILL.md 7521 字节，正文 60 步）和一个 agent <code>pg-reviewer</code>（5531 字节）。基线是 21806，加了技能后 21864，再加 agent 后 21931。一个技能 +58，一个 agent +67，进上下文的只有 front-matter 里的名字和描述，正文要等调用时才读。</p>
+<p>所以单个技能、agent 写多长都无所谓，真正累积起来的是数量：上面那一万八千多 token，推测主要就是几百个技能和 agent 的描述叠出来的。</p>
+<h2 id="缓存：命中便宜-31-倍，改一行就重写整块"><a href="#缓存：命中便宜-31-倍，改一行就重写整块" class="headerlink" title="缓存：命中便宜 31 倍，改一行就重写整块"></a>缓存：命中便宜 31 倍，改一行就重写整块</h2><p>接下来看缓存。工作目录里放 200 行中文 CLAUDE.md，<code>--tools ""</code>，依次做四件事：原样再跑一次，改最后一行，改第三行，再原样跑一次。下面是从保存的 stream-json 里重新打印的摘要：</p>
+<pre class="language-text" data-language="text"><code class="language-text">== g1_same_again  duration_ms=2593
+req1: input=2 cache_create=0 (5m=0,1h=0) cache_read=11288 output=4 context=11290
+result: turns=1 cost=$0.0023455999999999998 is_error=False text='OK'
+== g2_edit_last_line  duration_ms=3291
+req1: input=2 cache_create=8963 (5m=0,1h=8963) cache_read=2386 output=4 context=11351
+result: turns=2 cost=$0.1442944 is_error=False text='OK'
+== g3_edit_line3  duration_ms=1773
+req1: input=2 cache_create=8935 (5m=0,1h=8935) cache_read=2386 output=4 context=11323
+result: turns=1 cost=$0.0720452 is_error=False text='OK'
+== g4_again_after_edit  duration_ms=2471
+req1: input=2 cache_create=0 (5m=0,1h=0) cache_read=11321 output=4 context=11323
+result: turns=1 cost=$0.0023522 is_error=False text='OK'</code></pre>
+
+<img loading="lazy" decoding="async" src="https://cdn.jsdelivr.net/gh/costa92/article-images@a6e78a4f682fae1e00c8a9b4ae3a5f1e35fe12d5/clawdbot/claude-code-token-budget-cache.webp" alt="缓存时间线：系统前缀 2386 token 始终命中；改 CLAUDE.md 最后一行或第三行都会重写之后约 8.9k token，单次 $0.072；不改动再跑全部命中只要 $0.0023" width="1600" height="990">
+
+<p>缓存是按前缀匹配的。这四次里，前 2386 token（系统提示词）一直命中；CLAUDE.md 不管改第 3 行还是第 200 行，后面约 8.9k token 都要重新写入。命中时 $0.0023，重写时 $0.072，差 31 倍。</p>
+<p>g2 的费用还翻了一倍，因为这一次模型第一次回复没有可见文字，Claude Code 自动追加了一条 <code>[Your previous response had no visible output. Please continue and produce a user-visible response.]</code>，又发了一次请求，而第二次请求也重新写了一遍缓存。这个现象在 54 次调用里出现了两次，都是 200 行中文 CLAUDE.md 的场景，原因我没有查清。</p>
+<p>缓存能活多久也测了一下。10 个 MCP 工具那次调用跑完 8 到 9 分钟后，用同样的参数再跑，5369 token 全部命中，只花 $0.0012。这和 1 小时 TTL 的写入记录一致，超过 5 分钟的间隔也能吃到缓存。代价是写入单价是输入价的 2 倍，按官方文档的算法，1 小时 TTL 下同一个前缀至少要用 3 次才比不缓存便宜。</p>
+<p>还有一个开关我以为有用，实测没效果：<code>--exclude-dynamic-system-prompt-sections</code>。帮助里说它把工作目录、git 状态这类每台机器不同的段落从系统提示词挪到第一条用户消息里，提升跨用户的缓存复用。我用两个不同的空目录 A、B 先后跑，不加这个参数时 B 能复用 17622 token、新写 4182；加了以后 B 复用 17375、新写还是 4182。在这个版本的 <code>-p</code> 模式下，目录相关的内容看起来本来就排在可共享的前缀之后。</p>
+<h2 id="多步任务：钱主要花在写缓存上"><a href="#多步任务：钱主要花在写缓存上" class="headerlink" title="多步任务：钱主要花在写缓存上"></a>多步任务：钱主要花在写缓存上</h2><p>一次调用里如果有工具调用，就会发多次请求。我在 <code>src/</code> 下放了 5 个 Go 文件（合计 10380 字节），让它逐个 Read，最后列出每个文件的导出函数：</p>
+<pre class="language-text" data-language="text"><code class="language-text">== k_agentic  wall=17.7s rc=0
+init: tools=2 mcp_servers=0 slash_commands=55 skills=19 agents=6 plugins=4 model=claude-opus-5-5
+req1: input=2 cache_create=2509 (5m=0,1h=2509) cache_read=1947 output=8 context=4458
+req2: input=2 cache_create=118 (5m=0,1h=118) cache_read=4456 output=16 context=4576
+req3: input=2 cache_create=1269 (5m=0,1h=1269) cache_read=4574 output=16 context=5845
+req4: input=2 cache_create=1284 (5m=0,1h=1284) cache_read=5843 output=16 context=7129
+req5: input=2 cache_create=1299 (5m=0,1h=1299) cache_read=7127 output=16 context=8428
+req6: input=2 cache_create=1330 (5m=0,1h=1330) cache_read=8426 output=59 context=9758
+req7: input=2 cache_create=1346 (5m=0,1h=1346) cache_read=9756 output=367 context=11104
+result: turns=7 cost=$0.1038018 is_error=False text='5 个文件已按顺序逐个读完。...'
+  modelUsage claude-opus-5-5: in=14 out=1104 cr=42129 cc=9155 cost=0.1038018</code></pre>
+
+<p>每一次请求都把前面的全部内容重发一遍，前缀命中缓存，只有新读进来的文件内容（每个约 1.3k token）写入缓存。7 次请求累计计费的输入是 51298 token，而最后的上下文只有 11104。</p>
+<img loading="lazy" decoding="async" src="https://cdn.jsdelivr.net/gh/costa92/article-images@90387983641674c080249898e9c9fe661184407d/clawdbot/claude-code-token-budget-agentic.webp" alt="逐请求堆叠条：7 次请求的缓存读取从 1947 涨到 9756，每次新写入约 1.3k；费用构成中缓存写入 $0.0732 占 70.5%，输出 $0.0221 占 21.3%，缓存读取 $0.0084 只占 8.1%" width="1600" height="860">
+
+<p>按单价拆开这 $0.1038：缓存写入 9155 × $8 = $0.0732，占 70.5%；输出 1104 × $20 = $0.0221，占 21.3%；缓存读取 42129 × $0.2 = $0.0084，只占 8.1%。累计读了 4 万多 token，却是最便宜的一项。同样的任务在缓存已热的情况下又跑了 4 次（本来是想换参数，结果是我的 zsh 循环没把参数拆开），费用在 $0.0831 到 $0.0839 之间，很稳定。</p>
+<p>多轮对话也是同一个规律。我在一个进程里通过 <code>--input-format stream-json</code> 一轮一轮地发 6 个问题（要等上一轮的 <code>result</code> 回来再发下一条；一次性把 4 条消息全塞进 stdin，后 3 条会被合并成一轮）：</p>
+<table>
+<thead>
+<tr>
+<th>轮次</th>
+<th>问题</th>
+<th>本轮费用</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>1</td>
+<td>读 order.go</td>
+<td>$0.0231</td>
+</tr>
+<tr>
+<td>2</td>
+<td>再读 payment.go</td>
+<td>$0.0189</td>
+</tr>
+<tr>
+<td>3</td>
+<td>再读 inventory.go</td>
+<td>$0.0191</td>
+</tr>
+<tr>
+<td>4</td>
+<td>CancelOrder 的超时是多少</td>
+<td>$0.0036</td>
+</tr>
+<tr>
+<td>5</td>
+<td>validateOrder 检查了什么</td>
+<td>$0.0041</td>
+</tr>
+<tr>
+<td>6</td>
+<td>合成三行清单</td>
+<td>$0.0074</td>
+</tr>
+</tbody></table>
+<img loading="lazy" decoding="async" src="https://cdn.jsdelivr.net/gh/costa92/article-images@1e89675e6055a3b0b6e9d696363e3b164355acea/clawdbot/claude-code-token-budget-term-turns.webp" alt="终端截图：一个进程里逐轮发 6 个问题，读文件的轮次每轮约 $0.019，只基于已有上下文回答的轮次 $0.0036 到 $0.0074，上下文从 4136 涨到 8640" width="1600" height="1022">
+
+<p>第 4 到 6 轮的上下文已经有 8500 token，比第 1 轮大一倍，费用却只有前三轮的约六分之一到五分之二。决定单轮费用的是这一轮新进来多少内容（要写缓存）和输出多少，而不是上下文总长度，前提是前缀一直命中。</p>
+<h2 id="换模型、降-effort、限轮数"><a href="#换模型、降-effort、限轮数" class="headerlink" title="换模型、降 effort、限轮数"></a>换模型、降 effort、限轮数</h2><p>还是读 5 个文件那个任务，每种配置各跑一次。只有默认 Opus 那次是冷缓存；<code>--effort low</code> 和 <code>--max-turns 3</code> 是在它之后跑的，读到了前面留下的缓存，所以要拿它们和缓存已热时的 $0.0831～$0.0839 比：</p>
+<table>
+<thead>
+<tr>
+<th>配置</th>
+<th>费用</th>
+<th>耗时</th>
+<th>结果</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Opus 5.5（默认）</td>
+<td>$0.1038</td>
+<td>16.9s</td>
+<td>正确</td>
+</tr>
+<tr>
+<td><code>--model sonnet</code>（claude-sonnet-5-5）</td>
+<td>$0.0510</td>
+<td>11.0s</td>
+<td>正确</td>
+</tr>
+<tr>
+<td><code>--model haiku</code>（claude-haiku-5-5）</td>
+<td>$0.0031</td>
+<td>9.3s</td>
+<td>正确</td>
+</tr>
+<tr>
+<td><code>--effort low</code></td>
+<td>$0.0876</td>
+<td>17.2s</td>
+<td>正确</td>
+</tr>
+<tr>
+<td><code>--max-turns 3</code></td>
+<td>$0.0201</td>
+<td>6.2s</td>
+<td><code>error_max_turns</code>，没有结果</td>
+</tr>
+</tbody></table>
+<p>Haiku 5.5 的标价是每百万 token 输入 $0.10、输出 $0.50，按这个价算出来正好是 $0.0031，只有冷启动那次 Opus 的 3%。5 个文件的 20 个函数一个不差，后面还多补了一句观察：”每个文件里的 4 个函数函数体完全相同”，Get、Cancel、List 并没有做名字说的事。Haiku 的首轮上下文是 5210，比 Opus 的 4458 多 17%，可能是分词更碎，也可能是系统提示词或工具集不同，这次没有拆开看；但单价低得多，完全抵消。这种读文件、提取字段的活，用小模型足够。</p>
+<p><code>--effort low</code> 在这个任务上基本没有省钱：输出 1139 token，和默认的 1104 差不多；$0.0876 比冷启动的 $0.1038 低，但比缓存已热时的 $0.083 左右还略高。任务太简单，本来就没多少思考可省，effort 的效果要在更难的任务上才看得出来。</p>
+<p><code>--max-turns 3</code> 是个负面例子。它在第 4 轮被截停，<code>result</code> 为空，<code>errors</code> 是 <code>Reached maximum number of turns (3)</code>，已经花掉的 $0.0201 什么也没换来。把它当成本上限用不合适，它只是让失控的循环少烧一点。帮助里另有一个 <code>--max-budget-usd</code>，我这次没测。</p>
+<h2 id="意外和坑"><a href="#意外和坑" class="headerlink" title="意外和坑"></a>意外和坑</h2><ul>
+<li>工作目录在 <code>/tmp/claude-&lt;uid&gt;/</code> 下面时，项目级 CLAUDE.md 不加载；加了 <code>--setting-sources project</code> 时用户级的也没进上下文，换到 home 下才正常（上一篇用默认设置来源在同一类目录里跑，用户级的是加载了的）。在 CI 或脚本里拿临时目录做工作目录时，最好先问一句模型确认 CLAUDE.md 进没进上下文。</li>
+<li><code>--setting-sources project</code> 挡不住 <code>~/.claude/CLAUDE.md</code>，我的用户级指令照样进了每一次无头调用；要完全隔离得用 <code>--safe-mode</code>。</li>
+<li>用 <code>--tools</code> 精简内置工具时漏掉 <code>ToolSearch</code>，MCP 工具会从”只占名字”变回全量加载。</li>
+<li>模型偶尔第一次回复没有可见文字，Claude Code 会自动补一次请求，那一次调用费用翻倍。</li>
+<li>往 <code>--input-format stream-json</code> 的 stdin 一次塞多条消息，排队的消息会被合并成一轮，想测逐轮成本必须等上一轮 <code>result</code> 回来再发。</li>
+</ul>
+<h2 id="落到脚本里"><a href="#落到脚本里" class="headerlink" title="落到脚本里"></a>落到脚本里</h2><p>根据这些数字，我给自己的脚本定了几条规矩：</p>
+<ol>
+<li>无头调用一律加 <code>--strict-mcp-config</code>，需要哪个 MCP 用 <code>--mcp-config</code> 单独给；用户级设置不需要时加 <code>--setting-sources project</code>，需要彻底干净时用 <code>--safe-mode</code>。我的配置下前两步就把首轮从 45096 降到 21806。</li>
+<li>用 <code>--tools</code> 只列真正要用的内置工具，要用 MCP 就把 <code>ToolSearch</code> 也列上。24 个内置工具占 15496 token，留 4 个只要 3273。</li>
+<li>CLAUDE.md 按每行约 30 token 估算，800 行就是 2.3 万。写给人看的长文档放到别的文件里，让模型需要时去读。</li>
+<li>批量跑同一类任务时，把会变的东西放进提示词，不要放进 CLAUDE.md 或系统提示词，让前缀保持不变，后续调用才能按 5% 的价格读缓存。</li>
+<li>读文件、抽字段这类任务直接 <code>--model haiku</code>，这次同样的结果费用只有冷启动 Opus 的 3%，和缓存已热的 Opus 比也不到 4%。</li>
+<li>不要靠 <code>--max-turns</code> 控成本，它截停时已经花掉的钱不退，也拿不到结果。</li>
+<li>看费用时直接读 <code>usage.cache_creation_input_tokens</code>，它比上下文总长度更能说明这次调用为什么贵。</li>
+</ol>
+<h2 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h2><ul>
+<li>Claude Code CLI 参考：<a target="_blank" rel="noopener" href="https://code.claude.com/docs/en/cli-reference">https://code.claude.com/docs/en/cli-reference</a></li>
+<li>Claude Code 设置与 CLAUDE.md：<a target="_blank" rel="noopener" href="https://code.claude.com/docs/en/settings">https://code.claude.com/docs/en/settings</a>、<a target="_blank" rel="noopener" href="https://code.claude.com/docs/en/memory">https://code.claude.com/docs/en/memory</a></li>
+<li>Claude API 价格：<a target="_blank" rel="noopener" href="https://platform.claude.com/docs/en/about-claude/pricing">https://platform.claude.com/docs/en/about-claude/pricing</a></li>
+<li>Prompt caching（TTL、写入和读取的计价）：<a target="_blank" rel="noopener" href="https://platform.claude.com/docs/en/build-with-claude/prompt-caching">https://platform.claude.com/docs/en/build-with-claude/prompt-caching</a></li>
+<li>MCP 规范（stdio 传输与 tools/list）：<a target="_blank" rel="noopener" href="https://modelcontextprotocol.io/specification">https://modelcontextprotocol.io/specification</a></li>
+</ul>
+
+                
+            </div>
+            <hr/>
+
+            
+<div class="hexo-ad" aria-label="赞助内容">
+    
+    
+        <div class="hexo-ad-script"><style type="text/css">
+.hexo-article-ad-slot { display: block; width: 100%; max-width: 320px; height: 100px; margin: 0 auto; }
+@media (min-width: 500px) { .hexo-article-ad-slot { max-width: 468px; height: 60px; } }
+@media (min-width: 800px) { .hexo-article-ad-slot { max-width: 728px; height: 90px; } }
+</style>
+<ins class="adsbygoogle hexo-article-ad-slot"
+     style="display:block"
+     data-ad-client="ca-pub-8990123471955885"
+     data-ad-slot="4326698678"></ins>
+<script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+</div>
+    
+</div>
+<style>
+    .hexo-ad { margin: 1.2rem auto; text-align: center; }
+    .hexo-ad-img { max-width: 100%; height: auto; border-radius: 8px; box-shadow: 0 2px 8px rgba(0, 0, 0, .08); }
+    .hexo-ad-script { margin: 0 auto; }
+</style>
+
+
+
+            
+
+    <div class="reprint" id="reprint-statement">
+        
+            <div class="reprint__author">
+                <span class="reprint-meta" style="font-weight: bold;">
+                    <i class="fas fa-user">
+                        文章作者:
+                    </i>
+                </span>
+                <span class="reprint-info">
+                    <a href="/about/" rel="external nofollow noreferrer">costalong</a>
+                </span>
+            </div>
+            <div class="reprint__type">
+                <span class="reprint-meta" style="font-weight: bold;">
+                    <i class="fas fa-link">
+                        文章链接:
+                    </i>
+                </span>
+                <span class="reprint-info">
+                    <a href="https://costalong.com/2026/11/20/claude-code-token-budget/">https://costalong.com/2026/11/20/claude-code-token-budget/</a>
+                    <button class="reprint-copy-link" type="button" data-copy-url="https://costalong.com/2026/11/20/claude-code-token-budget/" aria-label="复制文章链接" title="复制文章链接">
+                        <i class="fas fa-copy" aria-hidden="true"></i><span>复制链接</span>
+                    </button>
+                    <span class="reprint-copy-status" role="status" aria-live="polite"></span>
+                </span>
+            </div>
+            <div class="reprint__notice">
+                <span class="reprint-meta" style="font-weight: bold;">
+                    <i class="fas fa-copyright">
+                        版权声明:
+                    </i>
+                </span>
+                <span class="reprint-info">
+                    本博客所有文章除特別声明外，均采用
+                    <a href="https://creativecommons.org/licenses/by/4.0/deed.zh" rel="external nofollow noreferrer" target="_blank">CC BY 4.0</a>
+                    许可协议。转载请注明来源
+                    <a href="/about/" target="_blank">costalong</a>
+                    !
+                </span>
+            </div>
+        
+    </div>
+
+    <script async defer>
+      document.addEventListener("copy", function (e) {
+        if (window.__articlePermalinkCopy) return;
+        let toastHTML = '<span>复制成功，请遵循本文的转载规则</span><button class="btn-flat toast-action" onclick="navToReprintStatement()" style="font-size: smaller">查看</a>';
+        M.toast({html: toastHTML})
+      });
+
+      document.addEventListener("click", async function (e) {
+        const button = e.target.closest(".reprint-copy-link");
+        if (!button) return;
+
+        const row = button.closest(".reprint__type .reprint-info");
+        const permalink = button.dataset.copyUrl;
+        if (!row || !permalink) return;
+
+        const status = row.querySelector(".reprint-copy-status");
+        const fallbackCopy = function (text) {
+          const textarea = document.createElement("textarea");
+          textarea.value = text;
+          textarea.setAttribute("readonly", "");
+          textarea.style.position = "fixed";
+          textarea.style.opacity = "0";
+          document.body.appendChild(textarea);
+          textarea.select();
+          window.__articlePermalinkCopy = true;
+          let copied = false;
+          try {
+            copied = document.execCommand("copy");
+          } finally {
+            window.__articlePermalinkCopy = false;
+            textarea.remove();
+          }
+          if (!copied) throw new Error("Clipboard copy failed");
+        };
+
+        try {
+          if (navigator.clipboard && navigator.clipboard.writeText) {
+            try {
+              await navigator.clipboard.writeText(permalink);
+            } catch (error) {
+              fallbackCopy(permalink);
+            }
+          } else {
+            fallbackCopy(permalink);
+          }
+          status.textContent = "已复制";
+          button.classList.add("is-copied");
+        } catch (error) {
+          status.textContent = "复制失败，请长按链接复制";
+        }
+
+        window.setTimeout(function () {
+          status.textContent = "";
+          button.classList.remove("is-copied");
+        }, 2200);
+      });
+
+      function navToReprintStatement() {
+        $("html, body").animate({scrollTop: $("#reprint-statement").offset().top - 80}, 800);
+      }
+    </script>
+
+
+
+            <div class="tag_share" style="display: block;">
+                <div class="post-meta__tag-list" style="display: inline-block;">
+                    
+                        <div class="article-tag">
+                            
+                                <a href="/tags/Claude-Code/">
+                                    <span class="chip bg-color ">Claude Code</span>
+                                </a>
+                            
+                                <a href="/tags/MCP/">
+                                    <span class="chip bg-color ">MCP</span>
+                                </a>
+                            
+                                <a href="/tags/AI-%E5%B7%A5%E7%A8%8B%E5%AE%9E%E8%B7%B5/">
+                                    <span class="chip bg-color ai">AI 工程实践</span>
+                                </a>
+                            
+                        </div>
+                    
+                </div>
+                <div class="post_share" style="zoom: 80%; width: fit-content; display: inline-block; float: right; margin: -0.15rem 0;">
+                    <link rel="stylesheet" type="text/css" href="/libs/share/css/share.min.css">
+<div id="article-share">
+
+    
+    <div class="social-share" data-sites="twitter,facebook,google,qq,qzone,wechat,weibo,douban,linkedin" data-wechat-qrcode-helper="<p>微信扫一扫即可分享！</p>"></div>
+    <script src="/libs/share/js/social-share.min.js"></script>
+    
+
+    
+
+</div>
+
+                </div>
+            </div>
+            
+                <div id="reward">
+    <a href="#rewardModal" class="reward-link modal-trigger btn-floating btn-medium waves-effect waves-light red">赏</a>
+
+    <!-- Modal Structure -->
+    <div id="rewardModal" class="modal">
+        <div class="modal-content">
+            <a class="close modal-close"><i class="fas fa-times"></i></a>
+            <h4 class="reward-title">你的赏识是我前进的动力</h4>
+            <div class="reward-content">
+                <div class="reward-tabs">
+                    <ul class="tabs row">
+                        <li class="tab col s6 alipay-tab waves-effect waves-light"><a href="#alipay">支付宝</a></li>
+                        <li class="tab col s6 wechat-tab waves-effect waves-light"><a href="#wechat">微 信</a></li>
+                    </ul>
+                    <div id="alipay">
+                        <img src="/images/reward/alipay.jpg" class="reward-img" width="210" height="210" loading="lazy" alt="支付宝打赏二维码">
+                    </div>
+                    <div id="wechat">
+                        <img src="/images/reward/wechat.jpg" class="reward-img" width="210" height="210" loading="lazy" alt="微信打赏二维码">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    $(function () {
+        $('.tabs').tabs();
+    });
+</script>
+
+            
+        </div>
+    </div>
+
+    
+
+<section class="post-related" aria-labelledby="post-related-title">
+    <h2 id="post-related-title">继续阅读</h2>
+    <div class="post-related-grid">
+        
+        <a class="post-related-card" href="/2026/07/06/claude-md-configuration-playbook/">
+            <span class="post-related-date">2026-07-06</span>
+            <strong>CLAUDE.md 别写成许愿墙：200 行是红线</strong>
+            <span class="post-related-summary">CLAUDE.md 是拼进上下文的 user message，不强制执行；@ 导入不省 token，带 paths 的 rules 才省。我的博客仓库 CLAUDE.md 四个月从…</span>
+        </a>
+        
+        <a class="post-related-card" href="/2026/06/06/claude-minsearch-mcp-protobuf-rag/">
+            <span class="post-related-date">2026-06-06</span>
+            <strong>Claude 想看最新 protobuf 文档？用 minsearch + MCP 搭一个 100 行的迷你 RAG</strong>
+            <span class="post-related-summary">三个脚本共约 100 行，把 4 个 protobuf 官方页面切成 406 段建 TF-IDF 索引，经 MCP 调用单次检索 1–3 ms；最大的问题是 proto2/prot…</span>
+        </a>
+        
+        <a class="post-related-card" href="/2026/04/16/mempalace-local-memory-tutorial/">
+            <span class="post-related-date">2026-04-16</span>
+            <strong>MemPalace 从零上手：给 Claude Code 装本地 AI 记忆（零 API）</strong>
+            <span class="post-related-summary">MemPalace 3.11.0 本地实测：英文记忆检索准，纯中文查询 BM25 分恒为 0、靠英文 MiniLM 向量硬撑，会排错；带连字符的目录变成下划线 room，按原名过滤…</span>
+        </a>
+        
+    </div>
+</section>
+
+
+
+    
+
+    
+
+    
+
+    
+
+    
+        <style>
+    .valine-card {
+        margin: 1.5rem auto;
+    }
+
+    .valine-card .card-content {
+        padding: 20px 20px 5px 20px;
+    }
+
+    #vcomments textarea {
+        box-sizing: border-box;
+        background: url("/medias/comment_bg.png") 100% 100% no-repeat;
+    }
+
+    #vcomments p {
+        margin: 2px 2px 10px;
+        font-size: 1.05rem;
+        line-height: 1.78rem;
+    }
+
+    #vcomments blockquote p {
+        text-indent: 0.2rem;
+    }
+
+    #vcomments a {
+        padding: 0 2px;
+        color: #4cbf30;
+        font-weight: 500;
+        text-decoration: none;
+    }
+
+    #vcomments img {
+        max-width: 100%;
+        height: auto;
+        cursor: pointer;
+    }
+
+    #vcomments ol li {
+        list-style-type: decimal;
+    }
+
+    #vcomments ol,
+    ul {
+        display: block;
+        padding-left: 2em;
+        word-spacing: 0.05rem;
+    }
+
+    #vcomments ul li,
+    ol li {
+        display: list-item;
+        line-height: 1.8rem;
+        font-size: 1rem;
+    }
+
+    #vcomments ul li {
+        list-style-type: disc;
+    }
+
+    #vcomments ul ul li {
+        list-style-type: circle;
+    }
+
+    #vcomments table, th, td {
+        padding: 12px 13px;
+        border: 1px solid #dfe2e5;
+    }
+
+    #vcomments table, th, td {
+        border: 0;
+    }
+
+    table tr:nth-child(2n), thead {
+        background-color: #fafafa;
+    }
+
+    #vcomments table th {
+        background-color: #f2f2f2;
+        min-width: 80px;
+    }
+
+    #vcomments table td {
+        min-width: 80px;
+    }
+
+    #vcomments h1 {
+        font-size: 1.85rem;
+        font-weight: bold;
+        line-height: 2.2rem;
+    }
+
+    #vcomments h2 {
+        font-size: 1.65rem;
+        font-weight: bold;
+        line-height: 1.9rem;
+    }
+
+    #vcomments h3 {
+        font-size: 1.45rem;
+        font-weight: bold;
+        line-height: 1.7rem;
+    }
+
+    #vcomments h4 {
+        font-size: 1.25rem;
+        font-weight: bold;
+        line-height: 1.5rem;
+    }
+
+    #vcomments h5 {
+        font-size: 1.1rem;
+        font-weight: bold;
+        line-height: 1.4rem;
+    }
+
+    #vcomments h6 {
+        font-size: 1rem;
+        line-height: 1.3rem;
+    }
+
+    #vcomments p {
+        font-size: 1rem;
+        line-height: 1.5rem;
+    }
+
+    #vcomments hr {
+        margin: 12px 0;
+        border: 0;
+        border-top: 1px solid #ccc;
+    }
+
+    #vcomments blockquote {
+        margin: 15px 0;
+        border-left: 5px solid #42b983;
+        padding: 1rem 0.8rem 0.3rem 0.8rem;
+        color: #666;
+        background-color: rgba(66, 185, 131, .1);
+    }
+
+    #vcomments pre {
+        font-family: monospace, monospace;
+        padding: 1.2em;
+        margin: .5em 0;
+        background: #272822;
+        overflow: auto;
+        border-radius: 0.3em;
+        tab-size: 4;
+    }
+
+    #vcomments code {
+        font-family: monospace, monospace;
+        padding: 1px 3px;
+        font-size: 0.92rem;
+        color: #e96900;
+        background-color: #f8f8f8;
+        border-radius: 2px;
+    }
+
+    #vcomments pre code {
+        font-family: monospace, monospace;
+        padding: 0;
+        color: #e8eaf6;
+        background-color: #272822;
+    }
+
+    #vcomments pre[class*="language-"] {
+        padding: 1.2em;
+        margin: .5em 0;
+    }
+
+    #vcomments code[class*="language-"],
+    pre[class*="language-"] {
+        color: #e8eaf6;
+    }
+
+    #vcomments [type="checkbox"]:not(:checked), [type="checkbox"]:checked {
+        position: inherit;
+        margin-left: -1.3rem;
+        margin-right: 0.4rem;
+        margin-top: -1px;
+        vertical-align: middle;
+        left: unset;
+        visibility: visible;
+    }
+
+    #vcomments b,
+    strong {
+        font-weight: bold;
+    }
+
+    #vcomments dfn {
+        font-style: italic;
+    }
+
+    #vcomments small {
+        font-size: 85%;
+    }
+
+    #vcomments cite {
+        font-style: normal;
+    }
+
+    #vcomments mark {
+        background-color: #fcf8e3;
+        padding: .2em;
+    }
+
+    #vcomments table, th, td {
+        padding: 12px 13px;
+        border: 1px solid #dfe2e5;
+    }
+
+    table tr:nth-child(2n), thead {
+        background-color: #fafafa;
+    }
+
+    #vcomments table th {
+        background-color: #f2f2f2;
+        min-width: 80px;
+    }
+
+    #vcomments table td {
+        min-width: 80px;
+    }
+
+    #vcomments [type="checkbox"]:not(:checked), [type="checkbox"]:checked {
+        position: inherit;
+        margin-left: -1.3rem;
+        margin-right: 0.4rem;
+        margin-top: -1px;
+        vertical-align: middle;
+        left: unset;
+        visibility: visible;
+    }
+</style>
+
+<div class="card valine-card" data-aos="fade-up">
+    <div class="comment_headling" style="font-size: 20px; font-weight: 700; padding: 20px 20px 8px 20px;">
+        <i class="fas fa-comments fa-fw" aria-hidden="true"></i>
+        <span>评论</span>
+    </div>
+    <div id="vcomments" class="card-content" style="display: grid">
+    </div>
+</div>
+
+<script>
+(function () {
+    /* av-min.js + Valine.min.js 合计约 124KB(gzip)，评论区在页面最底部，
+       滚动接近时再加载，不占首屏带宽和主线程 */
+    var el = document.getElementById('vcomments');
+    var srcs = ['/libs/valine/av-min.js',
+                '/libs/valine/Valine.min.js'];
+
+    function load(i) {
+        if (i === srcs.length) return init();
+        var s = document.createElement('script');
+        s.src = srcs[i];
+        s.onload = function () { load(i + 1); };
+        document.body.appendChild(s);
+    }
+
+    if (!('IntersectionObserver' in window)) return load(0);
+    var io = new IntersectionObserver(function (entries) {
+        if (!entries[0].isIntersecting) return;
+        io.disconnect();
+        load(0);
+    }, { rootMargin: '600px 0px' });
+    io.observe(el);
+
+    function init() {
+    new Valine({
+        el: '#vcomments',
+        appId: 'wCf5tlcDtIMPMtrnfln6u3fL-MdYXbMMI',
+        appKey: 'pvzhB4VvZzNeC5gtXTaIv0oo',
+        serverURLs: 'https://wcf5tlcd.api.lncldglobal.com',
+        notify: 'false' === 'true',
+        verify: 'false' === 'true',
+        visitor: 'true' === 'true',
+        recordIP: 'false' === 'true',
+        avatar: 'mm',
+        pageSize: '10',
+        lang: 'zh-cn',
+        placeholder: '有什么想说的，在这里留言…'
+    });
+    }
+})();
+</script>
+
+<!--酷Q推送-->
+
+
+    
+
+    
+
+    
+
+    
+
+    
+
+<article id="prenext-posts" class="prev-next articles">
+    <div class="row article-row">
+        
+        <div class="article col s12 m6" data-aos="fade-up">
+            <div class="article-badge left-badge text-color">
+                <i class="fas fa-chevron-left"></i>&nbsp;上一篇</div>
+            <div class="card">
+                <a href="/2026/11/20/llm-json-output/">
+                    <div class="card-image card-image-V">
+                        <div class="box-content">
+                            <p class="title">阅读全文</p>
+                            <span class="post" style="width:180px">Ollama 结构化输出实测：schema 管得住格式，管不住对错</span>
+                        </div>
+                        
+                        <img src="https://cdn.jsdelivr.net/gh/costa92/article-images@ee8c5d8ab4a01702a79e6028ad32ff7c1ab2b30a/clawdbot/llm-json-output-cover.webp" width="400" height="300" loading="lazy" class="responsive-img" alt="Ollama 结构化输出实测：schema 管得住格式，管不住对错">
+                        
+                        <span class="card-title title-V">Ollama 结构化输出实测：schema 管得住格式，管不住对错</span>
+                    </div>
+                </a>
+                <div class="card-content article-content">
+                    <div class="summary block-with-text">
+                        给 Ollama 传 JSON Schema 后，四个本地模型在温度 0 下的输出和 format:json 逐字相同，字段准确率一个点没变；把 null 从 schema 里去掉，6 字段全对率从 75% 掉到 17%，模型改填 0 和字…
+                    </div>
+                    <div class="publish-info">
+                        <span class="publish-date">
+                            <i class="far fa-clock fa-fw icon-date"></i>2026-11-20
+                        </span>
+                        <span class="publish-author">
+                            
+                            <i class="fas fa-bookmark fa-fw icon-category"></i>
+                            
+                            <a href="/categories/AI/" class="post-category">
+                                    AI
+                                </a>
+                            
+                            
+                        </span>
+                    </div>
+                </div>
+                
+                <div class="card-action article-tags">
+                    
+                    <a href="/tags/%E6%9C%AC%E5%9C%B0%E5%A4%A7%E6%A8%A1%E5%9E%8B/">
+                        <span class="chip bg-color ai">本地大模型</span>
+                    </a>
+                    
+                    <a href="/tags/AI-%E5%B7%A5%E7%A8%8B%E5%AE%9E%E8%B7%B5/">
+                        <span class="chip bg-color ai">AI 工程实践</span>
+                    </a>
+                    
+                </div>
+                
+            </div>
+        </div>
+        
+        
+        <div class="article col s12 m6" data-aos="fade-up">
+            <div class="article-badge right-badge text-color">
+                下一篇&nbsp;<i class="fas fa-chevron-right"></i>
+            </div>
+            <div class="card">
+                <a href="/2026/11/20/ollama-context-truncation/">
+                    <div class="card-image card-image-V">
+                        <div class="box-content">
+                            <p class="title">阅读全文</p>
+                            <span class="post" style="width:180px">Ollama 静默截断长提示词：上下文 4096 时，4184 token 只剩 2050</span>
+                        </div>
+                        
+                        <img src="https://cdn.jsdelivr.net/gh/costa92/article-images@6624242561d68d1770c0f668cae27ce9fe1cf931/clawdbot/ollama-context-truncation-cover.webp" width="400" height="300" loading="lazy" class="responsive-img" alt="Ollama 静默截断长提示词：上下文 4096 时，4184 token 只剩 2050">
+                        
+                        <span class="card-title title-V">Ollama 静默截断长提示词：上下文 4096 时，4184 token 只剩 2050</span>
+                    </div>
+                </a>
+                <div class="card-content article-content">
+                    <div class="summary block-with-text">
+                        上下文 4096 时，4184 token 的提示词被 Ollama 砍到 2050，接口照样返回 200；砍掉的是中间，写在开头的任务说明 6 次全丢，放末尾或设 num_keep=64 就能保住。多轮对话会整条丢掉旧消息，不打 WARN…
+                    </div>
+                    <div class="publish-info">
+                            <span class="publish-date">
+                                <i class="far fa-clock fa-fw icon-date"></i>2026-11-20
+                            </span>
+                        <span class="publish-author">
+                            
+                            <i class="fas fa-bookmark fa-fw icon-category"></i>
+                            
+                            <a href="/categories/AI/" class="post-category">
+                                    AI
+                                </a>
+                            
+                            
+                        </span>
+                    </div>
+                </div>
+                
+                <div class="card-action article-tags">
+                    
+                    <a href="/tags/%E6%9C%AC%E5%9C%B0%E5%A4%A7%E6%A8%A1%E5%9E%8B/">
+                        <span class="chip bg-color ai">本地大模型</span>
+                    </a>
+                    
+                    <a href="/tags/AI-%E5%B7%A5%E7%A8%8B%E5%AE%9E%E8%B7%B5/">
+                        <span class="chip bg-color ai">AI 工程实践</span>
+                    </a>
+                    
+                </div>
+                
+            </div>
+        </div>
+        
+    </div>
+</article>
+
+</div>
+
+
+
+<!-- 代码块功能依赖 -->
+<script type="text/javascript" src="/libs/codeBlock/codeBlockFuction.js"></script>
+
+
+
+<!-- 代码语言 -->
+
+<script type="text/javascript" src="/libs/codeBlock/codeLang.js"></script>
+
+
+<!-- 代码块复制 -->
+
+<script type="text/javascript" src="/libs/codeBlock/codeCopy.js"></script>
+
+
+<!-- 代码块收缩 -->
+
+<script type="text/javascript" src="/libs/codeBlock/codeShrink.js"></script>
+
+
+
+<script>
+// 图片加载失败处理：隐藏破损图片及其 .img-item 容器，避免空白边框残留。
+// setTimeout(0) 确保在 matery.js articleInit() 包装图片（DOM ready 后）之后运行。
+(function () {
+    function hideBroken(img) {
+        var wrap = img.closest ? img.closest('.img-item') : null;
+        if (wrap) {
+            var next = wrap.nextElementSibling;
+            if (next && next.classList.contains('caption')) next.style.display = 'none';
+            wrap.style.display = 'none';
+        } else {
+            img.style.display = 'none';
+        }
+    }
+    $(function () {
+        setTimeout(function () {
+            document.querySelectorAll('#articleContent img').forEach(function (img) {
+                img.addEventListener('error', function () { hideBroken(this); }, { once: true });
+                if (img.complete && img.naturalWidth === 0) hideBroken(img);
+            });
+        }, 0);
+    });
+}());
+</script>
+
+<script>
+// 阅读模式切换
+$(function() {
+    $('#read_mode').on('click', function() {
+        var $card = $('#artDetail .card').first();
+        $card.toggleClass('card-block-fullscreen');
+        $('html').toggleClass('card-block-fullscreen-html-scroll');
+        $(this).attr('aria-pressed', String($card.hasClass('card-block-fullscreen')));
+        var $icon = $(this).find('i');
+        if ($icon.hasClass('fa-expand-arrows-alt')) {
+            $icon.removeClass('fa-expand-arrows-alt').addClass('fa-compress-arrows-alt');
+        } else {
+            $icon.removeClass('fa-compress-arrows-alt').addClass('fa-expand-arrows-alt');
+        }
+    }).on('keydown', function(e) {
+        if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            $(this).trigger('click');
+        }
+    });
+});
+</script>
+
+    </div>
+    <div id="toc-aside" class="expanded col l3 hide-on-med-and-down">
+        <div class="toc-widget card">
+            <div class="toc-title"><i class="far fa-list-alt"></i>&nbsp;&nbsp;目录</div>
+            <div id="toc-content"></div>
+        </div>
+    </div>
+</div>
+
+<!-- TOC 悬浮按钮 — 全屏可见 -->
+
+<div id="floating-toc-btn">
+    <button type="button" class="btn-floating btn-large bg-color" aria-label="打开文章目录" aria-controls="toc-aside mobile-toc-drawer" aria-expanded="false">
+        <i class="fas fa-list-ul" aria-hidden="true"></i>
+    </button>
+</div>
+
+<!-- 移动端 TOC 抽屉 -->
+<div id="mobile-toc-overlay" class="mobile-toc-overlay" aria-hidden="true"></div>
+<div id="mobile-toc-drawer" class="mobile-toc-drawer" role="dialog" aria-modal="true" aria-label="文章目录" aria-hidden="true" inert>
+    <div class="mobile-toc-header">
+        <span class="mobile-toc-title"><i class="far fa-list-alt"></i>&nbsp;&nbsp;目录</span>
+        <button type="button" id="mobile-toc-close" class="mobile-toc-close" aria-label="关闭文章目录"><i class="fas fa-times" aria-hidden="true"></i></button>
+    </div>
+    <div class="mobile-toc-body" id="mobile-toc-body"></div>
+</div>
+
+
+<script src="/libs/tocbot/tocbot.min.js"></script>
+<script>
+    $(function () {
+        tocbot.init({
+            tocSelector: '#toc-content',
+            contentSelector: '#articleContent',
+            headingsOffset: -($(window).height() * 0.4 - 45),
+            collapseDepth: Number('3'),
+            headingSelector: 'h2, h3, h4'
+        });
+
+        // Set scroll toc fixed.
+        let tocHeight = parseInt($(window).height() * 0.4 - 64);
+        let $tocWidget = $('.toc-widget');
+        $(window).scroll(function () {
+            let scroll = $(window).scrollTop();
+            /* add post toc fixed. */
+            if (scroll > tocHeight) {
+                $tocWidget.addClass('toc-fixed');
+            } else {
+                $tocWidget.removeClass('toc-fixed');
+            }
+        });
+
+        
+        /* 修复文章卡片 div 的宽度. */
+        let fixPostCardWidth = function (srcId, targetId) {
+            let srcDiv = $('#' + srcId);
+            if (srcDiv.length === 0) {
+                return;
+            }
+
+            let w = srcDiv.width();
+            if (w >= 450) {
+                w = w + 21;
+            } else if (w >= 350 && w < 450) {
+                w = w + 18;
+            } else if (w >= 300 && w < 350) {
+                w = w + 16;
+            } else {
+                w = w + 14;
+            }
+            $('#' + targetId).width(w);
+        };
+
+        // 切换TOC目录展开收缩的相关操作.
+        const expandedClass = 'expanded';
+        let $tocAside = $('#toc-aside');
+        let $mainContent = $('#main-content');
+
+        /* 目录只有一两条时，侧栏几乎是空的，右侧留下一大片空白。
+           这种情况直接不要侧栏，让正文占满整行（正文自身仍有 measure 行宽上限，
+           由 .no-toc 负责居中）。 */
+        if ($('#toc-content .toc-link').length < 3) {
+            $tocAside.removeClass(expandedClass).hide();
+            $mainContent.removeClass('l9').addClass('no-toc');
+            $('#floating-toc-btn').hide();
+        }
+
+        // 移动端 TOC 抽屉逻辑
+        let $overlay = $('#mobile-toc-overlay');
+        let $drawer = $('#mobile-toc-drawer');
+        let $drawerBody = $('#mobile-toc-body');
+        let $tocTrigger = $('#floating-toc-btn .btn-floating');
+        let drawerOpen = false;
+
+        function openMobileDrawer() {
+            // 克隆桌面端 TOC 内容到抽屉
+            $drawerBody.html($('#toc-content').html());
+            $overlay.addClass('active');
+            $drawer.addClass('active').attr('aria-hidden', 'false').removeAttr('inert');
+            $tocTrigger.attr({'aria-expanded': 'true', 'aria-label': '关闭文章目录'});
+            $('body').css('overflow', 'hidden');
+            drawerOpen = true;
+            $('#mobile-toc-close').trigger('focus');
+
+            // 点击抽屉内链接后自动关闭
+            $drawerBody.find('.toc-link').on('click', function() {
+                closeMobileDrawer(false);
+            });
+        }
+
+        function closeMobileDrawer(restoreFocus) {
+            $overlay.removeClass('active');
+            $drawer.removeClass('active').attr('aria-hidden', 'true');
+            // Let a clicked TOC anchor complete its native hash navigation before making it inert.
+            if (restoreFocus === false) {
+                window.setTimeout(function () { $drawer.attr('inert', ''); }, 0);
+            } else {
+                $drawer.attr('inert', '');
+            }
+            $tocTrigger.attr({'aria-expanded': 'false', 'aria-label': '打开文章目录'});
+            $('body').css('overflow', '');
+            drawerOpen = false;
+            if (restoreFocus !== false) $tocTrigger.trigger('focus');
+        }
+
+        $overlay.on('click', function () { closeMobileDrawer(); });
+        $('#mobile-toc-close').on('click', function () { closeMobileDrawer(); });
+        $(document).on('keydown', function (event) {
+            if (drawerOpen && event.key === 'Escape') closeMobileDrawer();
+        });
+
+        $(window).on('resize', function () {
+            if ($(window).width() > 1199 && drawerOpen) closeMobileDrawer(false);
+            if ($(window).width() > 1199) {
+                const expanded = $tocAside.hasClass(expandedClass);
+                $tocTrigger.attr({'aria-expanded': String(expanded), 'aria-label': expanded ? '收起文章目录' : '展开文章目录'});
+            } else if (!drawerOpen) {
+                $tocTrigger.attr({'aria-expanded': 'false', 'aria-label': '打开文章目录'});
+            }
+        });
+
+        if ($(window).width() > 1199 && $tocAside.hasClass(expandedClass)) {
+            $tocTrigger.attr({'aria-expanded': 'true', 'aria-label': '收起文章目录'});
+        }
+
+        $tocTrigger.on('click', function () {
+            // 1199px 及以下打开抽屉：993–1199 侧栏太窄，CSS 已把它隐藏
+            if ($(window).width() <= 1199) {
+                if (drawerOpen) {
+                    closeMobileDrawer();
+                } else {
+                    openMobileDrawer();
+                }
+                return;
+            }
+
+            // 桌面端保持原有折叠逻辑
+            if ($tocAside.hasClass(expandedClass)) {
+                $tocAside.removeClass(expandedClass).hide();
+                $tocTrigger.attr({'aria-expanded': 'false', 'aria-label': '展开文章目录'});
+                // 只去掉 l9 会让 col s12 m12 在大屏退回整行宽度，正文行宽从 788px
+                // 涨到 1092px（中文行太长且不居中，右侧空一大片）。补一个类来封顶并居中。
+                $mainContent.removeClass('l9').addClass('toc-collapsed');
+            } else {
+                $tocAside.addClass(expandedClass).show();
+                $tocTrigger.attr({'aria-expanded': 'true', 'aria-label': '收起文章目录'});
+                $mainContent.addClass('l9').removeClass('toc-collapsed');
+            }
+            fixPostCardWidth('artDetail', 'prenext-posts');
+        });
+        
+    });
+</script>
+
+    
+
+</main>
+
+
+
+
+    <div class="progress-bar"></div>
+
+
+
+<footer class="dp-footer page-footer">
+    <div class="dp-wrap dp-foot-grid">
+        <div class="l">
+            &copy;
+            
+                <span id="year">2023-2026</span>
+            
+            <b>翼舞成梦</b> · costalong.com — 用 <a href="https://hexo.io/" target="_blank" rel="noopener">Hexo</a> 构建，记录工程实践与学习笔记。
+        </div>
+        <div class="dp-foot-links">
+            <a href="/advertise/">广告合作</a>
+            <a href="/privacy/">隐私政策</a>
+            <a href="/atom.xml">RSS</a>
+            <a href="/archives/">归档</a>
+            <a href="/about/">关于</a>
+            <a href="https://github.com/costa92" target="_blank" rel="noopener">GitHub</a>
+            <a href="/sitemap.xml">sitemap</a>
+        </div>
+    </div>
+
+    <div class="dp-wrap" style="margin-top:16px;display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;font-size:12.5px;color:var(--text-mut);">
+        <div class="footer-social">
+    <a href="https://github.com/costa92" class="tooltipped" aria-label="访问我的GitHub" target="_blank" rel="noopener" data-tooltip="访问我的GitHub" data-position="top" data-delay="50">
+        <i class="fab fa-github"></i>
+    </a>
+
+
+
+    <a href="mailto:costa9293@gmail.com" class="tooltipped" aria-label="邮件联系我" target="_blank" rel="noopener" data-tooltip="邮件联系我" data-position="top" data-delay="50">
+        <i class="fas fa-envelope-open"></i>
+    </a>
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <a href="/atom.xml" class="tooltipped" aria-label="RSS 订阅" target="_blank" rel="noopener" data-tooltip="RSS 订阅" data-position="top" data-delay="50">
+        <i class="fas fa-rss"></i>
+    </a>
+
+</div>
+        <div class="footer-stats" style="font-family:var(--font-mono);">
+            
+                <span id="busuanzi_container_site_pv"><i class="far fa-eye"></i>&nbsp;<span id="busuanzi_value_site_pv"></span></span>
+            
+            
+                <span id="busuanzi_container_site_uv">&nbsp;&middot;&nbsp;<i class="fas fa-users"></i>&nbsp;<span id="busuanzi_value_site_uv"></span></span>
+            
+            
+            
+                &nbsp;&middot;&nbsp;<a href="https://beian.miit.gov.cn/#/Integrated/index" target="_blank" rel="noopener">湘ICP备15006875号</a>
+            
+        </div>
+    </div>
+
+    
+</footer>
+
+<!-- 显示灯笼的 -->
+
+
+
+    <div id="searchModal" class="modal" role="dialog" aria-modal="true" aria-labelledby="searchTitle">
+    <div class="modal-content">
+        <div class="search-header">
+            <label for="searchInput" id="searchTitle" class="title"><i class="fas fa-search" aria-hidden="true"></i>&nbsp;&nbsp;搜索</label>
+            <input type="search" id="searchInput" name="s" placeholder="请输入搜索的关键字"
+                   class="search-input" aria-controls="searchResult">
+        </div>
+        <div id="searchStatus" class="search-status" role="status" aria-live="polite"></div>
+        <div id="searchResult"></div>
+    </div>
+</div>
+
+<script type="text/javascript">
+$(function () {
+    'use strict';
+    var input = document.getElementById('searchInput');
+    var result = document.getElementById('searchResult');
+    var status = document.getElementById('searchStatus');
+    var entries = null;
+    var loading = false;
+
+    function showStatus(message) {
+        status.textContent = message;
+    }
+
+    function cleanContent(value) {
+        return String(value || '').replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim();
+    }
+
+    function render() {
+        result.replaceChildren();
+        var query = input.value.trim().toLocaleLowerCase();
+        if (!query) {
+            showStatus('');
+            return;
+        }
+        if (!entries) {
+            showStatus(loading ? '正在加载搜索索引…' : '搜索索引暂时不可用，请稍后重试。');
+            return;
+        }
+
+        var words = query.split(/[\s\-]+/).filter(Boolean);
+        var matches = entries.filter(function (entry) {
+            return words.every(function (word) { return entry.searchText.includes(word); });
+        }).slice(0, 20);
+        if (!matches.length) {
+            showStatus('没有找到相关内容，请换个关键词试试。');
+            return;
+        }
+        showStatus('找到 ' + matches.length + ' 条相关内容' + (matches.length === 20 ? '（最多显示 20 条）' : ''));
+        var list = document.createElement('ul');
+        list.className = 'search-result-list';
+        matches.forEach(function (entry) {
+            var item = document.createElement('li');
+            var link = document.createElement('a');
+            link.className = 'search-result-title';
+            link.href = entry.url;
+            link.textContent = entry.title;
+            item.appendChild(link);
+            if (entry.content) {
+                var first = entry.content.toLocaleLowerCase().indexOf(words[0]);
+                var start = Math.max(0, first - 35);
+                var snippet = document.createElement('p');
+                snippet.className = 'search-result';
+                snippet.textContent = (start ? '…' : '') + entry.content.slice(start, start + 130) + (start + 130 < entry.content.length ? '…' : '');
+                item.appendChild(snippet);
+            }
+            list.appendChild(item);
+        });
+        result.appendChild(list);
+    }
+
+    function loadIndex() {
+        if (entries || loading) return;
+        loading = true;
+        render();
+        $.ajax({ url: '/search.xml', dataType: 'xml' })
+            .done(function (xml) {
+                entries = $('entry', xml).map(function () {
+                    var title = $('title', this).text().trim();
+                    var content = cleanContent($('content', this).text());
+                    var url = $('url', this).text().trim();
+                    if (!title || !url) return null;
+                    return {
+                        title: title,
+                        content: content,
+                        url: url.charAt(0) === '/' ? url : '/' + url,
+                        searchText: (title + ' ' + content).toLocaleLowerCase()
+                    };
+                }).get();
+            })
+            .fail(function () { entries = null; })
+            .always(function () { loading = false; render(); });
+    }
+
+    input.addEventListener('input', function () { loadIndex(); render(); });
+    input.addEventListener('focus', loadIndex);
+    $('a[href="#searchModal"], .search-btn').on('click', loadIndex);
+});
+</script>
+
+    <!-- 白天和黑夜主题 -->
+<div class="stars-con">
+    <div id="stars"></div>
+    <div id="stars2"></div>
+    <div id="stars3"></div>  
+</div>
+
+<script>
+    function switchNightMode() {
+        $('<div class="Cuteen_DarkSky"><div class="Cuteen_DarkPlanet"></div></div>').appendTo($('body')),
+        setTimeout(function () {
+            $('body').hasClass('DarkMode') 
+            ? ($('body').removeClass('DarkMode'), localStorage.setItem('isDark', '0'), $('#sum-moon-icon').removeClass("fa-sun").addClass('fa-moon')) 
+            : ($('body').addClass('DarkMode'), localStorage.setItem('isDark', '1'), $('#sum-moon-icon').addClass("fa-sun").removeClass('fa-moon')),
+            
+            setTimeout(function () {
+            $('.Cuteen_DarkSky').fadeOut(1e3, function () {
+                $(this).remove()
+            })
+            }, 2e3)
+        })
+    }
+</script>
+
+    <!-- 回到顶部按钮 -->
+<div id="backTop" class="top-scroll">
+    <button type="button" class="btn-floating btn-large waves-effect waves-light" aria-label="回到顶部">
+        <i class="fas fa-arrow-up" aria-hidden="true"></i>
+    </button>
+</div>
+
+
+    <script src="/libs/materialize/materialize.min.js" defer></script>
+    
+    <script src="/libs/masonry/masonry.pkgd.min.js" defer></script>
+    <script src="/libs/aos/aos.js"></script>
+    <script src="/libs/lightGallery/js/lightgallery-all.min.js" defer></script>
+    
+    <script src="/libs/scrollprogress/scrollProgress.min.js"></script>
+    <script src="/js/matery.js?v=3f7ec091" defer></script>
+    <script src="/js/responsive-tables.js?v=6ebf2b5e"></script>
+    <script src="/js/infinite-scroll.js?v=b6f5ebe2" defer></script>
+
+    
+    
+
+    
+
+    
+
+    <!-- 雪花特效 -->
+    
+
+    <!-- 鼠标星星特效 -->
+    
+
+    
+
+    <!-- Baidu Analytics -->
+
+    <!-- Baidu Push -->
+
+    
+        
+    <script>
+      // 样式预览不计入站点和文章阅读量。
+      (function () {
+        if (new URLSearchParams(location.search).has('style-audit-preview')) return;
+        var visitCounter = document.createElement('script');
+        visitCounter.src = 'https://events.vercount.one/js';
+        document.head.appendChild(visitCounter);
+      })();
+    </script>
+    
+
+    
+
+    
+
+    <!--腾讯兔小巢-->
+    
+    
+
+    
+
+    
+
+    
+    <script src="/libs/instantpage/instantpage.js" type="module"></script>
+    
+
+<!--/email_off--></body>
+
+</html>

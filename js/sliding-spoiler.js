@@ -1,1 +1,14 @@
-document.addEventListener("DOMContentLoaded",function(){document.querySelectorAll(".sliding-spoiler").forEach(function(e){var l=e.querySelector(".sliding-spoiler-content");e.querySelector(".sliding-spoiler-title").addEventListener("click",function(){e.classList.contains("collapsed")?(e.classList.replace("collapsed","expanded"),l.style.maxHeight=l.scrollHeight+"px"):(e.classList.replace("expanded","collapsed"),l.style.maxHeight="0")})})});
+document.addEventListener('DOMContentLoaded', () => {
+    document.querySelectorAll('.sliding-spoiler').forEach((panel) => {
+        const content = panel.querySelector('.sliding-spoiler-content');
+        panel.querySelector('.sliding-spoiler-title').addEventListener('click', () => {
+            if (panel.classList.contains('collapsed')) {
+                panel.classList.replace('collapsed', 'expanded');
+                content.style.maxHeight = content.scrollHeight + 'px';
+            } else {
+                panel.classList.replace('expanded', 'collapsed');
+                content.style.maxHeight = '0';
+            }
+        });
+    });
+});

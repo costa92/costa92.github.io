@@ -1,1 +1,868 @@
-#rewardModal .close{color:var(--text-hi)}.post-dp-hero h1.post-title{height:auto!important;-webkit-line-clamp:unset!important;display:block!important;overflow:visible!important;line-height:1.15;text-wrap:balance}.post-dp-hero .meta{align-items:center}.post-dp-hero .meta a{color:inherit}.post-dp-hero .meta a:hover b{color:var(--acc-3)}.post-dp-hero .meta .hero-tags{display:inline-flex;gap:8px;flex-wrap:wrap}.post-dp-hero .meta .hero-tags a{display:inline-flex}.post-dp-hero .meta .hero-tags .chip{font-size:12px;padding:2px 10px;border-radius:999px;border:1px solid var(--glass-stroke);background:rgba(150,170,235,.05);color:var(--text-mut);transition:transform var(--dur),background var(--dur)}.post-dp-hero .meta .hero-tags a:hover .chip{transform:translateY(-1px)}main.post-container.content{width:100%!important;max-width:var(--dp-maxw)!important;margin:0 auto!important;padding:0 var(--s-6)!important;box-sizing:border-box}@media only screen and (max-width:760px){main.post-container.content{padding:0 var(--s-4)!important}}@media only screen and (min-width:993px){.dp .dp-wrap.post-dp-hero,main.post-container.content{max-width:1411px!important}.dp .dp-wrap.post-dp-hero.post-no-toc,body:has(#main-content.toc-collapsed) .dp .dp-wrap.post-dp-hero,body:has(#main-content.toc-collapsed) main.post-container.content,main.post-container.content.post-no-toc{max-width:1074px!important}}@media only screen and (min-width:993px) and (max-width:1199px){.dp .dp-wrap.post-dp-hero,main.post-container.content{max-width:1074px!important}#toc-aside{display:none!important}}main.post-container .row{margin-bottom:0}#artDetail{margin-top:var(--s-2)!important}#artDetail{background:0 0!important;border:none!important;box-shadow:none!important;border-radius:0!important;-webkit-backdrop-filter:none!important;backdrop-filter:none!important}@media only screen and (min-width:1418px){#artDetail{margin-top:var(--s-2)!important;padding:0!important}}#artDetail .article-info .tag-cate{display:none!important}#artDetail .article-info{padding:var(--s-4) var(--s-5) 0!important;margin-bottom:0!important}#artDetail .article-info .post-info{margin-top:0;display:flex;flex-wrap:wrap;align-items:center;gap:var(--s-2) var(--s-4);clear:both;font-family:var(--font-mono);font-size:13px;color:var(--text-mut)}#artDetail .article-info .post-info>div{margin:0!important;display:inline-flex;align-items:center}#artDetail .article-info .post-info>div i{color:var(--acc-soft);margin-right:4px}#artDetail .article-info .post-info #read_mode{cursor:pointer}#artDetail .article-info .post-info #read_mode:hover i,#artDetail .article-info .post-info #read_mode:hover span{color:var(--acc-3)!important}#artDetail .article-info .post-info #read_mode:focus-visible{outline:2px solid var(--acc-3);outline-offset:2px}#artDetail .card.card-block-fullscreen{transform:none!important;background:var(--bg-deep)!important;-webkit-backdrop-filter:none!important;backdrop-filter:none!important}#artDetail .card.card-block-fullscreen>.card-content,#artDetail .card.card-block-fullscreen>hr{max-width:1010px;margin-left:auto;margin-right:auto}#artDetail .card.card-block-fullscreen .post-info #read_mode{border-color:transparent;background:0 0}.mobile-toc-close{border:0;padding:0;background:0 0}@media only screen and (max-width:760px){#artDetail .article-info{padding:var(--s-4) var(--s-4) 0!important}#artDetail .article-info .post-info{display:grid;grid-auto-flow:column;grid-auto-columns:minmax(0,1fr);gap:8px;font-size:12px}#artDetail .article-info .post-info .post-meta-reading-time,#artDetail .article-info .post-info .post-meta-updated{display:none!important}#artDetail .article-info .post-info .post-date>span,#artDetail .article-info .post-info .post-meta-label{position:absolute;width:1px;height:1px;overflow:hidden;white-space:nowrap;clip-path:inset(50%)}#artDetail .article-info .post-info>div{float:none;width:auto;min-width:0;justify-content:center;padding:5px 8px;border:1px solid var(--glass-stroke);border-radius:999px;background:rgba(150,170,235,.05);white-space:nowrap}#artDetail .article-info .post-info #read_mode{display:inline-flex!important;padding:5px 8px}#artDetail .article-info .post-info #read_mode i{margin-right:0}body:has(.post-dp-hero) main.content{padding-bottom:calc(76px + env(safe-area-inset-bottom))!important}body:has(.post-dp-hero) #backTop,body:has(.post-dp-hero) #floating-toc-btn{position:fixed;bottom:calc(12px + env(safe-area-inset-bottom));padding:0;margin:0;z-index:998}body:has(.post-dp-hero) #floating-toc-btn{right:66px}body:has(.post-dp-hero) #backTop{right:12px}body:has(.post-dp-hero) #backTop .btn-floating,body:has(.post-dp-hero) #floating-toc-btn .btn-floating{display:grid;place-items:center;width:44px;height:44px;padding:0;cursor:pointer}body:has(.post-dp-hero) #backTop .btn-floating i,body:has(.post-dp-hero) #floating-toc-btn .btn-floating i{font-size:18px;line-height:1}}#articleContent{max-width:none!important}#articleContent>blockquote,#articleContent>dl,#articleContent>h1,#articleContent>h2,#articleContent>h3,#articleContent>h4,#articleContent>h5,#articleContent>h6,#articleContent>ol,#articleContent>p,#articleContent>ul{max-width:820px;margin-left:auto;margin-right:auto}#articleContent>.code-area,#articleContent>.img-item,#articleContent>.mermaid,#articleContent>.note,#articleContent>.table-container,#articleContent>details,#articleContent>figure.highlight,#articleContent>hr,#articleContent>p:has(>img:only-child),#articleContent>pre,#articleContent>table{max-width:880px;margin-left:auto;margin-right:auto}#articleContent>.code-area{width:100%;min-width:0;box-sizing:border-box}#artDetail #articleContent>:is(p,ul,ol,blockquote,h1,h2,h3,h4,h5,h6,dl,.img-item,hr,.note,.mermaid,details){max-width:960px}#articleContent>.code-area>pre{max-width:100%}#artDetail #articleContent>blockquote:has(>p>strong:first-child+br){padding:18px 20px 20px;border:1px solid var(--glass-stroke);border-left:3px solid var(--acc-1)!important;border-radius:0 12px 12px 0;background:var(--bg-elevated)!important}#artDetail #articleContent>blockquote:has(>p>strong:first-child+br)>p{margin:0;text-indent:0}#artDetail #articleContent>blockquote:has(>p>strong:first-child+br)>p>strong:first-child{display:block;margin-bottom:8px;color:var(--text-hi)!important}#artDetail #articleContent>blockquote:has(>p>strong:first-child+br)>p>strong:first-child+br{display:none}@media (max-width:760px){#artDetail #articleContent>blockquote:has(>p>strong:first-child+br){padding:16px 14px 18px}}@media print{#artDetail #articleContent>blockquote:has(>p>strong:first-child+br){background:#f4f4f4!important;border-color:#ccc!important}#artDetail #articleContent>blockquote:has(>p>strong:first-child+br)>p>strong:first-child{color:#000!important}}#articleContent table{max-width:100%;overflow-x:auto}#articleContent table.responsive-table-cards{display:table;width:100%;table-layout:fixed;overflow:visible}#artDetail #articleContent>:is(pre,figure.highlight,.code-area,table,.table-container){max-width:min(100%,960px);margin-left:auto;margin-right:auto}#articleContent table td,#articleContent table th{white-space:normal;overflow-wrap:anywhere;vertical-align:top}#articleContent table.responsive-table-cards td,#articleContent table.responsive-table-cards th{min-width:0}#articleContent table.responsive-table-cards code{white-space:normal;overflow-wrap:anywhere}#articleContent table.responsive-table-cards .responsive-table-label{display:none}@media only screen and (max-width:760px){#articleContent table.responsive-table-cards,#articleContent table.responsive-table-cards tbody,#articleContent table.responsive-table-cards td,#articleContent table.responsive-table-cards tr{display:block;width:100%;box-sizing:border-box}#articleContent table.responsive-table-cards{border:0;overflow:visible;table-layout:auto}#articleContent table.responsive-table-cards thead{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}#articleContent table.responsive-table-cards tbody{display:grid;gap:12px}#articleContent table.responsive-table-cards tbody tr{border:1px solid var(--glass-stroke);border-radius:12px;overflow:hidden;background:var(--bg-elevated)!important}#articleContent table.responsive-table-cards td{min-width:0;border:0!important;border-bottom:1px solid var(--glass-stroke)!important;padding:10px 14px;text-align:left}#articleContent table.responsive-table-cards td:last-child{border-bottom:0!important}#articleContent table.responsive-table-cards td code{white-space:normal;overflow-wrap:anywhere}#articleContent table.responsive-table-cards .responsive-table-label{display:block;margin-bottom:4px;color:var(--text-mut);font-size:11px;font-weight:600}#articleContent table.responsive-table-cards .responsive-table-value{display:block;min-width:0;overflow-wrap:anywhere}}#articleContent img{border-radius:var(--r-md,12px);border:1px solid var(--glass-stroke)}#articleContent>.img-item:first-child img,#articleContent>p:first-child>img:only-child{display:block;margin:0 auto var(--s-4);object-fit:cover}#articleContent>.img-item:first-child img:not([style*="--img-ar"]),#articleContent>p:first-child>img:only-child:not([style*="--img-ar"]){max-height:460px;width:auto;max-width:100%}#articleContent>.img-item:first-child img[style*="--img-ar"],#articleContent>p:first-child>img[style*="--img-ar"]:only-child{max-width:min(100%,calc(460px * var(--img-ar)))}#articleContent .img-item img{padding:6px;background:var(--bg-elevated);border-radius:var(--r-lg);border:1px solid var(--glass-stroke);box-sizing:border-box}#articleContent .img-item img[style*="--img-ar"]{max-width:min(100%,calc(640px * var(--img-ar)))}#articleContent .caption{margin:0 auto var(--s-4)}#articleContent .center-caption{display:inline-block;padding:0 8px;font-size:13px;font-weight:400;line-height:1.6;border-bottom:0!important}#articleContent table{margin-top:20px;margin-bottom:20px}#articleContent .headerlink{padding:0}#articleContent pre.mermaid{padding:20px 16px;text-align:center;border-radius:var(--r-md)}#articleContent pre.mermaid svg{height:auto}@media only screen and (max-width:760px){#articleContent pre.mermaid svg{width:600px}#articleContent pre.mermaid::-webkit-scrollbar{height:4px}#articleContent pre.mermaid::-webkit-scrollbar-track{background:0 0}}#articleContent img:not([src]),#articleContent img[src=""]{display:none!important}#toc-aside .toc-widget{border-radius:var(--r-lg)!important;padding:var(--s-2) var(--s-4) var(--s-4)!important}#toc-aside #toc-content{background:0 0!important;border:none!important;box-shadow:none!important;border-radius:0!important;-webkit-backdrop-filter:none!important;backdrop-filter:none!important}#toc-aside #toc-content .toc-link:focus-visible{outline:0!important;box-shadow:inset 3px 0 0 var(--acc-3);background:rgba(125,211,252,.12)}#toc-aside .toc-widget .toc-title{font-family:var(--font-sans);font-weight:800;font-size:16px;color:var(--text-hi);padding:var(--s-4) 0 var(--s-2) var(--s-2)}@media only screen and (min-width:993px){main.post-container>.row{display:flex;align-items:stretch}#main-content{min-width:0;flex:1 1 auto}#toc-aside .toc-widget,#toc-aside .toc-widget.toc-fixed{position:sticky!important;top:80px!important;width:100%!important;max-height:calc(100vh - 96px);overflow-y:auto}}@media only screen and (min-width:1200px) and (max-width:1299px){#toc-aside .toc-widget,#toc-aside .toc-widget.toc-fixed{max-height:calc(100vh - 80px - 140px)}}#artDetail #reprint-statement,#artDetail #reward,#artDetail .tag_share{width:100%;max-width:1100px;margin-left:auto;margin-right:auto;box-sizing:border-box}#artDetail #reprint-statement{position:relative;margin-top:24px;padding:18px 22px 16px;border:1px solid var(--glass-stroke);border-radius:var(--r-md);background:linear-gradient(135deg,rgba(22,26,42,.82),rgba(13,16,26,.72));color:var(--text-mut);box-shadow:inset 3px 0 0 rgba(167,139,250,.75),0 10px 30px rgba(0,0,0,.12);font-size:13px;line-height:1.65;overflow-wrap:anywhere}#artDetail #reprint-statement::before{content:"文章授权与转载信息";display:block;margin:0 0 9px;color:var(--text-hi);font-family:var(--font-sans);font-size:13px;font-weight:700;letter-spacing:.025em}#artDetail #reprint-statement .reprint__author,#artDetail #reprint-statement .reprint__notice,#artDetail #reprint-statement .reprint__type{display:grid;grid-template-columns:112px minmax(0,1fr);gap:10px;align-items:start;padding:7px 0}#artDetail #reprint-statement .reprint__notice,#artDetail #reprint-statement .reprint__type{border-top:1px solid var(--glass-stroke-2)}#artDetail #reprint-statement .reprint-meta{color:var(--text-faint)}#artDetail #reprint-statement .reprint-meta i{color:var(--acc-soft)}#artDetail #reprint-statement .reprint-info{min-width:0;word-break:normal}#artDetail #reprint-statement .reprint__type .reprint-info{display:flex;flex-wrap:wrap;align-items:center;gap:8px 10px}#artDetail #reprint-statement .reprint__type .reprint-info>a{flex:1 1 300px;min-width:0}#artDetail #reprint-statement .reprint-copy-link{display:inline-flex;flex:0 0 auto;align-items:center;justify-content:center;gap:6px;min-height:30px;padding:4px 10px;border:1px solid var(--glass-stroke);border-radius:var(--r-pill);background:rgba(139,92,246,.08);color:var(--text-mut);font:inherit;font-size:11px;line-height:1.2;white-space:nowrap;cursor:pointer;transition:color .2s ease,border-color .2s ease,background .2s ease}#artDetail #reprint-statement .reprint-copy-link.is-copied,#artDetail #reprint-statement .reprint-copy-link:focus-visible,#artDetail #reprint-statement .reprint-copy-link:hover{border-color:rgba(167,139,250,.55);background:rgba(139,92,246,.16);color:var(--text-hi)}#artDetail #reprint-statement .reprint-copy-link:focus-visible{outline:2px solid var(--acc-3);outline-offset:2px}#artDetail #reprint-statement .reprint-copy-status{color:var(--acc-3);font-size:11px}#artDetail #reprint-statement a{overflow-wrap:anywhere}#artDetail .tag_share{display:flex!important;align-items:center;justify-content:space-between;gap:14px 20px;margin-top:14px;padding:12px 14px;border:1px solid var(--glass-stroke-2);border-radius:var(--r-md);background:rgba(16,19,31,.48)}#artDetail .tag_share .post-meta__tag-list{display:block!important;flex:1 1 360px;min-width:0}#artDetail .tag_share .article-tag{display:flex;flex-wrap:wrap;gap:7px}#artDetail .tag_share .article-tag a{margin:0}#artDetail .tag_share .article-tag .chip{height:auto;margin:0;padding:2px 11px;border:1px solid var(--glass-stroke);border-radius:var(--r-pill);background:rgba(150,170,235,.045);color:var(--text-mut);font-family:var(--font-mono);font-size:12px;line-height:1.7;transition:border-color .2s ease,color .2s ease,background .2s ease}#artDetail .tag_share .article-tag a:hover .chip{border-color:rgba(167,139,250,.55);background:rgba(139,92,246,.1);color:var(--text-hi)}#artDetail .tag_share .post_share{display:block!important;flex:0 1 auto;float:none!important;width:auto!important;max-width:100%;margin:0!important;zoom:1!important}#artDetail .tag_share #article-share .social-share{display:flex;flex-wrap:wrap;align-items:center;justify-content:flex-end;gap:8px}#artDetail .tag_share #article-share .social-share a{margin:0!important;transition:transform .2s ease,filter .2s ease}#artDetail .tag_share #article-share .social-share a:hover{transform:translateY(-2px);filter:brightness(1.15)}#artDetail #reward{position:relative;display:flex;justify-content:center;margin-top:22px;margin-bottom:8px;padding-top:18px;border-top:1px solid var(--glass-stroke-2)}#artDetail #reward .reward-link{width:44px;height:44px;line-height:44px;border:1px solid rgba(167,139,250,.42);background:linear-gradient(135deg,var(--acc-1),var(--acc-2))!important;box-shadow:0 6px 18px rgba(99,102,241,.25);font-size:18px;transition:transform .2s ease,box-shadow .2s ease}#artDetail #reward .reward-link:hover{transform:translateY(-2px);box-shadow:0 10px 24px rgba(99,102,241,.38)}@media only screen and (max-width:760px){#artDetail #reprint-statement{margin-top:18px;padding:14px 14px 12px;font-size:12px}#artDetail #reprint-statement .reprint__author,#artDetail #reprint-statement .reprint__notice,#artDetail #reprint-statement .reprint__type{grid-template-columns:1fr;gap:3px;padding:8px 0}#artDetail .tag_share{flex-direction:column;align-items:stretch;gap:10px;padding:12px}#artDetail .tag_share .post-meta__tag-list{flex:0 1 auto}#artDetail .tag_share .post_share{align-self:center}#artDetail .tag_share #article-share .social-share{justify-content:center;gap:9px}#artDetail #reward{margin-top:16px;padding-top:14px}}.prev-next.articles::before{content:"上一篇 / 下一篇";display:block;font-family:var(--font-sans);font-weight:800;font-size:22px;color:var(--text-hi);letter-spacing:-.4px;margin:var(--s-6) 0 var(--s-5);padding-left:16px;border-left:5px solid var(--acc-1);line-height:1.2}#prenext-posts .article-row{display:flex!important;align-items:stretch}#prenext-posts .article{position:relative;display:flex;flex-direction:column}#prenext-posts .article .card{border-radius:var(--r-lg)!important;overflow:hidden;flex:1;height:auto}#prenext-posts .card-image-V{position:relative;height:180px;overflow:hidden;border-radius:var(--r-lg) var(--r-lg) 0 0}#prenext-posts .card-image-V img{width:100%!important;height:100%!important;aspect-ratio:auto!important;object-fit:cover!important;opacity:1!important;border-radius:0!important}#prenext-posts .card-title.title-V{position:absolute;left:0;right:0;bottom:0;margin:0;padding:36px 16px 12px;font-family:var(--font-sans);font-weight:700;font-size:16px;line-height:1.35;color:#fff!important;text-shadow:0 1px 3px rgba(0,0,0,.6);background:linear-gradient(to top,rgba(5,6,12,.92) 0,rgba(5,6,12,.5) 55%,transparent 100%);display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}#prenext-posts .card-image:hover .title-V{display:-webkit-box!important}#prenext-posts .card-image:hover .box-content{display:none!important}#prenext-posts .article-badge{top:10px;background:rgba(12,14,22,.78)!important;backdrop-filter:blur(6px);border:1px solid var(--glass-stroke);color:var(--text-hi)!important;font-size:13px!important;font-weight:600;border-radius:999px!important;pointer-events:none}#prenext-posts .article-badge i{color:var(--acc-3)}#prenext-posts .left-badge{left:10px}#prenext-posts .card-content{padding:16px 18px 4px!important}#prenext-posts .summary.block-with-text{font-size:14px;line-height:1.6}#prenext-posts .card-action.article-tags{padding:8px 16px 14px!important}#prenext-posts .article-tags a{background:0 0!important;border:none!important;border-radius:0!important;padding:0!important;display:inline-flex}@media only screen and (max-width:600px){#prenext-posts .article-row{flex-direction:column;gap:16px}#prenext-posts .article{width:100%!important;max-width:100%;flex:0 0 auto;padding-left:0;padding-right:0;box-sizing:border-box}#prenext-posts .card-image-V{height:164px}#prenext-posts .card-image-V .box-content{display:none!important}#prenext-posts .publish-info{overflow-wrap:anywhere}}.post-related{margin:32px 0 12px}.post-related h2{margin:0 0 16px;font-size:22px}.post-related-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}.post-related-card{display:flex;flex-direction:column;gap:10px;min-width:0;padding:20px;border:1px solid var(--glass-stroke);border-radius:var(--r-lg);background:var(--glass-fill);color:var(--text-hi);transition:border-color .2s ease,transform .2s ease}.post-related-card:hover{border-color:var(--acc-soft);transform:translateY(-2px);color:var(--text-hi)}.post-related-card strong{font-size:16px;line-height:1.5;overflow-wrap:anywhere}.post-related-date,.post-related-summary{color:var(--text-mut);font-size:13px;line-height:1.6}@media (max-width:760px){.post-related-grid{grid-template-columns:1fr}}#articleContent blockquote,#articleContent dd,#articleContent li,#articleContent p{overflow-wrap:anywhere}body:has(#artDetail) .deng-box,body:has(#artDetail) .deng-box1{display:none}#articleContent button.code_copy{padding:0;margin:0;appearance:none;-webkit-appearance:none;line-height:1}#articleContent button.code_copy:focus-visible{outline:2px solid var(--acc-soft,#a78bfa);outline-offset:2px}@media only screen and (min-width:993px){#main-content.no-toc,#main-content.toc-collapsed{float:none;width:100%;max-width:1010px;margin-left:0}#toc-aside{padding-left:16px!important;padding-right:0!important}#prenext-posts .article-row{gap:16px}#prenext-posts .article-row::after{display:none}#prenext-posts .article-row>.article{padding-left:0;padding-right:0;flex:1 1 0;width:auto}}#main-content{padding-left:0!important;padding-right:0!important}#artDetail .article-card-content{padding-left:16px;padding-right:16px}#artDetail .hexo-ad{width:100%;max-width:350px;box-sizing:border-box;margin-left:auto;margin-right:auto}#artDetail .hexo-ad-script{width:100%}@media (min-width:500px){#artDetail .hexo-ad{max-width:498px}}@media (min-width:800px){#artDetail .hexo-ad{max-width:758px}}@media only screen and (min-width:993px){#artDetail .article-card-content{padding-left:24px;padding-right:24px}#articleContent>.code-area,#articleContent>.img-item,#articleContent>.mermaid,#articleContent>.note,#articleContent>.table-container,#articleContent>blockquote,#articleContent>details,#articleContent>dl,#articleContent>figure.highlight,#articleContent>h1,#articleContent>h2,#articleContent>h3,#articleContent>h4,#articleContent>h5,#articleContent>h6,#articleContent>ol,#articleContent>p,#articleContent>pre,#articleContent>table,#articleContent>ul{margin-left:0;margin-right:0}#artDetail #articleContent>:is(p,ul,ol,blockquote,h1,h2,h3,h4,h5,h6,dl,pre,figure.highlight,.code-area,table,.table-container,.img-item,.note,.mermaid,details){margin-left:auto;margin-right:auto}}@media only screen and (min-width:1400px){.dp .dp-wrap.post-dp-hero,main.post-container.content{max-width:1800px!important}#artDetail .card.card-block-fullscreen{--reading-mode-width:clamp(1010px, calc(75vw - 48px), 1168px)}body:has(#main-content.toc-collapsed) #artDetail .card.card-block-fullscreen,body:has(main.container.content) #artDetail .card.card-block-fullscreen,body:has(main.post-no-toc) #artDetail .card.card-block-fullscreen{--reading-mode-width:clamp(1010px, calc(100vw - 390px), 1168px)}#artDetail .card.card-block-fullscreen>.card-content,#artDetail .card.card-block-fullscreen>hr{max-width:var(--reading-mode-width)}.dp .dp-wrap.post-dp-hero.post-no-toc,body:has(#main-content.toc-collapsed) .dp .dp-wrap.post-dp-hero,body:has(#main-content.toc-collapsed) main.post-container.content,body:has(.post-dp-hero) main.container.content,body:has(main.container.content) .dp .dp-wrap.post-dp-hero,main.post-container.content.post-no-toc{max-width:clamp(1074px,calc(100vw - 326px),1280px)!important}#main-content.no-toc,#main-content.toc-collapsed{max-width:none}#artDetail #articleContent>:is(p,ul,ol,blockquote,h1,h2,h3,h4,h5,h6,dl,.img-item,hr,.note,.mermaid,details),#artDetail #articleContent>:is(pre,figure.highlight,.code-area,table,.table-container){max-width:min(100%,1120px)}#artDetail #articleContent{--post-wide-font:clamp(16px, calc(0.5vw + 9px), 18px);font-size:var(--post-wide-font)}#artDetail #articleContent li,#artDetail #articleContent p{font-size:var(--post-wide-font)!important;line-height:1.8!important}}
+/* darkpremium 文章页头部 + 区块标题打磨（仅文章页作用域，选择器均为 post 页专属）
+   原先以内联 <style> 置于 post.ejs body 末尾，晚于 hero/正文渲染，导致首屏先按
+   obsidian.css/matery.css 旧布局绘制（标题截断 2 行、#artDetail margin-top:-60px），
+   再被该覆盖层纠正 → 进详情页时出现一次垂直布局跳动（闪）。
+   改为 head 内 render-blocking 样式表，首屏即应用，消除 FOUC。 */
+  /* 文章标题：覆盖 obsidian 的 post-title 2 行截断，保留渐变可读 */
+  #rewardModal .close { color: var(--text-hi); }
+
+  .post-dp-hero h1.post-title {
+    height: auto !important;
+    -webkit-line-clamp: unset !important;
+    display: block !important;
+    overflow: visible !important;
+    line-height: 1.15;
+    text-wrap: balance;
+  }
+  .post-dp-hero .meta { align-items: center; }
+  .post-dp-hero .meta a { color: inherit; }
+  .post-dp-hero .meta a:hover b { color: var(--acc-3); }
+  .post-dp-hero .meta .hero-tags { display: inline-flex; gap: 8px; flex-wrap: wrap; }
+  .post-dp-hero .meta .hero-tags a { display: inline-flex; }
+  .post-dp-hero .meta .hero-tags .chip {
+    font-size: 12px; padding: 2px 10px; border-radius: 999px;
+    border: 1px solid var(--glass-stroke); background: rgba(150,170,235,.05);
+    color: var(--text-mut); transition: transform var(--dur), background var(--dur);
+  }
+  .post-dp-hero .meta .hero-tags a:hover .chip { transform: translateY(-1px); }
+
+  /* ===== 宽度体系：正文区收敛到与 hero 同一 dp-wrap=1280 居中体系 =====
+     matery 的 .post-container 用 90%/max 1350（≥1600 放大到 1500），与 hero(dp-wrap)
+     左右边缘不对齐且过宽 → 统一为 dp-wrap 的 1280 + 同一内边距，去掉放大 */
+  main.post-container.content {
+    width: 100% !important;
+    max-width: var(--dp-maxw) !important;   /* 与 hero 对齐 */
+    margin: 0 auto !important;
+    padding: 0 var(--s-6) !important;
+    box-sizing: border-box;
+  }
+  @media only screen and (max-width: 760px) {
+    main.post-container.content { padding: 0 var(--s-4) !important; }
+  }
+  /* 桌面版心按正文反推：(960 行宽 + 卡片内边距 50) / l9 的 75% + 版心内边距 64 ≈ 1411。
+     沿用全站 1600 时卡片比正文宽出 300px，平分到正文两侧成了两条空带。 */
+  @media only screen and (min-width: 993px) {
+    main.post-container.content,
+    .dp .dp-wrap.post-dp-hero { max-width: 1411px !important; }
+    /* 没有侧栏目录时整栏收到卡片宽（1010 + 64）居中，否则标题比卡片宽、右侧空一列。
+       .post-no-toc 构建期输出（post.ejs），手动收起目录走 :has。 */
+    main.post-container.content.post-no-toc,
+    .dp .dp-wrap.post-dp-hero.post-no-toc,
+    body:has(#main-content.toc-collapsed) main.post-container.content,
+    body:has(#main-content.toc-collapsed) .dp .dp-wrap.post-dp-hero { max-width: 1074px !important; }
+  }
+  /* 993–1199 侧栏目录只剩约 210px、条目被截断，正文也被压到 650px：
+     这一段改用单栏 + 抽屉目录（post-detail-toc.ejs 的断点同步为 1199）。 */
+  @media only screen and (min-width: 993px) and (max-width: 1199px) {
+    main.post-container.content,
+    .dp .dp-wrap.post-dp-hero { max-width: 1074px !important; }
+    #toc-aside { display: none !important; }
+  }
+
+  /* 桌面正文/侧栏栅格比例微调：正文略宽、TOC 稍窄，sticky 由 .toc-fixed 处理 */
+  main.post-container .row { margin-bottom: 0; }
+
+  /* 主题默认给 #artDetail 一个 -60px 上边距，把卡片拉到旧封面 banner 上。
+     新 hero 较矮，这个负边距会让卡片压到 hero 的 meta 行上 → 归零并留出间距 */
+  #artDetail { margin-top: var(--s-2) !important; }
+  /* #artDetail 只是「文章卡片 + 评论 + 相关文章」的外层容器，obsidian.css 却把它
+     和内层 .card 套了同一套玻璃面板(同色边框/圆角/底色/阴影) → 外框套内框 = 双边框。
+     去掉外层容器的面板样式，只保留内层 .card 作为唯一可视面板。 */
+  #artDetail {
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+    border-radius: 0 !important;
+    -webkit-backdrop-filter: none !important;
+    backdrop-filter: none !important;
+  }
+  /* matery 在 ≥1418px 给 #artDetail 额外 padding，会破坏与 hero 的对齐 → 清掉 */
+  @media only screen and (min-width: 1418px) {
+    #artDetail { margin-top: var(--s-2) !important; padding: 0 !important; }
+  }
+
+  /* hero 已展示分类 + 标签，隐藏卡片顶部重复的 tag/分类行。
+     materialize .row 用浮动布局，隐藏后需补 clearfix 让 post-info 正常换行 */
+  #artDetail .article-info .tag-cate { display: none !important; }
+  #artDetail .article-info {
+    padding: var(--s-4) var(--s-5) 0 !important;   /* 收紧 meta 区内边距 */
+    margin-bottom: 0 !important;
+  }
+  #artDetail .article-info .post-info {
+    margin-top: 0;
+    display: flex; flex-wrap: wrap; align-items: center;
+    gap: var(--s-2) var(--s-4); clear: both;
+    font-family: var(--font-mono); font-size: 13px; color: var(--text-mut);
+  }
+  #artDetail .article-info .post-info > div {
+    margin: 0 !important;
+    display: inline-flex; align-items: center;
+  }
+  /* meta 项做成低调 chip，与 hero 标签风格统一 */
+  #artDetail .article-info .post-info > div i { color: var(--acc-soft); margin-right: 4px; }
+  #artDetail .article-info .post-info #read_mode { cursor: pointer; }
+  #artDetail .article-info .post-info #read_mode:hover i,
+  #artDetail .article-info .post-info #read_mode:hover span { color: var(--acc-3) !important; }
+  #artDetail .article-info .post-info #read_mode:focus-visible { outline: 2px solid var(--acc-3); outline-offset: 2px; }
+  /* 阅读模式的全屏卡片仍吃 .card:hover 的 -8px 上浮（底部漏出页面）和半透明玻璃底（透出整页）；
+     信息栏铺满全宽而正文 820 居中，两者错开。改成不透明、不上浮，信息栏与正文同宽。 */
+  #artDetail .card.card-block-fullscreen {
+    transform: none !important;
+    background: var(--bg-deep) !important;
+    -webkit-backdrop-filter: none !important; backdrop-filter: none !important;
+  }
+  #artDetail .card.card-block-fullscreen > .card-content,
+  #artDetail .card.card-block-fullscreen > hr { max-width: 1010px; margin-left: auto; margin-right: auto; }
+  /* 图标此时 fixed 到屏幕右侧当退出按钮，原位置只剩一个空 chip 框 */
+  #artDetail .card.card-block-fullscreen .post-info #read_mode { border-color: transparent; background: none; }
+
+  .mobile-toc-close { border: 0; padding: 0; background: transparent; }
+
+  /* 手机端：信息项排成一行平分宽度（阅读次数要等不蒜子返回才显示，项数不固定），避开 matery 的半宽浮动规则。 */
+  @media only screen and (max-width: 760px) {
+    #artDetail .article-info { padding: var(--s-4) var(--s-4) 0 !important; }
+    #artDetail .article-info .post-info {
+      display: grid;
+      grid-auto-flow: column;
+      grid-auto-columns: minmax(0, 1fr);
+      gap: 8px;
+      font-size: 12px;
+    }
+    #artDetail .article-info .post-info .post-meta-updated,
+    #artDetail .article-info .post-info .post-meta-reading-time { display: none !important; }
+    #artDetail .article-info .post-info .post-date > span,
+    #artDetail .article-info .post-info .post-meta-label {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      overflow: hidden;
+      white-space: nowrap;
+      clip-path: inset(50%);
+    }
+    #artDetail .article-info .post-info > div {
+      float: none;
+      width: auto;
+      min-width: 0;
+      justify-content: center;
+      padding: 5px 8px;
+      border: 1px solid var(--glass-stroke);
+      border-radius: 999px;
+      background: rgba(150,170,235,.05);
+      white-space: nowrap;
+    }
+    #artDetail .article-info .post-info #read_mode { display: inline-flex !important; padding: 5px 8px; }
+    #artDetail .article-info .post-info #read_mode i { margin-right: 0; }
+
+    /* 目录和回顶按钮并排停在底部，正文末尾留出完整的操作区。 */
+    body:has(.post-dp-hero) main.content {
+      padding-bottom: calc(76px + env(safe-area-inset-bottom)) !important;
+    }
+    body:has(.post-dp-hero) #floating-toc-btn,
+    body:has(.post-dp-hero) #backTop {
+      position: fixed;
+      bottom: calc(12px + env(safe-area-inset-bottom));
+      padding: 0;
+      margin: 0;
+      z-index: 998;
+    }
+    body:has(.post-dp-hero) #floating-toc-btn { right: 66px; }
+    body:has(.post-dp-hero) #backTop { right: 12px; }
+    body:has(.post-dp-hero) #floating-toc-btn .btn-floating,
+    body:has(.post-dp-hero) #backTop .btn-floating {
+      display: grid;
+      place-items: center;
+      width: 44px;
+      height: 44px;
+      padding: 0;
+      cursor: pointer;
+    }
+    body:has(.post-dp-hero) #floating-toc-btn .btn-floating i,
+    body:has(.post-dp-hero) #backTop .btn-floating i {
+      font-size: 18px;
+      line-height: 1;
+    }
+  }
+
+  /* ===== 正文阅读 measure：文字、代码和表格共用 820px 行宽 =====
+     图片和图示保留更宽的媒体尺寸。 */
+  #articleContent { max-width: none !important; }
+  #articleContent > p,
+  #articleContent > ul,
+  #articleContent > ol,
+  #articleContent > blockquote,
+  #articleContent > h1,
+  #articleContent > h2,
+  #articleContent > h3,
+  #articleContent > h4,
+  #articleContent > h5,
+  #articleContent > h6,
+  #articleContent > dl {
+    max-width: 820px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+  /* 宽媒体元素先给出 880px 上限；代码和表格在下方收至正文行宽。 */
+  #articleContent > pre,
+  #articleContent > figure.highlight,
+  #articleContent > .code-area,
+  #articleContent > table,
+  #articleContent > .table-container,
+  #articleContent > p:has(> img:only-child),
+  #articleContent > .img-item,
+  #articleContent > hr,
+  #articleContent > .note,
+  #articleContent > .mermaid,
+  #articleContent > details {
+    max-width: 880px; margin-left: auto; margin-right: auto;
+  }
+  /* The copy button wraps fenced code in .code-area after rendering. Constrain that
+     wrapper as well so code blocks follow the same reading column as other media. */
+  #articleContent > .code-area { width: 100%; min-width: 0; box-sizing: border-box; }
+  /* 文章页行宽放到 960（约 60 字/行），媒体与正文同宽；笔记页没有 #artDetail，仍用上面的 820 / 880 */
+  #artDetail #articleContent > :is(p, ul, ol, blockquote, h1, h2, h3, h4, h5, h6, dl,
+    .img-item, hr, .note, .mermaid, details) { max-width: 960px; }
+  #articleContent > .code-area > pre { max-width: 100%; }
+
+  /* Markdown callouts with a bold label and line break need a distinct header and
+     balanced padding; ordinary quotations keep the theme's original treatment. */
+  #artDetail #articleContent > blockquote:has(> p > strong:first-child + br) {
+    padding: 18px 20px 20px;
+    border: 1px solid var(--glass-stroke);
+    border-left: 3px solid var(--acc-1) !important;
+    border-radius: 0 12px 12px 0;
+    background: var(--bg-elevated) !important;
+  }
+  #artDetail #articleContent > blockquote:has(> p > strong:first-child + br) > p {
+    margin: 0;
+    text-indent: 0;
+  }
+  #artDetail #articleContent > blockquote:has(> p > strong:first-child + br) > p > strong:first-child {
+    display: block;
+    margin-bottom: 8px;
+    color: var(--text-hi) !important;
+  }
+  #artDetail #articleContent > blockquote:has(> p > strong:first-child + br) > p > strong:first-child + br {
+    display: none;
+  }
+  @media (max-width: 760px) {
+    #artDetail #articleContent > blockquote:has(> p > strong:first-child + br) {
+      padding: 16px 14px 18px;
+    }
+  }
+  @media print {
+    #artDetail #articleContent > blockquote:has(> p > strong:first-child + br) {
+      background: #f4f4f4 !important;
+      border-color: #ccc !important;
+    }
+    #artDetail #articleContent > blockquote:has(> p > strong:first-child + br) > p > strong:first-child {
+      color: #000 !important;
+    }
+  }
+
+  /* 所有正文表格都限制在内容列内；复杂表格保留自身横向滚动。 */
+  #articleContent table {
+    max-width: 100%; overflow-x: auto;
+  }
+  #articleContent table.responsive-table-cards {
+    display: table; width: 100%; table-layout: fixed; overflow: visible;
+  }
+  /* Keep code and tables on the same 960px line as the post prose. */
+  #artDetail #articleContent > :is(pre, figure.highlight, .code-area, table, .table-container) {
+    max-width: min(100%, 960px);
+    margin-left: auto;
+    margin-right: auto;
+  }
+  #articleContent table th,
+  #articleContent table td {
+    white-space: normal; overflow-wrap: anywhere; vertical-align: top;
+  }
+  #articleContent table.responsive-table-cards th,
+  #articleContent table.responsive-table-cards td { min-width: 0; }
+  #articleContent table.responsive-table-cards code {
+    white-space: normal; overflow-wrap: anywhere;
+  }
+  #articleContent table.responsive-table-cards .responsive-table-label { display: none; }
+  @media only screen and (max-width: 760px) {
+    #articleContent table.responsive-table-cards,
+    #articleContent table.responsive-table-cards tbody,
+    #articleContent table.responsive-table-cards tr,
+    #articleContent table.responsive-table-cards td {
+      display: block; width: 100%; box-sizing: border-box;
+    }
+    #articleContent table.responsive-table-cards {
+      border: 0; overflow: visible; table-layout: auto;
+    }
+    #articleContent table.responsive-table-cards thead {
+      position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+      overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0;
+    }
+    #articleContent table.responsive-table-cards tbody { display: grid; gap: 12px; }
+    #articleContent table.responsive-table-cards tbody tr {
+      border: 1px solid var(--glass-stroke); border-radius: 12px;
+      overflow: hidden; background: var(--bg-elevated) !important;
+    }
+    #articleContent table.responsive-table-cards td {
+      min-width: 0; border: 0 !important;
+      border-bottom: 1px solid var(--glass-stroke) !important;
+      padding: 10px 14px; text-align: left;
+    }
+    #articleContent table.responsive-table-cards td:last-child {
+      border-bottom: 0 !important;
+    }
+    #articleContent table.responsive-table-cards td code {
+      white-space: normal; overflow-wrap: anywhere;
+    }
+    #articleContent table.responsive-table-cards .responsive-table-label {
+      display: block; margin-bottom: 4px; color: var(--text-mut);
+      font-size: 11px; font-weight: 600;
+    }
+    #articleContent table.responsive-table-cards .responsive-table-value {
+      display: block; min-width: 0; overflow-wrap: anywhere;
+    }
+  }
+
+  /* ===== 封面/正文首图：圆角、限高、与玻璃风格统一 ===== */
+  #articleContent img {
+    border-radius: var(--r-md, 12px);
+    border: 1px solid var(--glass-stroke);
+  }
+  /* 首图（封面）通常是正文第一段里的单图：限制最大高度避免占满整列 */
+  #articleContent > p:first-child > img:only-child,
+  #articleContent > .img-item:first-child img {
+    display: block; margin: 0 auto var(--s-4);
+    object-fit: cover;
+  }
+  #articleContent > p:first-child > img:only-child:not([style*="--img-ar"]),
+  #articleContent > .img-item:first-child img:not([style*="--img-ar"]) {
+    max-height: 460px; width: auto; max-width: 100%;
+  }
+  /* 已知宽高比的首图不能 width:auto：宽高都 auto 时图片到达前占位为 0，加载后正文下跳（CLS）。
+     保留 width 属性定宽，用等价的 max-width 把高度封顶在 460px。 */
+  #articleContent > p:first-child > img[style*="--img-ar"]:only-child,
+  #articleContent > .img-item:first-child img[style*="--img-ar"] {
+    max-width: min(100%, calc(460px * var(--img-ar)));
+  }
+  /* FINDING-012 — 白底图片适配暗色主题：img-item 容器图（块级图）加深色 mat。
+     padding 在图片像素外围撑出一圈 --bg-elevated 底色，让白底图片与暗背景之间有
+     渐进过渡而不是硬性的白→黑边界；box-sizing:border-box 防止 padding 撑出容器。
+     外框 r-lg(20px) > 图片内容 r-md(14px)，保持圆角层次感。 */
+  #articleContent .img-item img {
+    padding: 6px;
+    background: var(--bg-elevated);
+    border-radius: var(--r-lg);
+    border: 1px solid var(--glass-stroke);
+    box-sizing: border-box;
+  }
+
+  /* 方图、竖图按列宽铺满会比一屏还高；用 post_img.js 写入的宽高比把高度封顶在
+     640px，宽高仍由 width/height 属性推出，不引入布局跳动。 */
+  #articleContent .img-item img[style*="--img-ar"] {
+    max-width: min(100%, calc(640px * var(--img-ar)));
+  }
+  /* 图注原为 16px 粗体加下划线，分量接近 H2，紧跟在小标题后像又一个标题 */
+  #articleContent .caption { margin: 0 auto var(--s-4); }
+  #articleContent .center-caption {
+    display: inline-block; padding: 0 8px;
+    font-size: 13px; font-weight: 400; line-height: 1.6;
+    border-bottom: 0 !important;
+  }
+  /* 表格默认无上下外边距，紧随其后的段落贴着表格底边 */
+  #articleContent table { margin-top: 20px; margin-bottom: 20px; }
+  /* matery 给所有正文链接 0 2px 内边距，空的标题锚点因此把标题文字右推 4px */
+  #articleContent .headerlink { padding: 0; }
+
+  /* mermaid 图复用了代码块的 pre 内边距（左侧 3rem 给行号留位），图因此偏右；
+     SVG 带固定 height 属性，按宽缩小时会在图下方留出大块空白 */
+  #articleContent pre.mermaid {
+    padding: 20px 16px; text-align: center; border-radius: var(--r-md);
+  }
+  #articleContent pre.mermaid svg { height: auto; }
+  /* 手机列宽下整图缩放会把文字压到 5px 左右，改为不低于 600px 宽、横向滑动；
+     内联 max-width 是图的原始宽度，小图不会被放大 */
+  @media only screen and (max-width: 760px) {
+    #articleContent pre.mermaid svg { width: 600px; }
+    /* 全站滚动条宽高为 0，这里补一条细滚动条提示「可横向滑动」 */
+    #articleContent pre.mermaid::-webkit-scrollbar { height: 4px; }
+    #articleContent pre.mermaid::-webkit-scrollbar-track { background: transparent; }
+  }
+
+  /* 图片加载失败（src 为空或缺失）：隐藏元素避免显示带边框的空盒 */
+  #articleContent img:not([src]),
+  #articleContent img[src=""] {
+    display: none !important;
+  }
+
+  /* ===== 桌面 TOC 侧栏：玻璃面板 + sticky ===== */
+  #toc-aside .toc-widget {
+    border-radius: var(--r-lg) !important;
+    padding: var(--s-2) var(--s-4) var(--s-4) !important;
+  }
+  /* #toc-content 是 .toc-widget 内的列表容器，obsidian.css 却把它也套了同一套玻璃面板
+     → TOC 出现内外双框。中和内层面板，只留 .toc-widget 作为唯一面板。 */
+  #toc-aside #toc-content {
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+    border-radius: 0 !important;
+    -webkit-backdrop-filter: none !important;
+    backdrop-filter: none !important;
+  }
+  #toc-aside #toc-content .toc-link:focus-visible {
+    outline: none !important;
+    box-shadow: inset 3px 0 0 var(--acc-3);
+    background: rgba(125, 211, 252, .12);
+  }
+  #toc-aside .toc-widget .toc-title {
+    font-family: var(--font-sans); font-weight: 800; font-size: 16px;
+    color: var(--text-hi); padding: var(--s-4) 0 var(--s-2) var(--s-2);
+  }
+  /* ===== TOC sticky 修复（替代 matery 的 JS position:fixed） =====
+     原 bug：向下滚动后 matery.js 给 .toc-widget 加 .toc-fixed → position:fixed，
+     而 obsidian.css 的 .toc-widget{width:100%!important} 在 fixed 下按「视口」算宽，
+     目录瞬间撑满整屏(1440px)并溢出右侧。
+     改法：桌面(≥993px，移动端侧栏本就隐藏)把两列容器设为 flex 等高，侧栏满高后，
+     .toc-widget 改用 position:sticky 留在列内 → 宽度/左位自动跟随列，无需 JS 计算。 */
+  @media only screen and (min-width: 993px) {
+    main.post-container > .row { display: flex; align-items: stretch; }
+    /* flex:1 防止「从右滑入」：文章很长，浏览器渐进解析时先解析完 #main-content
+       (整篇正文)并绘制，此时 .row 已是 flex 但 #toc-aside(排在正文之后)还没解析进来。
+       单子项若沿用 materialize .col 的固定 75% 宽，会被摆到偏右(left≈416)，等 toc-aside
+       解析后才跳回 left≈112 → 视觉上正文从右侧滑入。让正文列 flex:1 填满可用宽度，
+       无论 toc-aside 是否已就位都停在 left≈112，消除横向跳动。 */
+    #main-content { min-width: 0; flex: 1 1 auto; }   /* min-width:0 防止长代码行把正文列撑宽 */
+    #toc-aside .toc-widget,
+    #toc-aside .toc-widget.toc-fixed {
+      position: sticky !important;
+      top: 80px !important;
+      width: 100% !important;
+      max-height: calc(100vh - 96px);
+      overflow-y: auto;
+    }
+  }
+  /* 这一段目录栏右缘伸到悬浮目录按钮（right 15、bottom 76、48px）底下，吸顶面板底边让出按钮 */
+  @media only screen and (min-width: 1200px) and (max-width: 1299px) {
+    #toc-aside .toc-widget,
+    #toc-aside .toc-widget.toc-fixed { max-height: calc(100vh - 80px - 140px); }
+  }
+
+  /* Article footer: give the license, topic tags, sharing actions and reward a
+     shared width and visual rhythm that matches the Obsidian glass panels. */
+  #artDetail #reprint-statement,
+  #artDetail .tag_share,
+  #artDetail #reward {
+    width: 100%;
+    max-width: 1100px;
+    margin-left: auto;
+    margin-right: auto;
+    box-sizing: border-box;
+  }
+  #artDetail #reprint-statement {
+    position: relative;
+    margin-top: 24px;
+    padding: 18px 22px 16px;
+    border: 1px solid var(--glass-stroke);
+    border-radius: var(--r-md);
+    background: linear-gradient(135deg, rgba(22, 26, 42, .82), rgba(13, 16, 26, .72));
+    color: var(--text-mut);
+    box-shadow: inset 3px 0 0 rgba(167, 139, 250, .75), 0 10px 30px rgba(0, 0, 0, .12);
+    font-size: 13px;
+    line-height: 1.65;
+    overflow-wrap: anywhere;
+  }
+  #artDetail #reprint-statement::before {
+    content: "文章授权与转载信息";
+    display: block;
+    margin: 0 0 9px;
+    color: var(--text-hi);
+    font-family: var(--font-sans);
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: .025em;
+  }
+  #artDetail #reprint-statement .reprint__author,
+  #artDetail #reprint-statement .reprint__type,
+  #artDetail #reprint-statement .reprint__notice {
+    display: grid;
+    grid-template-columns: 112px minmax(0, 1fr);
+    gap: 10px;
+    align-items: start;
+    padding: 7px 0;
+  }
+  #artDetail #reprint-statement .reprint__type,
+  #artDetail #reprint-statement .reprint__notice { border-top: 1px solid var(--glass-stroke-2); }
+  #artDetail #reprint-statement .reprint-meta { color: var(--text-faint); }
+  #artDetail #reprint-statement .reprint-meta i { color: var(--acc-soft); }
+  #artDetail #reprint-statement .reprint-info { min-width: 0; word-break: normal; }
+  #artDetail #reprint-statement .reprint__type .reprint-info {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px 10px;
+  }
+  #artDetail #reprint-statement .reprint__type .reprint-info > a {
+    flex: 1 1 300px;
+    min-width: 0;
+  }
+  #artDetail #reprint-statement .reprint-copy-link {
+    display: inline-flex;
+    flex: 0 0 auto;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    min-height: 30px;
+    padding: 4px 10px;
+    border: 1px solid var(--glass-stroke);
+    border-radius: var(--r-pill);
+    background: rgba(139, 92, 246, .08);
+    color: var(--text-mut);
+    font: inherit;
+    font-size: 11px;
+    line-height: 1.2;
+    white-space: nowrap;
+    cursor: pointer;
+    transition: color .2s ease, border-color .2s ease, background .2s ease;
+  }
+  #artDetail #reprint-statement .reprint-copy-link:hover,
+  #artDetail #reprint-statement .reprint-copy-link:focus-visible,
+  #artDetail #reprint-statement .reprint-copy-link.is-copied {
+    border-color: rgba(167, 139, 250, .55);
+    background: rgba(139, 92, 246, .16);
+    color: var(--text-hi);
+  }
+  #artDetail #reprint-statement .reprint-copy-link:focus-visible { outline: 2px solid var(--acc-3); outline-offset: 2px; }
+  #artDetail #reprint-statement .reprint-copy-status {
+    color: var(--acc-3);
+    font-size: 11px;
+  }
+  #artDetail #reprint-statement a { overflow-wrap: anywhere; }
+  #artDetail .tag_share {
+    display: flex !important;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px 20px;
+    margin-top: 14px;
+    padding: 12px 14px;
+    border: 1px solid var(--glass-stroke-2);
+    border-radius: var(--r-md);
+    background: rgba(16, 19, 31, .48);
+  }
+  #artDetail .tag_share .post-meta__tag-list {
+    display: block !important;
+    flex: 1 1 360px;
+    min-width: 0;
+  }
+  #artDetail .tag_share .article-tag {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 7px;
+  }
+  #artDetail .tag_share .article-tag a { margin: 0; }
+  #artDetail .tag_share .article-tag .chip {
+    height: auto;
+    margin: 0;
+    padding: 2px 11px;
+    border: 1px solid var(--glass-stroke);
+    border-radius: var(--r-pill);
+    background: rgba(150, 170, 235, .045);
+    color: var(--text-mut);
+    font-family: var(--font-mono);
+    font-size: 12px;
+    line-height: 1.7;
+    transition: border-color .2s ease, color .2s ease, background .2s ease;
+  }
+  #artDetail .tag_share .article-tag a:hover .chip {
+    border-color: rgba(167, 139, 250, .55);
+    background: rgba(139, 92, 246, .1);
+    color: var(--text-hi);
+  }
+  #artDetail .tag_share .post_share {
+    display: block !important;
+    flex: 0 1 auto;
+    float: none !important;
+    width: auto !important;
+    max-width: 100%;
+    margin: 0 !important;
+    zoom: 1 !important;
+  }
+  #artDetail .tag_share #article-share .social-share {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 8px;
+  }
+  #artDetail .tag_share #article-share .social-share a {
+    margin: 0 !important;
+    transition: transform .2s ease, filter .2s ease;
+  }
+  #artDetail .tag_share #article-share .social-share a:hover { transform: translateY(-2px); filter: brightness(1.15); }
+  #artDetail #reward {
+    position: relative;
+    display: flex;
+    justify-content: center;
+    margin-top: 22px;
+    margin-bottom: 8px;
+    padding-top: 18px;
+    border-top: 1px solid var(--glass-stroke-2);
+  }
+  #artDetail #reward .reward-link {
+    width: 44px;
+    height: 44px;
+    line-height: 44px;
+    border: 1px solid rgba(167, 139, 250, .42);
+    background: linear-gradient(135deg, var(--acc-1), var(--acc-2)) !important;
+    box-shadow: 0 6px 18px rgba(99, 102, 241, .25);
+    font-size: 18px;
+    transition: transform .2s ease, box-shadow .2s ease;
+  }
+  #artDetail #reward .reward-link:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 24px rgba(99, 102, 241, .38);
+  }
+
+  @media only screen and (max-width: 760px) {
+    #artDetail #reprint-statement { margin-top: 18px; padding: 14px 14px 12px; font-size: 12px; }
+    #artDetail #reprint-statement .reprint__author,
+    #artDetail #reprint-statement .reprint__type,
+    #artDetail #reprint-statement .reprint__notice { grid-template-columns: 1fr; gap: 3px; padding: 8px 0; }
+    #artDetail .tag_share { flex-direction: column; align-items: stretch; gap: 10px; padding: 12px; }
+    #artDetail .tag_share .post-meta__tag-list { flex: 0 1 auto; }
+    #artDetail .tag_share .post_share { align-self: center; }
+    #artDetail .tag_share #article-share .social-share { justify-content: center; gap: 9px; }
+    #artDetail #reward { margin-top: 16px; padding-top: 14px; }
+  }
+
+  /* prev-next 区块标题：复用 sec-head 渐变竖条风格 */
+  .prev-next.articles::before {
+    content: "上一篇 / 下一篇";
+    display: block;
+    font-family: var(--font-sans); font-weight: 800; font-size: 22px;
+    color: var(--text-hi); letter-spacing: -.4px; margin: var(--s-6) 0 var(--s-5);
+    padding-left: 16px;
+    border-left: 5px solid var(--acc-1);
+    line-height: 1.2;
+  }
+
+  /* ===== 相关文章卡片：统一到 darkpremium 卡片风格（仅 #prenext-posts 作用域）=====
+     原 matery 卡片：标题大字直接叠满图片(长标题盖整图)、图片压暗 0.7、徽标白底块、
+     hover 还会把标题滑走换成「阅读全文」——与全站玻璃卡片不一致。此处统一处理。 */
+  /* 修复：徽标(上一篇/下一篇)是 position:absolute，但列容器 .article 在本主题里是
+     position:static，全链路祖先都没定位，徽标因此脱离卡片、上浮到文章顶部，盖住
+     「发布日期」并拦截头部点击 → 看上去「按钮不生效」。给列容器加 position:relative，
+     徽标即锚定回各自卡片。 */
+  /* 让两列等高：row 用 flex stretch，列用 flex-column 把高度传给 card */
+  #prenext-posts .article-row { display: flex !important; align-items: stretch; }
+  #prenext-posts .article { position: relative; display: flex; flex-direction: column; }
+  #prenext-posts .article .card { border-radius: var(--r-lg) !important; overflow: hidden; flex: 1; height: auto; }
+  /* 图片区：固定高度铺满、恢复正常亮度 */
+  #prenext-posts .card-image-V { position: relative; height: 180px; overflow: hidden; border-radius: var(--r-lg) var(--r-lg) 0 0; }
+  #prenext-posts .card-image-V img {
+    width: 100% !important; height: 100% !important;
+    aspect-ratio: auto !important; object-fit: cover !important;
+    opacity: 1 !important; border-radius: 0 !important;
+  }
+  /* 标题：叠在图片底部 + 渐变蒙层保证可读 + 最多两行，不再盖满整图 */
+  #prenext-posts .card-title.title-V {
+    position: absolute; left: 0; right: 0; bottom: 0; margin: 0;
+    padding: 36px 16px 12px;
+    font-family: var(--font-sans); font-weight: 700; font-size: 16px; line-height: 1.35;
+    color: #fff !important; text-shadow: 0 1px 3px rgba(0,0,0,.6);
+    background: linear-gradient(to top, rgba(5,6,12,.92) 0%, rgba(5,6,12,.5) 55%, transparent 100%);
+    display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+  }
+  /* 关掉 hover 标题滑走换「阅读全文」的交互，保持标题常驻清晰 */
+  #prenext-posts .card-image:hover .title-V { display: -webkit-box !important; }
+  #prenext-posts .card-image:hover .box-content { display: none !important; }
+  /* 徽标（本篇/上一篇/下一篇）：白底块 → 暗色玻璃 pill */
+  #prenext-posts .article-badge {
+    top: 10px; background: rgba(12,14,22,.78) !important; backdrop-filter: blur(6px);
+    border: 1px solid var(--glass-stroke); color: var(--text-hi) !important;
+    font-size: 13px !important; font-weight: 600; border-radius: 999px !important;
+    /* 徽标只是标签、不是链接；让它对点击透明，整张卡片(外层 <a>)区域都可点击跳转 */
+    pointer-events: none;
+  }
+  #prenext-posts .article-badge i { color: var(--acc-3); }
+  #prenext-posts .left-badge { left: 10px; }
+  /* 正文/标签区内边距收敛 */
+  #prenext-posts .card-content { padding: 16px 18px 4px !important; }
+  #prenext-posts .summary.block-with-text { font-size: 14px; line-height: 1.6; }
+  #prenext-posts .card-action.article-tags { padding: 8px 16px 14px !important; }
+  /* 标签结构是 a > span.chip。obsidian.css 的 `.article-tags a, .card-action a {药丸}`
+     把外层 <a> 也做成药丸，叠加内层 .chip 的药丸 → 每个标签两层边框。
+     这里把外层 <a> 还原成透明内联包裹，只留内层 .chip 作为唯一药丸。 */
+  #prenext-posts .article-tags a {
+    background: transparent !important;
+    border: none !important;
+    border-radius: 0 !important;
+    padding: 0 !important;
+    display: inline-flex;
+  }
+  @media only screen and (max-width: 600px) {
+    #prenext-posts .article-row { flex-direction: column; gap: 16px; }
+    #prenext-posts .article {
+      width: 100% !important; max-width: 100%; flex: 0 0 auto;
+      padding-left: 0; padding-right: 0; box-sizing: border-box;
+    }
+    #prenext-posts .card-image-V { height: 164px; }
+    #prenext-posts .card-image-V .box-content { display: none !important; }
+    #prenext-posts .publish-info { overflow-wrap: anywhere; }
+  }
+
+  /* 同主题文章提供可抓取的正文链接，也让读者顺着专题继续阅读。 */
+  .post-related { margin: 32px 0 12px; }
+  .post-related h2 { margin: 0 0 16px; font-size: 22px; }
+  .post-related-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
+  .post-related-card {
+    display: flex; flex-direction: column; gap: 10px; min-width: 0; padding: 20px;
+    border: 1px solid var(--glass-stroke); border-radius: var(--r-lg);
+    background: var(--glass-fill); color: var(--text-hi);
+    transition: border-color .2s ease, transform .2s ease;
+  }
+  .post-related-card:hover { border-color: var(--acc-soft); transform: translateY(-2px); color: var(--text-hi); }
+  .post-related-card strong { font-size: 16px; line-height: 1.5; overflow-wrap: anywhere; }
+  .post-related-date, .post-related-summary { color: var(--text-mut); font-size: 13px; line-height: 1.6; }
+  @media (max-width: 760px) { .post-related-grid { grid-template-columns: 1fr; } }
+
+  /* 正文长串兜底：CJK 天然可断行，掩盖了含长 ASCII 串的段落会撑破正文列的问题。
+     实测 390px 下 `TS/JS/Python/Go/Rust/Java/C#/Swift/Kotlin…` 这类斜杠连写
+     使 documentElement.scrollWidth 达到 420，整页可横向拖动。
+     代码块/表格已各自 overflow-x:auto，这里只管普通文本节点。 */
+  #articleContent p,
+  #articleContent li,
+  #articleContent dd,
+  #articleContent blockquote { overflow-wrap: anywhere; }
+
+  /* Fixed seasonal lanterns cover the first table column while the page scrolls. */
+  body:has(#artDetail) .deng-box,
+  body:has(#artDetail) .deng-box1 { display: none; }
+
+  /* 复制按钮从 <i> 改成 <button>（原先不可聚焦、且 aria-hidden 让读屏读不到）。
+     清掉 button 的默认 padding/appearance，视觉与改动前保持一致。 */
+  #articleContent button.code_copy {
+    padding: 0; margin: 0; appearance: none; -webkit-appearance: none;
+    line-height: 1;
+  }
+  #articleContent button.code_copy:focus-visible {
+    outline: 2px solid var(--acc-soft, #A78BFA);
+    outline-offset: 2px;
+  }
+
+  /* 侧栏目录收起后的正文宽度。#main-content 是 col s12 m12 l9，去掉 l9 会退回
+     整行 100%（正文列 788px → 1092px），中文行宽过长且因为 .col 是 float:left
+     而不会居中，右侧空出原本 TOC 的位置。这里让卡片占满整行、由 measure 管行宽。 */
+  @media only screen and (min-width: 993px) {
+    /* 收起侧栏（手动点悬浮按钮，或目录过短自动去掉）：卡片和有目录时一样宽、贴左，
+       与 hero 标题对齐；占满整行时卡片比正文宽出一大截，卡片里两侧各空一大片。 */
+    #main-content.toc-collapsed,
+    #main-content.no-toc { float: none; width: 100%; max-width: 1010px; margin-left: 0; }
+    /* 侧栏和上一篇/下一篇的 .col 仍带 materialize 的 11.25px 内边距，比卡片和 hero 各缩进一截 */
+    #toc-aside { padding-left: 16px !important; padding-right: 0 !important; }
+    #prenext-posts .article-row { gap: 16px; }
+    #prenext-posts .article-row::after { display: none; }   /* .row 的清浮动伪元素在 flex 里也吃一份 gap */
+    #prenext-posts .article-row > .article { padding-left: 0; padding-right: 0; flex: 1 1 0; width: auto; }
+  }
+
+  /* ===== 文章卡片与页头标题对齐 =====
+     原先正文段落比 hero 标题右缩 76px，视觉上明显不齐。缩进由三层叠加而成：
+     .col 的 11.25px + .article-card-content 的 50px + measure 居中产生的 14px。
+     这里把卡片左右边缘拉到与 hero 内容线齐平，卡片内只保留一层内边距。 */
+  /* .col 的水平内边距在所有断点下都去掉，让卡片边缘与 hero 内容线齐平 */
+  #main-content { padding-left: 0 !important; padding-right: 0 !important; }
+  #artDetail .article-card-content { padding-left: 16px; padding-right: 16px; }
+  /* 文章末尾广告框随广告本身收缩并居中，避免桌面广告只占中间一段，
+     外层玻璃卡片却横跨整张文章卡片。 */
+  #artDetail .hexo-ad {
+    width: 100%; max-width: 350px; box-sizing: border-box; margin-left: auto; margin-right: auto;
+  }
+  #artDetail .hexo-ad-script { width: 100%; }
+  @media (min-width: 500px) {
+    #artDetail .hexo-ad { max-width: 498px; }
+  }
+  @media (min-width: 800px) {
+    #artDetail .hexo-ad { max-width: 758px; }
+  }
+  @media only screen and (min-width: 993px) {
+    #artDetail .article-card-content { padding-left: 24px; padding-right: 24px; }
+    #articleContent > p,
+    #articleContent > ul,
+    #articleContent > ol,
+    #articleContent > blockquote,
+    #articleContent > h1,
+    #articleContent > h2,
+    #articleContent > h3,
+    #articleContent > h4,
+    #articleContent > h5,
+    #articleContent > h6,
+    #articleContent > dl,
+    /* 笔记页保留左对齐；博客文章在下方单独覆盖为居中。 */
+    #articleContent > pre,
+    #articleContent > figure.highlight,
+    #articleContent > .code-area,
+    #articleContent > table,
+    #articleContent > .table-container,
+    #articleContent > .img-item,
+    #articleContent > .note,
+    #articleContent > .mermaid,
+    #articleContent > details {
+      margin-left: 0;
+      margin-right: 0;
+    }
+    /* 博客文章的正文行宽小于卡片时保持两侧留白相等；笔记阅读页保留原布局。 */
+    #artDetail #articleContent > :is(
+      p, ul, ol, blockquote, h1, h2, h3, h4, h5, h6, dl,
+      pre, figure.highlight, .code-area, table, .table-container,
+      .img-item, .note, .mermaid, details
+    ) {
+      margin-left: auto;
+      margin-right: auto;
+    }
+  }
+
+  /* 宽屏文章：让正文和侧栏一起利用屏幕宽度，保留适合阅读的行宽。 */
+  @media only screen and (min-width: 1400px) {
+    main.post-container.content,
+    .dp .dp-wrap.post-dp-hero { max-width: 1800px !important; }
+
+    /* 阅读模式的信息栏和正文沿用对应文章卡片的增长宽度；
+       1168px 的容器扣除两侧 24px 内边距后，正文正好是 1120px。 */
+    #artDetail .card.card-block-fullscreen {
+      --reading-mode-width: clamp(1010px, calc(75vw - 48px), 1168px);
+    }
+    body:has(main.post-no-toc) #artDetail .card.card-block-fullscreen,
+    body:has(#main-content.toc-collapsed) #artDetail .card.card-block-fullscreen,
+    body:has(main.container.content) #artDetail .card.card-block-fullscreen {
+      --reading-mode-width: clamp(1010px, calc(100vw - 390px), 1168px);
+    }
+    #artDetail .card.card-block-fullscreen > .card-content,
+    #artDetail .card.card-block-fullscreen > hr {
+      max-width: var(--reading-mode-width);
+    }
+
+    main.post-container.content.post-no-toc,
+    .dp .dp-wrap.post-dp-hero.post-no-toc,
+    body:has(#main-content.toc-collapsed) main.post-container.content,
+    body:has(#main-content.toc-collapsed) .dp .dp-wrap.post-dp-hero,
+    body:has(main.container.content) .dp .dp-wrap.post-dp-hero,
+    body:has(.post-dp-hero) main.container.content {
+      max-width: clamp(1074px, calc(100vw - 326px), 1280px) !important;
+    }
+
+    #main-content.toc-collapsed,
+    #main-content.no-toc { max-width: none; }
+
+    #artDetail #articleContent > :is(p, ul, ol, blockquote, h1, h2, h3, h4, h5, h6, dl,
+      .img-item, hr, .note, .mermaid, details),
+    #artDetail #articleContent > :is(pre, figure.highlight, .code-area, table, .table-container) {
+      max-width: min(100%, 1120px);
+    }
+
+    #artDetail #articleContent {
+      --post-wide-font: clamp(16px, calc(0.5vw + 9px), 18px);
+      font-size: var(--post-wide-font);
+    }
+    #artDetail #articleContent p,
+    #artDetail #articleContent li {
+      font-size: var(--post-wide-font) !important;
+      line-height: 1.8 !important;
+    }
+  }
