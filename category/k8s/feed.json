@@ -41,17 +41,6 @@
                 "k8s",
                 "k8s"
             ]
-        },
-        {
-            "id": "https://costalong.com/2023/09/03/k8s/csi-fen-xi-rong-qi-chu-cun-jie-kou/",
-            "url": "https://costalong.com/2023/09/03/k8s/csi-fen-xi-rong-qi-chu-cun-jie-kou/",
-            "title": "CSI--容器储存接口",
-            "date_published": "2023-09-03T14:08:17.000Z",
-            "content_html": "<h2 id=\"1-CSI简介–-储存接口\"><a href=\"#1-CSI简介–-储存接口\" class=\"headerlink\" title=\"1. CSI简介– 储存接口\"></a>1. CSI简介– 储存接口</h2><p>  k8s 的设计理念是支持可插拔架构，从而有利用扩展k8s 的功能。在次思想下，k8s 提供了 3 个特定功能得到接口，分别是：容器网络接口（CNI）、容器运行时接口（CRI）、容器储存接口（CSI）。本文主要介绍容器储存接口（CSI）。</p>\n",
-            "tags": [
-                "k8s",
-                "k8s"
-            ]
         }
     ]
 }
