@@ -2,6 +2,33 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   
   <url>
+    <loc>https://costalong.com/2026/11/20/go-keepalive-k8s-imbalance/</loc>
+    
+    <lastmod>2026-11-20</lastmod>
+    
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  
+  <url>
+    <loc>https://costalong.com/2026/11/20/local-embedding-chinese-retrieval/</loc>
+    
+    <lastmod>2026-11-20</lastmod>
+    
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  
+  <url>
+    <loc>https://costalong.com/2026/11/20/ollama-openai-compat/</loc>
+    
+    <lastmod>2026-11-20</lastmod>
+    
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  
+  <url>
     <loc>https://costalong.com/2026/11/20/go-memlimit-k8s/</loc>
     
     <lastmod>2026-11-20</lastmod>
@@ -218,7 +245,7 @@
   </url>
   
   <url>
-    <loc>https://costalong.com/notes/k8s/secret-rotation/</loc>
+    <loc>https://costalong.com/notes/k8s/server-side-apply/</loc>
     
     <lastmod>2026-10-30</lastmod>
     
@@ -227,7 +254,7 @@
   </url>
   
   <url>
-    <loc>https://costalong.com/notes/k8s/server-side-apply/</loc>
+    <loc>https://costalong.com/notes/k8s/secret-rotation/</loc>
     
     <lastmod>2026-10-30</lastmod>
     
@@ -371,7 +398,7 @@
   </url>
   
   <url>
-    <loc>https://costalong.com/2026/04/16/mempalace-local-memory-tutorial/</loc>
+    <loc>https://costalong.com/2026/09/11/obsidian-vault-local-retrieval/</loc>
     
     <lastmod>2026-10-30</lastmod>
     
@@ -380,7 +407,7 @@
   </url>
   
   <url>
-    <loc>https://costalong.com/2026/09/11/obsidian-vault-local-retrieval/</loc>
+    <loc>https://costalong.com/2026/04/16/mempalace-local-memory-tutorial/</loc>
     
     <lastmod>2026-10-30</lastmod>
     
@@ -434,15 +461,6 @@
   </url>
   
   <url>
-    <loc>https://costalong.com/notes/k8s/components/</loc>
-    
-    <lastmod>2026-10-13</lastmod>
-    
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  
-  <url>
     <loc>https://costalong.com/notes/k8s/cni-network-path/</loc>
     
     <lastmod>2026-10-13</lastmod>
@@ -461,6 +479,15 @@
   </url>
   
   <url>
+    <loc>https://costalong.com/notes/k8s/components/</loc>
+    
+    <lastmod>2026-10-13</lastmod>
+    
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  
+  <url>
     <loc>https://costalong.com/notes/k8s/crd/</loc>
     
     <lastmod>2026-10-13</lastmod>
@@ -470,7 +497,7 @@
   </url>
   
   <url>
-    <loc>https://costalong.com/notes/k8s/deployment/</loc>
+    <loc>https://costalong.com/notes/k8s/daemonset/</loc>
     
     <lastmod>2026-10-13</lastmod>
     
@@ -479,7 +506,7 @@
   </url>
   
   <url>
-    <loc>https://costalong.com/notes/k8s/daemonset/</loc>
+    <loc>https://costalong.com/notes/k8s/deployment/</loc>
     
     <lastmod>2026-10-13</lastmod>
     
@@ -515,7 +542,7 @@
   </url>
   
   <url>
-    <loc>https://costalong.com/notes/k8s/etcd-snapshots/</loc>
+    <loc>https://costalong.com/notes/k8s/gateway-api/</loc>
     
     <lastmod>2026-10-13</lastmod>
     
@@ -524,7 +551,7 @@
   </url>
   
   <url>
-    <loc>https://costalong.com/notes/k8s/gateway-api/</loc>
+    <loc>https://costalong.com/notes/k8s/etcd-snapshots/</loc>
     
     <lastmod>2026-10-13</lastmod>
     
@@ -614,15 +641,6 @@
   </url>
   
   <url>
-    <loc>https://costalong.com/notes/k8s/install/</loc>
-    
-    <lastmod>2026-10-13</lastmod>
-    
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  
-  <url>
     <loc>https://costalong.com/notes/k8s/jobs/</loc>
     
     <lastmod>2026-10-13</lastmod>
@@ -632,7 +650,7 @@
   </url>
   
   <url>
-    <loc>https://costalong.com/notes/k8s/kubeadm-upgrade/</loc>
+    <loc>https://costalong.com/notes/k8s/install/</loc>
     
     <lastmod>2026-10-13</lastmod>
     
@@ -650,7 +668,7 @@
   </url>
   
   <url>
-    <loc>https://costalong.com/notes/k8s/kubectl/</loc>
+    <loc>https://costalong.com/notes/k8s/kubectl-debug/</loc>
     
     <lastmod>2026-10-13</lastmod>
     
@@ -659,7 +677,16 @@
   </url>
   
   <url>
-    <loc>https://costalong.com/notes/k8s/kubectl-debug/</loc>
+    <loc>https://costalong.com/notes/k8s/kubeadm-upgrade/</loc>
+    
+    <lastmod>2026-10-13</lastmod>
+    
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  
+  <url>
+    <loc>https://costalong.com/notes/k8s/kubectl/</loc>
     
     <lastmod>2026-10-13</lastmod>
     
@@ -722,15 +749,6 @@
   </url>
   
   <url>
-    <loc>https://costalong.com/notes/k8s/observability/</loc>
-    
-    <lastmod>2026-10-13</lastmod>
-    
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  
-  <url>
     <loc>https://costalong.com/notes/k8s/pdb/</loc>
     
     <lastmod>2026-10-13</lastmod>
@@ -740,7 +758,7 @@
   </url>
   
   <url>
-    <loc>https://costalong.com/notes/k8s/pod/</loc>
+    <loc>https://costalong.com/notes/k8s/observability/</loc>
     
     <lastmod>2026-10-13</lastmod>
     
@@ -750,6 +768,15 @@
   
   <url>
     <loc>https://costalong.com/notes/k8s/operator-pattern/</loc>
+    
+    <lastmod>2026-10-13</lastmod>
+    
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  
+  <url>
+    <loc>https://costalong.com/notes/k8s/pod/</loc>
     
     <lastmod>2026-10-13</lastmod>
     
@@ -776,7 +803,7 @@
   </url>
   
   <url>
-    <loc>https://costalong.com/notes/k8s/probes-resources/</loc>
+    <loc>https://costalong.com/notes/k8s/pod-lifecycle/</loc>
     
     <lastmod>2026-10-13</lastmod>
     
@@ -785,7 +812,7 @@
   </url>
   
   <url>
-    <loc>https://costalong.com/notes/k8s/pod-lifecycle/</loc>
+    <loc>https://costalong.com/notes/k8s/probes-resources/</loc>
     
     <lastmod>2026-10-13</lastmod>
     
@@ -803,7 +830,7 @@
   </url>
   
   <url>
-    <loc>https://costalong.com/notes/k8s/reconciliation/</loc>
+    <loc>https://costalong.com/notes/k8s/scheduling/</loc>
     
     <lastmod>2026-10-13</lastmod>
     
@@ -812,7 +839,7 @@
   </url>
   
   <url>
-    <loc>https://costalong.com/notes/k8s/scheduling/</loc>
+    <loc>https://costalong.com/notes/k8s/reconciliation/</loc>
     
     <lastmod>2026-10-13</lastmod>
     
