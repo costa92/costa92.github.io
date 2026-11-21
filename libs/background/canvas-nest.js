@@ -9,6 +9,7 @@
             return;
         }
     }
+    if (window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches) return;
 
     function o(w, v, i) {
         return w.getAttribute(v) || i

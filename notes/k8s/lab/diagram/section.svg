@@ -1,27 +1,28 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 360 500" role="img" aria-labelledby="title desc">
-<title id="title">实验开始前核对三个边界</title>
-<desc id="desc">确认环境后再运行写入命令。</desc>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 360 490" role="img" aria-labelledby="title desc">
+<title id="title">上下文指错时的三种表现</title>
+<desc id="desc">最危险的是命令成功却写错地方，写入前先过 lab_guard。</desc>
 <defs><pattern id="grid" width="32" height="32" patternUnits="userSpaceOnUse"><path d="M32 0 L0 0 0 32" fill="none" stroke="#1e293b" stroke-width=".6"/></pattern><marker id="arrow" markerWidth="9" markerHeight="7" refX="8" refY="3.5" orient="auto"><path d="M0 0 L9 3.5 L0 7Z" fill="#94a3b8"/></marker></defs>
-<rect width="360" height="500" rx="16" fill="#0f172a"/>
-<rect width="360" height="500" rx="16" fill="url(#grid)"/>
-<text x="24" y="32" fill="#f8fafc" font-family="'PingFang SC','Noto Sans SC','Microsoft YaHei',sans-serif" font-size="17" font-weight="700">实验开始前核对三个边界</text>
-<text x="24" y="54" fill="#94a3b8" font-family="'PingFang SC','Noto Sans SC','Microsoft YaHei',sans-serif" font-size="11">建立实验命名空间</text>
-<rect x="57" y="91" width="279" height="86" rx="11" fill="#142238" stroke="#22d3ee" stroke-width="1.5"/>
-<text x="196.5" y="127.0" text-anchor="middle" font-family="'PingFang SC','Noto Sans SC','Microsoft YaHei',sans-serif" font-size="15" font-weight="600" fill="#f8fafc">current-context</text>
-<text x="196.5" y="148.0" text-anchor="middle" font-family="'PingFang SC','Noto Sans SC','Microsoft YaHei',sans-serif" font-size="12" font-weight="400" fill="#cbd5e1">确认集群目标</text>
-<circle cx="37" cy="134" r="12" fill="#142238" stroke="#22d3ee" stroke-width="1.5"/>
-<text x="37" y="139.0" text-anchor="middle" font-family="'PingFang SC','Noto Sans SC','Microsoft YaHei',sans-serif" font-size="13" font-weight="600" fill="#22d3ee">1</text>
-<rect x="57" y="201" width="279" height="86" rx="11" fill="#142238" stroke="#34d399" stroke-width="1.5"/>
-<text x="196.5" y="237.0" text-anchor="middle" font-family="'PingFang SC','Noto Sans SC','Microsoft YaHei',sans-serif" font-size="15" font-weight="600" fill="#f8fafc">k8s-lab</text>
-<text x="196.5" y="258.0" text-anchor="middle" font-family="'PingFang SC','Noto Sans SC','Microsoft YaHei',sans-serif" font-size="12" font-weight="400" fill="#cbd5e1">隔离教程资源</text>
-<circle cx="37" cy="244" r="12" fill="#142238" stroke="#34d399" stroke-width="1.5"/>
-<text x="37" y="249.0" text-anchor="middle" font-family="'PingFang SC','Noto Sans SC','Microsoft YaHei',sans-serif" font-size="13" font-weight="600" fill="#34d399">2</text>
-<rect x="57" y="311" width="279" height="86" rx="11" fill="#142238" stroke="#a78bfa" stroke-width="1.5"/>
-<text x="196.5" y="347.0" text-anchor="middle" font-family="'PingFang SC','Noto Sans SC','Microsoft YaHei',sans-serif" font-size="15" font-weight="600" fill="#f8fafc">资源清理</text>
-<text x="196.5" y="368.0" text-anchor="middle" font-family="'PingFang SC','Noto Sans SC','Microsoft YaHei',sans-serif" font-size="12" font-weight="400" fill="#cbd5e1">只删除本次实验对象</text>
-<circle cx="37" cy="354" r="12" fill="#142238" stroke="#a78bfa" stroke-width="1.5"/>
-<text x="37" y="359.0" text-anchor="middle" font-family="'PingFang SC','Noto Sans SC','Microsoft YaHei',sans-serif" font-size="13" font-weight="600" fill="#a78bfa">3</text>
-<text x="180" y="449.0" text-anchor="middle" font-family="'PingFang SC','Noto Sans SC','Microsoft YaHei',sans-serif" font-size="11" font-weight="400" fill="#fbbf24">确认环境后再运行写入命令。</text>
-<line x1="24" y1="467" x2="336" y2="467" stroke="#334155"/>
-<text x="24" y="486" fill="#94a3b8" font-family="'PingFang SC','Noto Sans SC','Microsoft YaHei',sans-serif" font-size="10">costalong.com · Kubernetes 笔记</text>
+<rect width="360" height="490" rx="16" fill="#0f172a"/>
+<rect width="360" height="490" rx="16" fill="url(#grid)"/>
+<text x="24" y="32" fill="#f8fafc" font-family="'PingFang SC','Noto Sans SC','Microsoft YaHei',sans-serif" font-size="17" font-weight="700">上下文指错时的三种表现</text>
+<text x="24" y="54" fill="#94a3b8" font-family="'PingFang SC','Noto Sans SC','Microsoft YaHei',sans-serif" font-size="11">上下文指错了会怎样</text>
+<rect x="25" y="92" width="310" height="90" rx="11" fill="#142238" stroke="#334155"/>
+<rect x="25" y="92" width="5" height="90" rx="2" fill="#22d3ee"/>
+<text x="91" y="142.0" text-anchor="middle" font-family="'PingFang SC','Noto Sans SC','Microsoft YaHei',sans-serif" font-size="14" font-weight="600" fill="#f8fafc">地址不可达</text>
+<line x1="151" y1="107" x2="151" y2="167" stroke="#334155"/>
+<text x="243" y="133.8" text-anchor="middle" font-family="'PingFang SC','Noto Sans SC','Microsoft YaHei',sans-serif" font-size="12" font-weight="400" fill="#cbd5e1">i/o timeout，</text>
+<text x="243" y="148.2" text-anchor="middle" font-family="'PingFang SC','Noto Sans SC','Microsoft YaHei',sans-serif" font-size="12" font-weight="400" fill="#cbd5e1">一条 get 卡 2 分 30 秒</text>
+<rect x="25" y="195" width="310" height="90" rx="11" fill="#142238" stroke="#334155"/>
+<rect x="25" y="195" width="5" height="90" rx="2" fill="#34d399"/>
+<text x="91" y="245.0" text-anchor="middle" font-family="'PingFang SC','Noto Sans SC','Microsoft YaHei',sans-serif" font-size="14" font-weight="600" fill="#f8fafc">端口无服务</text>
+<line x1="151" y1="210" x2="151" y2="270" stroke="#334155"/>
+<text x="243" y="244.0" text-anchor="middle" font-family="'PingFang SC','Noto Sans SC','Microsoft YaHei',sans-serif" font-size="12" font-weight="400" fill="#cbd5e1">connection refused，瞬间报错</text>
+<rect x="25" y="298" width="310" height="90" rx="11" fill="#142238" stroke="#334155"/>
+<rect x="25" y="298" width="5" height="90" rx="2" fill="#a78bfa"/>
+<text x="91" y="348.0" text-anchor="middle" font-family="'PingFang SC','Noto Sans SC','Microsoft YaHei',sans-serif" font-size="14" font-weight="600" fill="#f8fafc">缺 namespace</text>
+<line x1="151" y1="313" x2="151" y2="373" stroke="#334155"/>
+<text x="243" y="347.0" text-anchor="middle" font-family="'PingFang SC','Noto Sans SC','Microsoft YaHei',sans-serif" font-size="12" font-weight="400" fill="#cbd5e1">命令成功，对象写进 default</text>
+<text x="180" y="439.0" text-anchor="middle" font-family="'PingFang SC','Noto Sans SC','Microsoft YaHei',sans-serif" font-size="11" font-weight="400" fill="#fbbf24">最危险的是命令成功却写错地方，写入前先过 lab_guard。</text>
+<line x1="24" y1="457" x2="336" y2="457" stroke="#334155"/>
+<text x="24" y="476" fill="#94a3b8" font-family="'PingFang SC','Noto Sans SC','Microsoft YaHei',sans-serif" font-size="10">costalong.com · Kubernetes 笔记</text>
 </svg>

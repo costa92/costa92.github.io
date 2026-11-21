@@ -1,5 +1,5 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 360 518" role="img" aria-labelledby="diagram-title diagram-desc">
-<title id="diagram-title">Pod 优雅终止与流量排空</title><desc id="diagram-desc">用带 preStop 与 TERM 处理的实验 Pod 观察删除宽限期，并区分进程退出与 Service 流量排空。</desc>
+<title id="diagram-title">Pod 优雅终止与流量排空</title><desc id="diagram-desc">摘流量和 preStop 同时开始；preStop 只是推迟 SIGTERM，给转发规则更新留时间，超出宽限期就会被 SIGKILL。</desc>
 <defs><pattern id="grid" width="32" height="32" patternUnits="userSpaceOnUse"><path d="M32 0 L0 0 0 32" fill="none" stroke="#1e293b" stroke-width=".6"/></pattern>
 <marker id="arrow" markerWidth="9" markerHeight="7" refX="8" refY="3.5" orient="auto"><path d="M0 0 L9 3.5 L0 7Z" fill="#94a3b8"/></marker></defs>
 <rect width="360" height="518" rx="16" fill="#0f172a"/><rect width="360" height="518" rx="16" fill="url(#grid)"/>

@@ -1,5 +1,5 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 360 495" role="img" aria-labelledby="diagram-title diagram-desc">
-<title id="diagram-title">污点与容忍</title><desc id="diagram-desc">在独立多节点实验环境中比较带污点节点对普通 Pod 与具备容忍 Pod 的调度结果。</desc>
+<title id="diagram-title">污点与容忍</title><desc id="diagram-desc">污点 → effect → 是否容忍 → 结果；容忍只让节点成为候选，不保证落点。</desc>
 <defs><pattern id="grid" width="32" height="32" patternUnits="userSpaceOnUse"><path d="M32 0 L0 0 0 32" fill="none" stroke="#1e293b" stroke-width=".6"/></pattern>
 <marker id="arrow" markerWidth="9" markerHeight="7" refX="8" refY="3.5" orient="auto"><path d="M0 0 L9 3.5 L0 7Z" fill="#94a3b8"/></marker></defs>
 <rect width="360" height="495" rx="16" fill="#0f172a"/><rect width="360" height="495" rx="16" fill="url(#grid)"/>

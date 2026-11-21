@@ -1,19 +1,33 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 360 430" role="img" aria-labelledby="title desc">
-<title id="title">每个副本保留自己的身份</title>
-<desc id="desc">删除 Pod 后可复用对应 PVC；并非共享同一卷。</desc>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 360 575" role="img" aria-labelledby="title desc">
+<title id="title">什么操作会删掉 PVC</title>
+<desc id="desc">保留默认 Retain 更安全：误缩一次就可能丢数据。</desc>
 <defs><pattern id="grid" width="32" height="32" patternUnits="userSpaceOnUse"><path d="M32 0 L0 0 0 32" fill="none" stroke="#1e293b" stroke-width=".6"/></pattern><marker id="arrow" markerWidth="9" markerHeight="7" refX="8" refY="3.5" orient="auto"><path d="M0 0 L9 3.5 L0 7Z" fill="#94a3b8"/></marker></defs>
-<rect width="360" height="430" rx="16" fill="#0f172a"/>
-<rect width="360" height="430" rx="16" fill="url(#grid)"/>
-<text x="24" y="32" fill="#f8fafc" font-family="'PingFang SC','Noto Sans SC','Microsoft YaHei',sans-serif" font-size="17" font-weight="700">每个副本保留自己的身份</text>
-<text x="24" y="54" fill="#94a3b8" font-family="'PingFang SC','Noto Sans SC','Microsoft YaHei',sans-serif" font-size="11">有稳定身份的 Pod</text>
-<rect x="24" y="133" width="148" height="175" rx="11" fill="#142238" stroke="#22d3ee" stroke-width="1.5"/>
-<text x="98.0" y="213.5" text-anchor="middle" font-family="'PingFang SC','Noto Sans SC','Microsoft YaHei',sans-serif" font-size="15" font-weight="600" fill="#f8fafc">stateful-demo-0</text>
-<text x="98.0" y="234.5" text-anchor="middle" font-family="'PingFang SC','Noto Sans SC','Microsoft YaHei',sans-serif" font-size="12" font-weight="400" fill="#cbd5e1">稳定名称 + 独立 PVC</text>
-<rect x="188" y="133" width="148" height="175" rx="11" fill="#142238" stroke="#34d399" stroke-width="1.5"/>
-<text x="262.0" y="213.5" text-anchor="middle" font-family="'PingFang SC','Noto Sans SC','Microsoft YaHei',sans-serif" font-size="15" font-weight="600" fill="#f8fafc">stateful-demo-1</text>
-<text x="262.0" y="234.5" text-anchor="middle" font-family="'PingFang SC','Noto Sans SC','Microsoft YaHei',sans-serif" font-size="12" font-weight="400" fill="#cbd5e1">稳定名称 + 独立 PVC</text>
-<text x="180" y="341" text-anchor="middle" fill="#94a3b8" font-family="'PingFang SC','Noto Sans SC','Microsoft YaHei',sans-serif" font-size="12">两种情况需要分别判断</text>
-<text x="180" y="379.0" text-anchor="middle" font-family="'PingFang SC','Noto Sans SC','Microsoft YaHei',sans-serif" font-size="11" font-weight="400" fill="#fbbf24">删除 Pod 后可复用对应 PVC；并非共享同一卷。</text>
-<line x1="24" y1="397" x2="336" y2="397" stroke="#334155"/>
-<text x="24" y="416" fill="#94a3b8" font-family="'PingFang SC','Noto Sans SC','Microsoft YaHei',sans-serif" font-size="10">costalong.com · Kubernetes 笔记</text>
+<rect width="360" height="575" rx="16" fill="#0f172a"/>
+<rect width="360" height="575" rx="16" fill="url(#grid)"/>
+<text x="24" y="32" fill="#f8fafc" font-family="'PingFang SC','Noto Sans SC','Microsoft YaHei',sans-serif" font-size="17" font-weight="700">什么操作会删掉 PVC</text>
+<text x="24" y="54" fill="#94a3b8" font-family="'PingFang SC','Noto Sans SC','Microsoft YaHei',sans-serif" font-size="11">缩容和删除时 PVC 的去留</text>
+<rect x="25" y="92" width="310" height="92" rx="11" fill="#142238" stroke="#334155"/>
+<rect x="25" y="92" width="5" height="92" rx="2" fill="#22d3ee"/>
+<text x="91" y="143.0" text-anchor="middle" font-family="'PingFang SC','Noto Sans SC','Microsoft YaHei',sans-serif" font-size="14" font-weight="600" fill="#f8fafc">删除 Pod</text>
+<line x1="151" y1="107" x2="151" y2="169" stroke="#334155"/>
+<text x="243" y="142.0" text-anchor="middle" font-family="'PingFang SC','Noto Sans SC','Microsoft YaHei',sans-serif" font-size="12" font-weight="400" fill="#cbd5e1">同名重建，挂回原 PVC</text>
+<rect x="25" y="197" width="310" height="92" rx="11" fill="#142238" stroke="#334155"/>
+<rect x="25" y="197" width="5" height="92" rx="2" fill="#34d399"/>
+<text x="91" y="248.0" text-anchor="middle" font-family="'PingFang SC','Noto Sans SC','Microsoft YaHei',sans-serif" font-size="14" font-weight="600" fill="#f8fafc">缩容 Retain</text>
+<line x1="151" y1="212" x2="151" y2="274" stroke="#334155"/>
+<text x="243" y="247.0" text-anchor="middle" font-family="'PingFang SC','Noto Sans SC','Microsoft YaHei',sans-serif" font-size="12" font-weight="400" fill="#cbd5e1">PVC 保留，扩容原样挂回</text>
+<rect x="25" y="302" width="310" height="92" rx="11" fill="#142238" stroke="#334155"/>
+<rect x="25" y="302" width="5" height="92" rx="2" fill="#a78bfa"/>
+<text x="91" y="353.0" text-anchor="middle" font-family="'PingFang SC','Noto Sans SC','Microsoft YaHei',sans-serif" font-size="14" font-weight="600" fill="#f8fafc">缩容 Delete</text>
+<line x1="151" y1="317" x2="151" y2="379" stroke="#334155"/>
+<text x="243" y="352.0" text-anchor="middle" font-family="'PingFang SC','Noto Sans SC','Microsoft YaHei',sans-serif" font-size="12" font-weight="400" fill="#cbd5e1">PVC 删除，PV 随之回收</text>
+<rect x="25" y="407" width="310" height="92" rx="11" fill="#142238" stroke="#334155"/>
+<rect x="25" y="407" width="5" height="92" rx="2" fill="#fbbf24"/>
+<text x="91" y="449.6" text-anchor="middle" font-family="'PingFang SC','Noto Sans SC','Microsoft YaHei',sans-serif" font-size="14" font-weight="600" fill="#f8fafc">删除</text>
+<text x="91" y="466.4" text-anchor="middle" font-family="'PingFang SC','Noto Sans SC','Microsoft YaHei',sans-serif" font-size="14" font-weight="600" fill="#f8fafc">StatefulSet</text>
+<line x1="151" y1="422" x2="151" y2="484" stroke="#334155"/>
+<text x="243" y="457.0" text-anchor="middle" font-family="'PingFang SC','Noto Sans SC','Microsoft YaHei',sans-serif" font-size="12" font-weight="400" fill="#cbd5e1">默认保留，需手工删 PVC</text>
+<text x="180" y="524.0" text-anchor="middle" font-family="'PingFang SC','Noto Sans SC','Microsoft YaHei',sans-serif" font-size="11" font-weight="400" fill="#fbbf24">保留默认 Retain 更安全：误缩一次就可能丢数据。</text>
+<line x1="24" y1="542" x2="336" y2="542" stroke="#334155"/>
+<text x="24" y="561" fill="#94a3b8" font-family="'PingFang SC','Noto Sans SC','Microsoft YaHei',sans-serif" font-size="10">costalong.com · Kubernetes 笔记</text>
 </svg>

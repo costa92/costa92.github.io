@@ -15,8 +15,9 @@
 <path d="M180 252 V292 H98 V328" fill="none" stroke="#a78bfa" stroke-width="1.8" marker-end="url(#arrow)"/>
 <path d="M180 292 H262 V328" fill="none" stroke="#fbbf24" stroke-width="1.8" marker-end="url(#arrow)"/>
 <rect x="24" y="328" width="148" height="92" rx="10" fill="#152338" stroke="#a78bfa" stroke-width="1.4"/>
-<text x="98.0" y="370.0" text-anchor="middle" font-family="'PingFang SC','Noto Sans SC',sans-serif" font-size="14" fill="#f8fafc" font-weight="700">静态 PV</text>
-<text x="98.0" y="386.0" text-anchor="middle" font-family="'PingFang SC','Noto Sans SC',sans-serif" font-size="12" fill="#cbd5e1">预建卷绑定</text>
+<text x="98.0" y="362.0" text-anchor="middle" font-family="'PingFang SC','Noto Sans SC',sans-serif" font-size="14" fill="#f8fafc" font-weight="700">已有 PV</text>
+<text x="98.0" y="378.0" text-anchor="middle" font-family="'PingFang SC','Noto Sans SC',sans-serif" font-size="12" fill="#cbd5e1">volumeName</text>
+<text x="98.0" y="394.0" text-anchor="middle" font-family="'PingFang SC','Noto Sans SC',sans-serif" font-size="12" fill="#cbd5e1">指定绑定</text>
 <rect x="188" y="328" width="148" height="92" rx="10" fill="#152338" stroke="#fbbf24" stroke-width="1.4"/>
 <text x="262.0" y="370.0" text-anchor="middle" font-family="'PingFang SC','Noto Sans SC',sans-serif" font-size="14" fill="#f8fafc" font-weight="700">StorageClass</text>
 <text x="262.0" y="386.0" text-anchor="middle" font-family="'PingFang SC','Noto Sans SC',sans-serif" font-size="12" fill="#cbd5e1">动态供给 PV</text>
