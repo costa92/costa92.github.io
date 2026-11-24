@@ -38,24 +38,6 @@
   </url>
   
   <url>
-    <loc>https://costalong.com/2026/11/23/agent-development-review-gates/</loc>
-    
-    <lastmod>2026-11-23</lastmod>
-    
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  
-  <url>
-    <loc>https://costalong.com/2026/11/23/agent-memory-lifecycle/</loc>
-    
-    <lastmod>2026-11-23</lastmod>
-    
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  
-  <url>
     <loc>https://costalong.com/2026/11/22/ai-native-change-gate/</loc>
     
     <lastmod>2026-11-22</lastmod>
@@ -83,15 +65,6 @@
   </url>
   
   <url>
-    <loc>https://costalong.com/2026/11/22/personal-developer-waffo-pancake/</loc>
-    
-    <lastmod>2026-11-22</lastmod>
-    
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  
-  <url>
     <loc>https://costalong.com/2026/11/22/local-agent-prompt-injection/</loc>
     
     <lastmod>2026-11-22</lastmod>
@@ -111,15 +84,6 @@
   
   <url>
     <loc>https://costalong.com/2026/11/21/go-http-timeout-cancellation/</loc>
-    
-    <lastmod>2026-11-21</lastmod>
-    
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  
-  <url>
-    <loc>https://costalong.com/2026/11/21/personal-developer-payment-vibe-pay-wechat/</loc>
     
     <lastmod>2026-11-21</lastmod>
     
@@ -281,15 +245,6 @@
   </url>
   
   <url>
-    <loc>https://costalong.com/2026/03/02/ollama-local-llm-deploy/</loc>
-    
-    <lastmod>2026-11-20</lastmod>
-    
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  
-  <url>
     <loc>https://costalong.com/2026/06/06/searxng-docker-deploy/</loc>
     
     <lastmod>2026-11-20</lastmod>
@@ -302,15 +257,6 @@
     <loc>https://costalong.com/notes/k8s/</loc>
     
     <lastmod>2026-11-20</lastmod>
-    
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  
-  <url>
-    <loc>https://costalong.com/2026/11/18/ai-native/</loc>
-    
-    <lastmod>2026-11-18</lastmod>
     
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
@@ -347,15 +293,6 @@
     <loc>https://costalong.com/2026/11/05/cloudflare-cache-github-pages-html/</loc>
     
     <lastmod>2026-11-05</lastmod>
-    
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  
-  <url>
-    <loc>https://costalong.com/2026/11/01/deepseek-superagent-analysis/</loc>
-    
-    <lastmod>2026-11-01</lastmod>
     
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
@@ -515,15 +452,6 @@
   </url>
   
   <url>
-    <loc>https://costalong.com/2026/07/06/claude-md-configuration-playbook/</loc>
-    
-    <lastmod>2026-10-30</lastmod>
-    
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  
-  <url>
     <loc>https://costalong.com/2026/06/06/claude-minsearch-mcp-protobuf-rag/</loc>
     
     <lastmod>2026-10-30</lastmod>
@@ -560,15 +488,6 @@
   </url>
   
   <url>
-    <loc>https://costalong.com/2026/04/27/karpathy-llm-wiki-architecture/</loc>
-    
-    <lastmod>2026-10-30</lastmod>
-    
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  
-  <url>
     <loc>https://costalong.com/2026/10/15/llm-wiki-practical-cases/</loc>
     
     <lastmod>2026-10-30</lastmod>
@@ -588,24 +507,6 @@
   
   <url>
     <loc>https://costalong.com/2026/09/11/obsidian-vault-local-retrieval/</loc>
-    
-    <lastmod>2026-10-30</lastmod>
-    
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  
-  <url>
-    <loc>https://costalong.com/2026/03/04/openclaw-usage-guide/</loc>
-    
-    <lastmod>2026-10-30</lastmod>
-    
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  
-  <url>
-    <loc>https://costalong.com/2026/04/14/superpowers-gsd-workflow/</loc>
     
     <lastmod>2026-10-30</lastmod>
     
@@ -641,7 +542,7 @@
   </url>
   
   <url>
-    <loc>https://costalong.com/notes/k8s/components/</loc>
+    <loc>https://costalong.com/notes/k8s/cni-network-path/</loc>
     
     <lastmod>2026-10-13</lastmod>
     
@@ -650,7 +551,7 @@
   </url>
   
   <url>
-    <loc>https://costalong.com/notes/k8s/cni-network-path/</loc>
+    <loc>https://costalong.com/notes/k8s/components/</loc>
     
     <lastmod>2026-10-13</lastmod>
     
@@ -686,6 +587,15 @@
   </url>
   
   <url>
+    <loc>https://costalong.com/notes/k8s/deployment/</loc>
+    
+    <lastmod>2026-10-13</lastmod>
+    
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  
+  <url>
     <loc>https://costalong.com/notes/k8s/dns-debugging/</loc>
     
     <lastmod>2026-10-13</lastmod>
@@ -704,25 +614,7 @@
   </url>
   
   <url>
-    <loc>https://costalong.com/notes/k8s/deployment/</loc>
-    
-    <lastmod>2026-10-13</lastmod>
-    
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  
-  <url>
     <loc>https://costalong.com/notes/k8s/emptydir/</loc>
-    
-    <lastmod>2026-10-13</lastmod>
-    
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  
-  <url>
-    <loc>https://costalong.com/notes/k8s/gateway-api/</loc>
     
     <lastmod>2026-10-13</lastmod>
     
@@ -740,16 +632,7 @@
   </url>
   
   <url>
-    <loc>https://costalong.com/notes/k8s/headless-service/</loc>
-    
-    <lastmod>2026-10-13</lastmod>
-    
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  
-  <url>
-    <loc>https://costalong.com/notes/k8s/helm/</loc>
+    <loc>https://costalong.com/notes/k8s/gateway-api/</loc>
     
     <lastmod>2026-10-13</lastmod>
     
@@ -776,7 +659,16 @@
   </url>
   
   <url>
-    <loc>https://costalong.com/notes/k8s/helm-dependencies/</loc>
+    <loc>https://costalong.com/notes/k8s/headless-service/</loc>
+    
+    <lastmod>2026-10-13</lastmod>
+    
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  
+  <url>
+    <loc>https://costalong.com/notes/k8s/helm/</loc>
     
     <lastmod>2026-10-13</lastmod>
     
@@ -803,7 +695,7 @@
   </url>
   
   <url>
-    <loc>https://costalong.com/notes/k8s/ingress/</loc>
+    <loc>https://costalong.com/notes/k8s/helm-dependencies/</loc>
     
     <lastmod>2026-10-13</lastmod>
     
@@ -813,6 +705,15 @@
   
   <url>
     <loc>https://costalong.com/notes/k8s/images/</loc>
+    
+    <lastmod>2026-10-13</lastmod>
+    
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  
+  <url>
+    <loc>https://costalong.com/notes/k8s/ingress/</loc>
     
     <lastmod>2026-10-13</lastmod>
     
@@ -839,15 +740,6 @@
   </url>
   
   <url>
-    <loc>https://costalong.com/notes/k8s/kubeadm-certs/</loc>
-    
-    <lastmod>2026-10-13</lastmod>
-    
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  
-  <url>
     <loc>https://costalong.com/notes/k8s/kubeadm-upgrade/</loc>
     
     <lastmod>2026-10-13</lastmod>
@@ -857,7 +749,7 @@
   </url>
   
   <url>
-    <loc>https://costalong.com/notes/k8s/kubectl-debug/</loc>
+    <loc>https://costalong.com/notes/k8s/kubeadm-certs/</loc>
     
     <lastmod>2026-10-13</lastmod>
     
@@ -867,6 +759,15 @@
   
   <url>
     <loc>https://costalong.com/notes/k8s/kubectl/</loc>
+    
+    <lastmod>2026-10-13</lastmod>
+    
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  
+  <url>
+    <loc>https://costalong.com/notes/k8s/kubectl-debug/</loc>
     
     <lastmod>2026-10-13</lastmod>
     
@@ -920,7 +821,7 @@
   </url>
   
   <url>
-    <loc>https://costalong.com/notes/k8s/node-maintenance/</loc>
+    <loc>https://costalong.com/notes/k8s/pdb/</loc>
     
     <lastmod>2026-10-13</lastmod>
     
@@ -929,7 +830,7 @@
   </url>
   
   <url>
-    <loc>https://costalong.com/notes/k8s/observability/</loc>
+    <loc>https://costalong.com/notes/k8s/node-maintenance/</loc>
     
     <lastmod>2026-10-13</lastmod>
     
@@ -947,7 +848,7 @@
   </url>
   
   <url>
-    <loc>https://costalong.com/notes/k8s/pdb/</loc>
+    <loc>https://costalong.com/notes/k8s/pod/</loc>
     
     <lastmod>2026-10-13</lastmod>
     
@@ -956,7 +857,7 @@
   </url>
   
   <url>
-    <loc>https://costalong.com/notes/k8s/pod/</loc>
+    <loc>https://costalong.com/notes/k8s/observability/</loc>
     
     <lastmod>2026-10-13</lastmod>
     
@@ -1028,7 +929,7 @@
   </url>
   
   <url>
-    <loc>https://costalong.com/notes/k8s/security-context/</loc>
+    <loc>https://costalong.com/notes/k8s/service/</loc>
     
     <lastmod>2026-10-13</lastmod>
     
@@ -1037,7 +938,7 @@
   </url>
   
   <url>
-    <loc>https://costalong.com/notes/k8s/service/</loc>
+    <loc>https://costalong.com/notes/k8s/security-context/</loc>
     
     <lastmod>2026-10-13</lastmod>
     
